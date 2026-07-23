@@ -180,7 +180,7 @@ export default function ActivityFeed() {
         }
       `}</style>
 
-      <div className="relative mx-auto flex h-[600px] w-full max-w-3xl overflow-hidden rounded-xl border border-gray-800 bg-gray-950 font-sans text-gray-100 shadow-2xl">
+      <div className="relative mx-auto h-full flex w-full max-w-3xl overflow-hidden rounded-xl border border-gray-800 bg-gray-950 font-sans text-gray-100 shadow-2xl">
         {/* Side Navigation */}
         <div className="z-10 flex w-16 shrink-0 flex-col items-center gap-4 border-r border-gray-800 bg-gray-900 py-6">
           <button

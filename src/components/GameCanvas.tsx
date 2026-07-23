@@ -560,15 +560,7 @@ export default function GameCanvas() {
   }, [])
 
   return (
-    <div
-      style={{
-        position: "relative",
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-        backgroundColor: "#05070d",
-      }}
-    >
+      <div className="relative flex w-full overflow-hidden border border-gray-800/50 bg-transparent font-sans text-gray-100 shadow-2xl">
       <canvas
         ref={canvasRef}
         style={{ display: "block", touchAction: "none" }}
@@ -592,7 +584,7 @@ export default function GameCanvas() {
       {profile && (
         <div
           style={{
-            position: "fixed",
+            position: "absolute",
             bottom: 20,
             right: 20,
             width: "300px",

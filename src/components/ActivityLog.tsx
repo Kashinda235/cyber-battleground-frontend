@@ -46,7 +46,7 @@ const ActivityLog: React.FC = () => {
   const onlineCount = MOCK_PLAYERS.filter((p) => p.status === "online").length
 
   return (
-    <div className="mx-auto flex h-96 w-full max-w-md flex-col overflow-hidden rounded-xl border border-gray-700 bg-gray-900 font-sans text-gray-200 shadow-2xl">
+    <div className="mx-auto h-full flex w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-gray-900 font-sans text-gray-200 shadow-2xl">
       {/* Dynamic Header */}
       <div className="bg-gray-800/40 px-5 py-4">
         <h2 className="text-lg font-bold tracking-wide text-gray-100">

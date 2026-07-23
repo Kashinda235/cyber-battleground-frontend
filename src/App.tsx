@@ -4,38 +4,57 @@ import Home from "./pages/Home.tsx"
 import GameLobby from "./pages/GameLobby.tsx";
 import "./styles/site.css"
 import GameScreen from "./pages/GameScreen.tsx";
+import { motion, AnimatePresence } from 'framer-motion';
 
 const App = () => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [currentScreen, setCurrentScreen] = useState('home');
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [currentScreen, setCurrentScreen] = useState('game');
 
-  const handleJoinGame = () => {
-      setIsLoaded(false);
-      setCurrentScreen('lobby');
-  }
+    return (
+        <div className="app-container">
 
-  return (
-    <div className="app-container">
-      {/* 1. Show the loader if it hasn't completed yet */}
-      <Loader onComplete={() => setIsLoaded(true)} />
+            {/*<Loader onComplete={() => setIsLoaded(true)} />*/}
+            {/* AnimatePresence handles animating components as they unmount */}
+            <div id="main-site" className={isLoaded ? 'in' : ''}>
+                <AnimatePresence mode="wait">
+                {currentScreen === 'home' && (
+                    <motion.div
+                        key="home"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <Home onStart={() => setCurrentScreen('lobby')} />
+                    </motion.div>
+                )}
 
-      {/* 2. Your actual main site layout */}
-      {/* You can use the `isLoaded` state to trigger CSS transitions like your original `.in` class */}
-      <div id="main-site" className={isLoaded ? 'in' : ''}>
-          {currentScreen === 'home' && (
-              <Home onStart={handleJoinGame} />
-          )}
+                {currentScreen === 'lobby' && (
+                    <motion.div
+                        key="lobby"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <GameLobby onJoinGame={() => setCurrentScreen('game')} />
+                    </motion.div>
+                )}
 
-          {currentScreen === 'lobby' && (
-              <GameLobby onJoinGame={() => setCurrentScreen('game')} />
-          )}
-
-          {currentScreen === 'game' && (
-              <GameScreen />
-          )}
-      </div>
-    </div>
-  )
-}
+                {currentScreen === 'game' && (
+                    <motion.div
+                        key="game"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <GameScreen />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            </div>
+        </div>
+    );
+};
 
 export default App

@@ -2,26 +2,37 @@ import Header from '../components/Header';
 import ActivityFeed from '../components/ActivityFeed.tsx';
 import ActivityLog from '../components/ActivityLog.tsx';
 import GameCanvas from '../components/GameCanvas.tsx';
+import NetBackground from "../components/NetBackground.tsx";
+import Footer from "../components/Footer.tsx";
 
 const GameScreen = () => {
     return (
         <div>
-            <Header />
-            <div className="flex min-h-screen w-full flex-col lg:flex-row">
-                {/* Panel Component (36%) */}
-                <div className="w-full lg:h-screen lg:w-[30%]">
-                    <ActivityFeed />
+            <NetBackground />
+            <div className="app-content flex h-screen flex-col overflow-hidden">
+                <Header />
+
+                {/* The row expands to remaining space and forces children to fill height */}
+                <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
+
+                    {/* ActivityFeed */}
+                    <div className="h-full w-full overflow-y-auto lg:w-[30%]">
+                        <ActivityFeed />
+                    </div>
+
+                    {/* ActivityLog */}
+                    <div className="h-full w-full overflow-y-auto lg:w-[24%]">
+                        <ActivityLog />
+                    </div>
+
+                    {/* GameCanvas */}
+                    <div className="h-full w-full overflow-hidden lg:w-[46%]">
+                        <GameCanvas />
+                    </div>
+
                 </div>
 
-                {/* SubList Component (24%) */}
-                <div className="w-full lg:h-screen lg:w-[24%]">
-                    <ActivityLog />
-                </div>
-
-                {/* GameCanvas Component (40%) */}
-                <div className="w-full lg:h-screen lg:w-[46%]">
-                    <GameCanvas />
-                </div>
+                <Footer />
             </div>
         </div>
     )
