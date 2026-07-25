@@ -6,7 +6,6 @@ export default function NetBackground() {
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    console.log(canvasRef.current);
 
     let w, h;
     let nodes = [];

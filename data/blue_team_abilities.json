@@ -1,0 +1,100 @@
+{
+  "tools": [
+    {
+      "name": "Firewall Upgrade",
+      "type": "Prevention",
+      "strength": 3,
+      "effect": "Blocks low-level attacks like brute force",
+      "cooldown": 10,
+      "icon": "ShieldCheck"
+    },
+    {
+      "name": "Intrusion Detection",
+      "type": "Detection",
+      "strength": 4,
+      "effect": "Reveals attacker activity in real-time",
+      "cooldown": 15,
+      "icon": "Radar"
+    },
+    {
+      "name": "Auto Patch",
+      "type": "Prevention",
+      "strength": 3,
+      "effect": "Removes known vulnerabilities over time",
+      "cooldown": 12,
+      "icon": "Wrench"
+    },
+    {
+      "name": "Honeypot",
+      "type": "Deception",
+      "strength": 5,
+      "effect": "Creates fake targets to trap attackers",
+      "cooldown": 25,
+      "icon": "Box"
+    },
+    {
+      "name": "IP Block",
+      "type": "Response",
+      "strength": 3,
+      "effect": "Temporarily blocks attacker access",
+      "cooldown": 8,
+      "icon": "Ban"
+    },
+    {
+      "name": "Traceback",
+      "type": "Counter",
+      "strength": 4,
+      "effect": "Reveals attacker identity/location",
+      "cooldown": 20,
+      "icon": "Locate"
+    },
+    {
+      "name": "System Scan",
+      "type": "Recovery",
+      "strength": 2,
+      "effect": "Finds and removes malware",
+      "cooldown": 5,
+      "icon": "Search"
+    },
+    {
+      "name": "Multi-Factor Auth",
+      "type": "Prevention",
+      "strength": 5,
+      "effect": "Makes account access much harder",
+      "cooldown": 30,
+      "icon": "KeyRound"
+    },
+    {
+      "name": "Traffic Filter",
+      "type": "Prevention",
+      "strength": 3,
+      "effect": "Reduces effectiveness of DDoS attacks",
+      "cooldown": 10,
+      "icon": "Filter"
+    },
+    {
+      "name": "Decoy Files",
+      "type": "Deception",
+      "strength": 4,
+      "effect": "Misleads attackers with fake data",
+      "cooldown": 18,
+      "icon": "FileText"
+    },
+    {
+      "name": "Emergency Lockdown",
+      "type": "Response",
+      "strength": 5,
+      "effect": "Shuts down all entry points temporarily",
+      "cooldown": 45,
+      "icon": "Lock"
+    },
+    {
+      "name": "Backup Restore",
+      "type": "Recovery",
+      "strength": 4,
+      "effect": "Resets system after major breach",
+      "cooldown": 60,
+      "icon": "RotateCcw"
+    }
+  ]
+}

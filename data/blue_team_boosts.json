@@ -1,0 +1,44 @@
+{
+  "boosts": [
+    {
+      "name": "Fast Detection",
+      "effect": "+25% faster intrusion alerts"
+    },
+    {
+      "name": "Hardened System",
+      "effect": "-20% success rate for all attacks"
+    },
+    {
+      "name": "Silent Monitoring",
+      "effect": "Attackers don’t know they are detected"
+    },
+    {
+      "name": "Adaptive Defense",
+      "effect": "Improves resistance after each attack"
+    },
+    {
+      "name": "Decoy Mastery",
+      "effect": "+40% effectiveness of honeypots/decoys"
+    },
+    {
+      "name": "Quick Recovery",
+      "effect": "Faster system restore after breach"
+    },
+    {
+      "name": "Aggressive Counter",
+      "effect": "Successful detection triggers counter-attack"
+    },
+    {
+      "name": "Resource Optimization",
+      "effect": "Run 1 extra defense tool"
+    },
+    {
+      "name": "Encrypted Traffic",
+      "effect": "Reduces effectiveness of sniffing attacks"
+    },
+    {
+      "name": "Zero Trust Mode",
+      "effect": "All access attempts face increased difficulty"
+    }
+  ]
+}

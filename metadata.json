@@ -1,0 +1,5 @@
+{
+  "name": "Cyber Battleground",
+  "description": "A real-time multiplayer strategic game featuring live WebSocket SIEM logs, players interaction, global chat.",
+  "requestFramePermissions": []
+}
