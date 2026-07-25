@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
+import ChatBlock from './ChatBlock.tsx';
 import {
   Send, MessageSquare, Zap, Shield, Swords,
   Flame, Heart, Bell, AlertTriangle, Info,
 } from "lucide-react"
 import type {Ability, ActionRequest, ActionResult, ChatLog, Player} from "../utils/types.ts";
-
+import blueAbility from '@/data/blue_team_abilities.json';
 // --- Types ---
 type Mode = "chat" | "actions" | "alerts"
 
@@ -15,12 +16,6 @@ interface FeedProps {
   sendChat: (message: string) => Promise<ChatLog>,
   abilities: Ability[],
   performAction: (data: ActionRequest) => Promise<ActionResult>
-}
-interface Message {
-  id: string
-  text: string
-  sender: "user" | "other"
-  senderName: string
 }
 
 interface ActionDef {
@@ -37,28 +32,6 @@ interface Alert {
   message: string
   time: string
 }
-
-// --- Mock Data ---
-const INITIAL_MESSAGES: Message[] = [
-  {
-    id: "1",
-    text: "Are you ready for the raid?",
-    sender: "other",
-    senderName: "Alex_Shadow",
-  },
-  {
-    id: "2",
-    text: "Almost, let me buff up first.",
-    sender: "user",
-    senderName: "You",
-  },
-  {
-    id: "3",
-    text: "We need to pull in 30 seconds.",
-    sender: "other",
-    senderName: "Ironclad_Tank",
-  },
-]
 
 const ACTIONS: ActionDef[] = [
   {
@@ -120,42 +93,10 @@ const SYSTEM_ALERTS: Alert[] = [
 
 export default function ActivityFeed( { players, currentPlayer, chats, sendChat, abilities, performAction }: FeedProps ) {
   const [mode, setMode] = useState<Mode>("chat")
-  const [messages, setMessages] = useState(chats)
-  const [inputValue, setInputValue] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
+
   const [activeCooldowns, setActiveCooldowns] = useState<Record<string, boolean>>({})
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const chatEndRef = useRef<HTMLDivElement | null>(null);
 
   const activePlayers:number = players.length;
-  // Fake typing animation effect
-  useEffect(() => {
-    if (mode !== "chat") return
-    const interval = setInterval(() => {
-      setIsTyping((prev) => !prev)
-    }, 4500)
-    return () => clearInterval(interval)
-  }, [mode])
-
-  // Auto-scroll to bottom whenever chats array updates
-  useEffect(() => {
-    const container = chatEndRef.current;
-    if (container) {
-      // Scroll ONLY this container to the bottom
-      container.scrollTo({
-        top: container.scrollHeight,
-        behavior: 'smooth'
-      });
-    }
-  }, [chats]);
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!inputValue.trim()) return
-
-    sendChat(inputValue);
-    setInputValue("")
-  }
 
   const triggerAction = (actionId: string, cooldownTimeStr: string) => {
     if (activeCooldowns[actionId]) return
@@ -226,78 +167,12 @@ export default function ActivityFeed( { players, currentPlayer, chats, sendChat,
         {/* Main Content Area */}
         <div className="relative flex flex-1 flex-col overflow-hidden bg-gray-950">
           {/* --- CHAT MODE --- */}
-          {mode === "chat" && (
-            <div className="flex h-full animate-in flex-col duration-300 fade-in">
-              <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-800 bg-gray-900/50 px-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-indigo-500/30 bg-indigo-900/50">
-                    <span className="font-bold text-indigo-400">R1</span>
-                  </div>
-                  <div>
-                    <h2 className="font-semibold text-gray-100">
-                      Raid Group 1
-                    </h2>
-                    <div className="h-4">
-                      {isTyping ? (
-                        <span className="flex items-center gap-1 text-xs text-indigo-400 italic">
-                          Alex_Shadow is typing
-                          <span className="animate-bounce">.</span>
-                          <span className="animate-bounce delay-100">.</span>
-                          <span className="animate-bounce delay-200">.</span>
-                        </span>
-                      ) : (
-                        <span className="text-xs text-gray-500">
-                          {activePlayers} Members Online
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </header>
-
-              <div ref={chatEndRef} className="custom-scrollbar flex-1 space-y-5 overflow-y-auto p-6">
-                {chats.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex flex-col ${msg.senderId === currentPlayer.id ? "items-end" : "items-start"}`}
-                  >
-                    <span className="mb-1 px-1 text-[11px] font-medium tracking-wide text-gray-500">
-                      {msg.metadata.sender}
-                    </span>
-                    <div
-                      className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm ${
-                          msg.senderId === currentPlayer.id
-                          ? "rounded-tr-sm bg-indigo-600 text-white shadow-sm shadow-indigo-900/20"
-                          : "rounded-tl-sm border border-gray-700/50 bg-gray-800 text-gray-200"
-                      }`}
-                    >
-                      {msg.message}
-                    </div>
-                    {/*<div ref={chatEndRef} />*/}
-                  </div>
-                ))}
-              </div>
-
-              <div className="shrink-0 border-t border-gray-800 bg-gray-900/80 p-4">
-                <form onSubmit={handleSendMessage} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Type to room..."
-                    className="flex-1 rounded-lg border border-gray-700 bg-gray-950 px-4 py-2.5 text-sm text-gray-200 transition-all focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!inputValue.trim()}
-                    className="flex w-12 items-center justify-center rounded-lg bg-indigo-600 p-2.5 text-white transition-colors hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600"
-                  >
-                    <Send size={18} />
-                  </button>
-                </form>
-              </div>
-            </div>
-          )}
+          {mode === "chat" && <ChatBlock
+              chats={chats}
+              activePlayers={activePlayers}
+              currentPlayer={currentPlayer}
+              sendChat={sendChat}
+          />}
 
           {/* --- ACTIONS MODE --- */}
           {mode === "actions" && (
