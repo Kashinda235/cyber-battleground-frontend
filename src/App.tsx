@@ -8,7 +8,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const App = () => {
     const [isLoaded, setIsLoaded] = useState(false);
-    const [currentScreen, setCurrentScreen] = useState('game');
+    const [currentScreen, setCurrentScreen] = useState('home');
+
+    const [token, setToken] = useState(null);
+    const [player, setPlayer] = useState(null);
+
+    const handleJoinGame = (receivedToken, receivedPlayer) => {
+        setToken(receivedToken);
+        setPlayer(receivedPlayer);
+        setCurrentScreen('game');
+    };
 
     return (
         <div className="app-container">
@@ -37,7 +46,7 @@ const App = () => {
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.3 }}
                     >
-                        <GameLobby onJoinGame={() => setCurrentScreen('game')} />
+                        <GameLobby onJoinGame={handleJoinGame} />
                     </motion.div>
                 )}
 
@@ -48,7 +57,7 @@ const App = () => {
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.3 }}
                     >
-                        <GameScreen />
+                        <GameScreen token={token} player={player} />
                     </motion.div>
                 )}
             </AnimatePresence>

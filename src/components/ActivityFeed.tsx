@@ -1,20 +1,21 @@
 import React, { useState, useEffect, useRef } from "react"
 import {
-  Send,
-  MessageSquare,
-  Zap,
-  Shield,
-  Swords,
-  Flame,
-  Heart,
-  Bell,
-  AlertTriangle,
-  Info,
+  Send, MessageSquare, Zap, Shield, Swords,
+  Flame, Heart, Bell, AlertTriangle, Info,
 } from "lucide-react"
+import type {Ability, ActionRequest, ActionResult, ChatLog, Player} from "../utils/types.ts";
 
 // --- Types ---
 type Mode = "chat" | "actions" | "alerts"
 
+interface FeedProps {
+  players: Player[],
+  currentPlayer: Player,
+  chats: ChatLog[],
+  sendChat: (message: string) => Promise<ChatLog>,
+  abilities: Ability[],
+  performAction: (data: ActionRequest) => Promise<ActionResult>
+}
 interface Message {
   id: string
   text: string
@@ -117,16 +118,16 @@ const SYSTEM_ALERTS: Alert[] = [
   },
 ]
 
-export default function ActivityFeed() {
+export default function ActivityFeed( { players, currentPlayer, chats, sendChat, abilities, performAction }: FeedProps ) {
   const [mode, setMode] = useState<Mode>("chat")
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES)
+  const [messages, setMessages] = useState(chats)
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
-  const [activeCooldowns, setActiveCooldowns] = useState<
-    Record<string, boolean>
-  >({})
+  const [activeCooldowns, setActiveCooldowns] = useState<Record<string, boolean>>({})
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
 
+  const activePlayers:number = players.length;
   // Fake typing animation effect
   useEffect(() => {
     if (mode !== "chat") return
@@ -136,26 +137,23 @@ export default function ActivityFeed() {
     return () => clearInterval(interval)
   }, [mode])
 
-  // // Auto-scroll to bottom of chat
-  // useEffect(() => {
-  //   if (mode === "chat") {
-  //     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  //   }
-  // }, [messages, isTyping, mode])
+  // Auto-scroll to bottom whenever chats array updates
+  useEffect(() => {
+    const container = chatEndRef.current;
+    if (container) {
+      // Scroll ONLY this container to the bottom
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [chats]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
     if (!inputValue.trim()) return
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        text: inputValue,
-        sender: "user",
-        senderName: "You",
-      },
-    ])
+    sendChat(inputValue);
     setInputValue("")
   }
 
@@ -249,7 +247,7 @@ export default function ActivityFeed() {
                         </span>
                       ) : (
                         <span className="text-xs text-gray-500">
-                          3 Members Online
+                          {activePlayers} Members Online
                         </span>
                       )}
                     </div>
@@ -257,27 +255,27 @@ export default function ActivityFeed() {
                 </div>
               </header>
 
-              <div className="custom-scrollbar flex-1 space-y-5 overflow-y-auto p-6">
-                {messages.map((msg) => (
+              <div ref={chatEndRef} className="custom-scrollbar flex-1 space-y-5 overflow-y-auto p-6">
+                {chats.map((msg) => (
                   <div
                     key={msg.id}
-                    className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}
+                    className={`flex flex-col ${msg.senderId === currentPlayer.id ? "items-end" : "items-start"}`}
                   >
                     <span className="mb-1 px-1 text-[11px] font-medium tracking-wide text-gray-500">
-                      {msg.senderName}
+                      {msg.metadata.sender}
                     </span>
                     <div
                       className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm ${
-                        msg.sender === "user"
+                          msg.senderId === currentPlayer.id
                           ? "rounded-tr-sm bg-indigo-600 text-white shadow-sm shadow-indigo-900/20"
                           : "rounded-tl-sm border border-gray-700/50 bg-gray-800 text-gray-200"
                       }`}
                     >
-                      {msg.text}
+                      {msg.message}
                     </div>
+                    {/*<div ref={chatEndRef} />*/}
                   </div>
                 ))}
-                <div ref={messagesEndRef} />
               </div>
 
               <div className="shrink-0 border-t border-gray-800 bg-gray-900/80 p-4">

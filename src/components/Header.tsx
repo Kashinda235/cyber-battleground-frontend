@@ -1,6 +1,7 @@
 import React from "react"
 import { motion } from "framer-motion"
 import { ShieldCheck, HeartPulse, Trophy, Radio, Activity } from "lucide-react"
+import type {GameState, Player} from "../utils/types.ts";
 
 interface PlayerDetailsProps {
   name: string
@@ -13,20 +14,16 @@ interface GameStateProps {
   score: number
 }
 
-interface ModernDarkHeaderProps {
-  playerData?: PlayerDetailsProps
-  gameStateData?: GameStateProps
+interface HeaderProps {
+  player: Player,
+  gameState: GameState
 }
 
-const PlayerDetailsCard: React.FC<PlayerDetailsProps> = ({
-  name,
-  ip,
-  role,
-}) => (
+const PlayerDetailsCard: React.FC<PlayerDetailsProps> = ({name, ip, role}) => (
   <div className="flex items-center gap-3.5">
     {/* Role Icon */}
-    <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-700/80 bg-slate-900 text-emerald-400 shadow-inner">
-      <ShieldCheck className="h-5 w-5" />
+    <div className="relative flex h-40 w-11 items-center justify-center rounded-xl border border-slate-700/80 bg-slate-900 text-emerald-400 shadow-inner">
+      <ShieldCheck className="h-10 w-10" />
       <span className="absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-slate-950" />
     </div>
 
@@ -100,10 +97,13 @@ const LiveBeacon: React.FC = () => (
   </div>
 )
 
-export const Header: React.FC<ModernDarkHeaderProps> = ({
-  playerData = { name: "Alex Vance", ip: "192.168.1.42", role: "Operator" },
-  gameStateData = { systemHealth: 98, score: 24850 },
-}) => {
+export const Header: React.FC<HeaderProps> = ({ player, gameState }) => {
+
+    const playerData = { name: player?.username ?? "Guest", ip: `192.168.1.${player.id}`, role: player.role }
+    // const playerData = { name:  "Guest", ip: `192.168.1.${10}`, role: 'red' }
+
+    const gameStateData = { systemHealth: 98, score: 24850 }
+
   return (
     <header className="w-full border-b border-slate-800 bg-slate-950/95 text-slate-100 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
@@ -111,7 +111,7 @@ export const Header: React.FC<ModernDarkHeaderProps> = ({
         <PlayerDetailsCard {...playerData} />
 
         {/* Center: Live Beacon */}
-        <LiveBeacon />
+        {/*<LiveBeacon />*/}
 
         {/* Right: Game Telemetry */}
         <GameStatesCard {...gameStateData} />

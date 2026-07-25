@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
+import {useGameData} from "../hooks/useGameData.ts";
 
 // --- SVGs & Design Assets ---
 const Icons = {
@@ -78,6 +79,7 @@ const Icons = {
 const ROLES = [
   {
     id: "attack",
+    role: 'red',
     title: "Attack",
     badge: "⚔️",
     description: "Vanguard damage dealer. Decimate enemy lines.",
@@ -89,6 +91,7 @@ const ROLES = [
   },
   {
     id: "defend",
+    role: 'blue',
     title: "Defend",
     badge: "🛡️",
     description: "Frontline protector. Absorb impact and hold objectives.",
@@ -100,6 +103,7 @@ const ROLES = [
   },
   {
     id: "spectate",
+    role: 'spectator',
     title: "Spectate",
     badge: "👁️",
     description: "Tactical observer. Analyze strategies from above.",
@@ -121,6 +125,7 @@ export default function GameLobby( { onJoinGame }) {
     const foundIdx = ROLES.findIndex((r) => r.id === saved)
     return foundIdx !== -1 ? foundIdx : 1
   })
+  const {registerPlayer} = useGameData();
 
   const activeRole = ROLES[selectedIndex]
   const isUsernameValid = username.trim().length >= 3
@@ -155,13 +160,26 @@ export default function GameLobby( { onJoinGame }) {
     return Math.abs(hash % 360)
   }, [username])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!isFormValid) return
-    onJoinGame();
-    alert(
-      `Deploying ${username} as ${activeRole.title.toUpperCase()} to the arena!`
-    )
+
+    const data = { username: username, role: activeRole.role.toLowerCase() }
+    try {
+      const playerData = await registerPlayer(data);
+      const fetchedToken = playerData.token;
+      const fetchedPlayer = playerData.player;
+      onJoinGame(fetchedToken, fetchedPlayer);
+      alert(`Deploying ${username} as ${activeRole.title.toUpperCase()} to the arena!`);
+    } catch (error: any) {
+      // Handle duplicate user error gracefully
+      alert(error.message || "Player already exists. Try logging in instead.");
+    }
+
+    // if (!playerData) {
+    //   alert(`Unable to Connect servers`);
+    //   return;
+    // }
   }
 
   return (

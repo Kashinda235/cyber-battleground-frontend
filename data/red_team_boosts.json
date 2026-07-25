@@ -1,0 +1,52 @@
+{
+  "boosts": [
+    {
+      "name": "Stealth Boost",
+      "effect": "+15% reduced detection chance"
+    },
+    {
+      "name": "Speed Boost",
+      "effect": "+20% faster attack execution"
+    },
+    {
+      "name": "XP Multiplier",
+      "effect": "+25% XP gain on success"
+    },
+    {
+      "name": "Brute Force Optimizer",
+      "effect": "+30% success rate for password attacks"
+    },
+    {
+      "name": "Exploit Amplifier",
+      "effect": "+20% effectiveness of exploit tools"
+    },
+    {
+      "name": "Recon Efficiency",
+      "effect": "+50% more info from scans"
+    },
+    {
+      "name": "Low Profile Mode",
+      "effect": "-25% detection but -10% speed"
+    },
+    {
+      "name": "Aggressive Mode",
+      "effect": "+30% success but +40% detection risk"
+    },
+    {
+      "name": "Persistence Boost",
+      "effect": "Malware lasts longer on target"
+    },
+    {
+      "name": "Quick Exit",
+      "effect": "Instantly reduce detection after attack"
+    },
+    {
+      "name": "Adaptive AI",
+      "effect": "Learns target behavior (+success over time)"
+    },
+    {
+      "name": "Multi-Threading",
+      "effect": "Run 2 low-level tools simultaneously"
+    }
+  ]
+}

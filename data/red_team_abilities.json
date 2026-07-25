@@ -1,0 +1,124 @@
+{
+  "tools": [
+    {
+      "name": "Brute Force",
+      "type": "Access",
+      "difficulty": 2,
+      "risk": 3,
+      "reward": "Medium",
+      "effect": "Attempts to guess passwords rapidly",
+      "cooldown": 10,
+      "icon": "Key"
+    },
+    {
+      "name": "Phishing Kit",
+      "type": "Social",
+      "difficulty": 3,
+      "risk": 4,
+      "reward": "High",
+      "effect": "Tricks target into revealing credentials",
+      "cooldown": 20,
+      "icon": "MailWarning"
+    },
+    {
+      "name": "Exploit Script",
+      "type": "Technical",
+      "difficulty": 4,
+      "risk": 3,
+      "reward": "High",
+      "effect": "Uses known vulnerabilities for access",
+      "cooldown": 25,
+      "icon": "Terminal"
+    },
+    {
+      "name": "Port Scanner",
+      "type": "Recon",
+      "difficulty": 1,
+      "risk": 1,
+      "reward": "Low",
+      "effect": "Reveals available entry points",
+      "cooldown": 4,
+      "icon": "Network"
+    },
+    {
+      "name": "Deep Scanner",
+      "type": "Recon",
+      "difficulty": 2,
+      "risk": 2,
+      "reward": "Info",
+      "effect": "Reveals weaknesses and defense stats",
+      "cooldown": 8,
+      "icon": "Scan"
+    },
+    {
+      "name": "Packet Sniffer",
+      "type": "Stealth",
+      "difficulty": 3,
+      "risk": 2,
+      "reward": "Medium",
+      "effect": "Intercepts data over network",
+      "cooldown": 15,
+      "icon": "Activity"
+    },
+    {
+      "name": "Credential Stuffing",
+      "type": "Access",
+      "difficulty": 2,
+      "risk": 3,
+      "reward": "Medium",
+      "effect": "Uses leaked passwords to gain access",
+      "cooldown": 12,
+      "icon": "Database"
+    },
+    {
+      "name": "Session Hijack",
+      "type": "Stealth",
+      "difficulty": 4,
+      "risk": 3,
+      "reward": "High",
+      "effect": "Takes over active user session",
+      "cooldown": 30,
+      "icon": "UserX"
+    },
+    {
+      "name": "Malware Drop",
+      "type": "Persistence",
+      "difficulty": 3,
+      "risk": 4,
+      "reward": "Ongoing XP",
+      "effect": "Installs backdoor for repeated access",
+      "cooldown": 35,
+      "icon": "Bug"
+    },
+    {
+      "name": "DDoS Burst",
+      "type": "Disruption",
+      "difficulty": 2,
+      "risk": 5,
+      "reward": "Control",
+      "effect": "Overwhelms system temporarily",
+      "cooldown": 40,
+      "icon": "Zap"
+    },
+    {
+      "name": "Zero-Day Attack",
+      "type": "Advanced",
+      "difficulty": 5,
+      "risk": 4,
+      "reward": "Very High",
+      "effect": "Bypasses defenses completely (rare)",
+      "cooldown": 60,
+      "icon": "Skull"
+    },
+    {
+      "name": "Log Wiper",
+      "type": "Stealth",
+      "difficulty": 3,
+      "risk": 2,
+      "reward": "Safety",
+      "effect": "Removes traces of your attack",
+      "cooldown": 18,
+      "icon": "Eraser"
+    }
+  ]
+}
