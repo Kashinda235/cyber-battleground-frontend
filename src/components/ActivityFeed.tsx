@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react"
 import ChatBlock from './ChatBlock.tsx';
+import ActionMode from './ActionMode.tsx';
 import {
   Send, MessageSquare, Zap, Shield, Swords,
   Flame, Heart, Bell, AlertTriangle, Info,
 } from "lucide-react"
 import type {Ability, ActionRequest, ActionResult, ChatLog, Player} from "../utils/types.ts";
-import blueAbility from '@/data/blue_team_abilities.json';
 // --- Types ---
 type Mode = "chat" | "actions" | "alerts"
 
@@ -18,51 +18,12 @@ interface FeedProps {
   performAction: (data: ActionRequest) => Promise<ActionResult>
 }
 
-interface ActionDef {
-  id: string
-  title: string
-  icon: React.ReactNode
-  cooldown: string
-  color: string
-}
-
 interface Alert {
   id: string
   type: "danger" | "warning" | "info"
   message: string
   time: string
 }
-
-const ACTIONS: ActionDef[] = [
-  {
-    id: "1",
-    title: "Power Strike",
-    icon: <Swords size={20} />,
-    cooldown: "4s",
-    color: "text-red-400",
-  },
-  {
-    id: "2",
-    title: "Fireball",
-    icon: <Flame size={20} />,
-    cooldown: "8s",
-    color: "text-orange-400",
-  },
-  {
-    id: "3",
-    title: "Shield Wall",
-    icon: <Shield size={20} />,
-    cooldown: "15s",
-    color: "text-blue-400",
-  },
-  {
-    id: "4",
-    title: "Greater Heal",
-    icon: <Heart size={20} />,
-    cooldown: "12s",
-    color: "text-emerald-400",
-  },
-]
 
 const SYSTEM_ALERTS: Alert[] = [
   {
@@ -93,22 +54,7 @@ const SYSTEM_ALERTS: Alert[] = [
 
 export default function ActivityFeed( { players, currentPlayer, chats, sendChat, abilities, performAction }: FeedProps ) {
   const [mode, setMode] = useState<Mode>("chat")
-
-  const [activeCooldowns, setActiveCooldowns] = useState<Record<string, boolean>>({})
-
   const activePlayers:number = players.length;
-
-  const triggerAction = (actionId: string, cooldownTimeStr: string) => {
-    if (activeCooldowns[actionId]) return
-
-    setActiveCooldowns((prev) => ({ ...prev, [actionId]: true }))
-
-    const ms = parseFloat(cooldownTimeStr.replace("s", "")) * 1000
-
-    setTimeout(() => {
-      setActiveCooldowns((prev) => ({ ...prev, [actionId]: false }))
-    }, ms)
-  }
 
   return (
     <>
@@ -175,102 +121,7 @@ export default function ActivityFeed( { players, currentPlayer, chats, sendChat,
           />}
 
           {/* --- ACTIONS MODE --- */}
-          {mode === "actions" && (
-            <div className="flex h-full animate-in flex-col duration-300 fade-in">
-              <header className="flex h-16 shrink-0 items-center border-b border-gray-800 bg-red-950/20 px-6">
-                <div className="flex w-full items-center gap-3">
-                  <div className="h-8 w-2 rounded-full bg-rose-600"></div>
-                  <div>
-                    <p className="text-[10px] font-semibold tracking-wider text-gray-400 uppercase">
-                      Current Target
-                    </p>
-                    <h2 className="text-lg leading-tight font-bold text-rose-100 drop-shadow-md">
-                      Void Dragon Sovereign
-                    </h2>
-                  </div>
-                  <div className="ml-auto text-right">
-                    <p className="mb-1 font-mono text-xs text-gray-400">
-                      75.0% HP
-                    </p>
-                    <div className="h-1.5 w-32 overflow-hidden rounded-full bg-gray-800">
-                      <div className="h-full w-[75%] bg-rose-600 shadow-[0_0_10px_rgba(225,29,72,0.5)]"></div>
-                    </div>
-                  </div>
-                </div>
-              </header>
-
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  {ACTIONS.map((action) => {
-                    const isOnCooldown = activeCooldowns[action.id]
-                    return (
-                      <button
-                        key={action.id}
-                        onClick={() =>
-                          triggerAction(action.id, action.cooldown)
-                        }
-                        disabled={isOnCooldown}
-                        className={`group flex items-center gap-4 rounded-xl border border-gray-800 bg-gray-900 p-4 text-left transition-all ${isOnCooldown ? "cursor-not-allowed opacity-70" : "hover:border-gray-600 hover:bg-gray-800/80 active:scale-95"}`}
-                      >
-                        <div className="relative flex h-12 w-12 shrink-0 items-center justify-center">
-                          <svg
-                            className="absolute inset-0 h-full w-full text-gray-800"
-                            viewBox="0 0 36 36"
-                          >
-                            <path
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="3"
-                            />
-                          </svg>
-                          {isOnCooldown && (
-                            <svg
-                              className="absolute inset-0 z-0 h-full w-full -rotate-90 text-white/50"
-                              viewBox="0 0 36 36"
-                            >
-                              <path
-                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="3"
-                                strokeDasharray="100, 100"
-                                style={{
-                                  animation: `cooldown-spin ${action.cooldown} linear forwards`,
-                                }}
-                              />
-                            </svg>
-                          )}
-                          <div
-                            className={`relative z-10 transition-transform ${!isOnCooldown && "group-hover:scale-110"} ${action.color}`}
-                          >
-                            {action.icon}
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <h3
-                            className={`font-bold transition-colors ${isOnCooldown ? "text-gray-500" : "text-gray-200 group-hover:text-white"}`}
-                          >
-                            {action.title}
-                          </h3>
-                          <div className="mt-1 flex items-center gap-1.5">
-                            <div
-                              className={`h-1.5 w-1.5 rounded-full ${isOnCooldown ? "animate-pulse bg-rose-500" : "bg-emerald-500"}`}
-                            ></div>
-                            <span className="text-[11px] font-semibold tracking-wider text-gray-400 uppercase">
-                              {isOnCooldown
-                                ? "On Cooldown"
-                                : `Ready (${action.cooldown})`}
-                            </span>
-                          </div>
-                        </div>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
+          {mode === "actions" && <ActionMode performAction={performAction} mode={'attack'}/>}
 
           {/* --- ALERTS MODE --- */}
           {mode === "alerts" && (

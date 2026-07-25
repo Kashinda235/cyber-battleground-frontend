@@ -1,7 +1,6 @@
 import * as Icons from 'lucide-react';
-import React from "react";
 
-function AbilityIcon({ name: string, color = "currentColor", size = 20 }) {
+function AbilityIcon({ name, color = "currentColor", size = 20 }) {
     // Grab the icon component dynamically from Lucide using the string key
     const IconComponent = Icons[name];
 
@@ -30,20 +29,19 @@ function TrialCard({ ability }) {
     );
 }
 
-export function ActionCard({ ability }) {
+export function ActionCard({ ability, triggerAction, color, isOnCooldown}) {
     const action = {
         id: ability.id,
+        effect: ability.effect,
         title: ability.name,
-        color: 'red',
+        color: color,
         cooldown: ability.cooldown,
         icon: ability.icon,
     }
 
-    const triggerAction = (id, cooldown) => void;
-    const isOnCooldown = false;
     return (
         <button
-            onClick={() => triggerAction(action.id, action.cooldown)}
+            onClick={() => triggerAction(action.id, action.effect, action.cooldown)}
             disabled={isOnCooldown}
             className={`group flex items-center gap-4 rounded-xl border border-gray-800 bg-gray-900 p-4 text-left transition-all ${isOnCooldown ? "cursor-not-allowed opacity-70" : "hover:border-gray-600 hover:bg-gray-800/80 active:scale-95"}`}
         >
