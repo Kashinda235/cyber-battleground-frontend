@@ -7,6 +7,12 @@ import type {ActionRequest, ActionResult} from "../utils/types.ts";
 const ATTACKS = redAbility.tools;
 const DEFENCES = blueAbility.tools;
 
+interface Action {
+    id: number,
+    name: string,
+    effect: string,
+    cooldown: number
+}
 interface ActionProps {
     mode : "attack" | "defend",
     performAction:  (data: ActionRequest) => Promise<ActionResult>
@@ -16,7 +22,6 @@ const ActionMode = ( {mode, performAction}: ActionProps) => {
 
     const TARGET = 3;
     const triggerAction = async (actionId: number, effect: string, cooldown: number) => {
-        console.log(activeCooldowns);
         if (activeCooldowns[actionId]) return
 
         setActiveCooldowns((prev) => ({ ...prev, [actionId]: true }))
@@ -27,7 +32,7 @@ const ActionMode = ( {mode, performAction}: ActionProps) => {
         }, ms)
 
         const data = { action_type: effect, target_id: TARGET, ability_id: actionId }
-        // await performAction(data);
+        const res = await performAction(data);
     }
 // console.log(ATTACKS);
     return (
@@ -60,7 +65,7 @@ const ActionMode = ( {mode, performAction}: ActionProps) => {
                     {ATTACKS.map((action) => {
                         const isOnCooldown = activeCooldowns[action.id]
                         return (
-                            <ActionCard key={action.name}
+                            <ActionCard key={'red' + action.id}
                                         ability={action}
                                         triggerAction={triggerAction}
                                         color={'text-red-400'}
@@ -71,8 +76,9 @@ const ActionMode = ( {mode, performAction}: ActionProps) => {
                 </div>) : (<div className="grid grid-cols-2 gap-4">
                         {DEFENCES.map((action) => {
                             const isOnCooldown = activeCooldowns[action.id]
+                            console.log('blue' + action.id);
                             return (
-                                <ActionCard key={'blue' + action.id}
+                                <ActionCard key={action.id}
                                             ability={action}
                                             triggerAction={triggerAction}
                                             color={'text-blue-400'}

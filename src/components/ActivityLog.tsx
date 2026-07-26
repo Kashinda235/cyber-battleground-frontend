@@ -13,7 +13,7 @@ interface LogProps {
   moveLogs: MoveLog[]
 }
 // --- Component ---
-const ActivityLog: React.FC = ( {players, moveLogs}: LogProps) => {
+const ActivityLog = ( {players, moveLogs}: LogProps) => {
   const [activeTab, setActiveTab] = useState<"users" | "logs">("users")
 
   const onlineCount = players.filter((p) => p.status === "online").length
@@ -93,7 +93,7 @@ const ActivityLog: React.FC = ( {players, moveLogs}: LogProps) => {
       <div className="flex items-center justify-between border-t border-gray-800 bg-gray-950 px-5 py-3 text-xs text-gray-400">
         {activeTab === "users" ? (
           <>
-            <span>Total Registered: {MOCK_PLAYERS.length}</span>
+            <span>Total Registered: {players.length}</span>
             <span className="flex items-center space-x-1">
               <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
               <span className="font-medium text-emerald-400">
@@ -104,7 +104,7 @@ const ActivityLog: React.FC = ( {players, moveLogs}: LogProps) => {
         ) : (
           <>
             <span>Log retention: 24h</span>
-            <span>Total entries: {MOCK_LOGS.length}</span>
+            <span>Total entries: {moveLogs.length}</span>
           </>
         )}
       </div>

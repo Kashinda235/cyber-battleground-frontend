@@ -105,7 +105,7 @@ export async function fetchGameState(): Promise<GameStateResponse> {
 }
 
 /**
- * GET /moves
+ * GET /actions
  * Retrieves move logs with optional filtering by player ID and limit.
  */
 export async function fetchMoveLogs(params?: GetMovesQueryParams): Promise<MoveLogResponse> {
@@ -114,7 +114,7 @@ export async function fetchMoveLogs(params?: GetMovesQueryParams): Promise<MoveL
     if (params?.limit) queryParams.append('limit', params.limit.toString());
 
     const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
-    return getRequest<MoveLog[]>(`/moves${queryString}`);
+    return getRequest<MoveLog[]>(`/actions${queryString}`);
 }
 
 /**

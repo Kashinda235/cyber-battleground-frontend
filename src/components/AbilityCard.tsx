@@ -69,7 +69,7 @@ export function ActionCard({ ability, triggerAction, color, isOnCooldown}) {
                             strokeWidth="3"
                             strokeDasharray="100, 100"
                             style={{
-                                animation: `cooldown-spin ${action.cooldown} linear forwards`,
+                                animation: `cooldown-spin ${action.cooldown}s linear forwards`,
                             }}
                         />
                     </svg>

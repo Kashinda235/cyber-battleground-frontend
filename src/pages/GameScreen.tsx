@@ -50,7 +50,7 @@ const GameScreen = ({ token, player }: GameProps) => {
 
                     {/* ActivityLog */}
                     <div className="h-[600px] w-full overflow-y-auto lg:w-[24%]">
-                        {/*<ActivityLog {...logData}/>*/}
+                        <ActivityLog {...logData}/>
                     </div>
 
                     {/* GameCanvas */}
