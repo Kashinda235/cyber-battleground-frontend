@@ -1,6 +1,7 @@
 {
   "tools": [
     {
+      "id": 0,
       "name": "Brute Force",
       "type": "Access",
       "difficulty": 2,
@@ -11,6 +12,7 @@
       "icon": "Key"
     },
     {
+      "id": 1,
       "name": "Phishing Kit",
       "type": "Social",
       "difficulty": 3,
@@ -21,6 +23,7 @@
       "icon": "MailWarning"
     },
     {
+      "id": 2,
       "name": "Exploit Script",
       "type": "Technical",
       "difficulty": 4,
@@ -31,6 +34,7 @@
       "icon": "Terminal"
     },
     {
+      "id": 3,
       "name": "Port Scanner",
       "type": "Recon",
       "difficulty": 1,
@@ -41,6 +45,7 @@
       "icon": "Network"
     },
     {
+      "id": 4,
       "name": "Deep Scanner",
       "type": "Recon",
       "difficulty": 2,
@@ -51,6 +56,7 @@
       "icon": "Scan"
     },
     {
+      "id": 5,
       "name": "Packet Sniffer",
       "type": "Stealth",
       "difficulty": 3,
@@ -61,6 +67,7 @@
       "icon": "Activity"
     },
     {
+      "id": 6,
       "name": "Credential Stuffing",
       "type": "Access",
       "difficulty": 2,
@@ -71,6 +78,7 @@
       "icon": "Database"
     },
     {
+      "id": 7,
       "name": "Session Hijack",
       "type": "Stealth",
       "difficulty": 4,
@@ -81,6 +89,7 @@
       "icon": "UserX"
     },
     {
+      "id": 8,
       "name": "Malware Drop",
       "type": "Persistence",
       "difficulty": 3,
@@ -91,6 +100,7 @@
       "icon": "Bug"
     },
     {
+      "id": 9,
       "name": "DDoS Burst",
       "type": "Disruption",
       "difficulty": 2,
@@ -101,6 +111,7 @@
       "icon": "Zap"
     },
     {
+      "id": 10,
       "name": "Zero-Day Attack",
       "type": "Advanced",
       "difficulty": 5,
@@ -111,6 +122,7 @@
       "icon": "Skull"
     },
     {
+      "id": 11,
       "name": "Log Wiper",
       "type": "Stealth",
       "difficulty": 3,

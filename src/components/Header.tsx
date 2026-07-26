@@ -16,7 +16,7 @@ interface GameStateProps {
 
 interface HeaderProps {
   player: Player,
-  gameState: GameState
+  gameState: GameState | null
 }
 
 const PlayerDetailsCard: React.FC<PlayerDetailsProps> = ({name, ip, role}) => (
@@ -97,7 +97,7 @@ const LiveBeacon: React.FC = () => (
   </div>
 )
 
-export const Header: React.FC<HeaderProps> = ({ player, gameState }) => {
+export const Header: React.FC<HeaderProps> = ({ player, gameState }: HeaderProps) => {
 
     const playerData = { name: player?.username ?? "Guest", ip: `192.168.1.${player.id}`, role: player.role }
     // const playerData = { name:  "Guest", ip: `192.168.1.${10}`, role: 'red' }

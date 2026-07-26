@@ -1,6 +1,7 @@
 {
   "tools": [
     {
+      "id": 0,
       "name": "Firewall Upgrade",
       "type": "Prevention",
       "strength": 3,
@@ -9,6 +10,7 @@
       "icon": "ShieldCheck"
     },
     {
+      "id": 1,
       "name": "Intrusion Detection",
       "type": "Detection",
       "strength": 4,
@@ -17,6 +19,7 @@
       "icon": "Radar"
     },
     {
+      "id": 2,
       "name": "Auto Patch",
       "type": "Prevention",
       "strength": 3,
@@ -25,6 +28,7 @@
       "icon": "Wrench"
     },
     {
+      "id": 3,
       "name": "Honeypot",
       "type": "Deception",
       "strength": 5,
@@ -33,6 +37,7 @@
       "icon": "Box"
     },
     {
+      "id": 4,
       "name": "IP Block",
       "type": "Response",
       "strength": 3,
@@ -41,6 +46,7 @@
       "icon": "Ban"
     },
     {
+      "id": 5,
       "name": "Traceback",
       "type": "Counter",
       "strength": 4,
@@ -49,6 +55,7 @@
       "icon": "Locate"
     },
     {
+      "id": 6,
       "name": "System Scan",
       "type": "Recovery",
       "strength": 2,
@@ -57,6 +64,7 @@
       "icon": "Search"
     },
     {
+      "id": 7,
       "name": "Multi-Factor Auth",
       "type": "Prevention",
       "strength": 5,
@@ -65,6 +73,7 @@
       "icon": "KeyRound"
     },
     {
+      "id": 8,
       "name": "Traffic Filter",
       "type": "Prevention",
       "strength": 3,
@@ -73,6 +82,7 @@
       "icon": "Filter"
     },
     {
+      "id": 9,
       "name": "Decoy Files",
       "type": "Deception",
       "strength": 4,
@@ -81,6 +91,7 @@
       "icon": "FileText"
     },
     {
+      "id": 10,
       "name": "Emergency Lockdown",
       "type": "Response",
       "strength": 5,
@@ -89,6 +100,7 @@
       "icon": "Lock"
     },
     {
+      "id": 11,
       "name": "Backup Restore",
       "type": "Recovery",
       "strength": 4,

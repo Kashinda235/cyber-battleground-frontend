@@ -1,12 +1,6 @@
 import React, { useState } from "react"
 import { User } from "lucide-react"
-
-// --- Types & Mock Data ---
-interface Player {
-  id: string
-  name: string
-  status: "online" | "idle"
-}
+import type {MoveLog, Player} from "../utils/types.ts";
 
 interface ActionLog {
   id: string
@@ -14,36 +8,15 @@ interface ActionLog {
   time: string
 }
 
-const MOCK_PLAYERS: Player[] = [
-  { id: "1", name: "CyberNinja", status: "online" },
-  { id: "2", name: "Ghost_Protocol", status: "online" },
-  { id: "3", name: "NeonRider", status: "idle" },
-  { id: "4", name: "ZeroCool", status: "online" },
-  { id: "5", name: "AcidBurn", status: "online" },
-  { id: "6", name: "CrashOverride", status: "idle" }, // Added to ensure scrolling
-]
-
-const MOCK_LOGS: ActionLog[] = [
-  { id: "l1", message: "Request from 101", time: "10:42:01" },
-  { id: "l2", message: "257 requests from 10.15.0.23", time: "10:45:12" },
-  {
-    id: "l3",
-    message: "Authentication failed for user admin",
-    time: "10:48:33",
-  },
-  {
-    id: "l4",
-    message: "Connection established on port 8080",
-    time: "10:51:05",
-  },
-  { id: "l5", message: "Firewall block rule triggered", time: "10:52:12" }, // Added to ensure scrolling
-]
-
+interface LogProps {
+  players: Player[],
+  moveLogs: MoveLog[]
+}
 // --- Component ---
-const ActivityLog: React.FC = () => {
+const ActivityLog = ( {players, moveLogs}: LogProps) => {
   const [activeTab, setActiveTab] = useState<"users" | "logs">("users")
 
-  const onlineCount = MOCK_PLAYERS.filter((p) => p.status === "online").length
+  const onlineCount = players.filter((p) => p.status === "online").length
 
   return (
     <div className="mx-auto h-full flex w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-gray-900 font-sans text-gray-200 shadow-2xl">
@@ -81,7 +54,7 @@ const ActivityLog: React.FC = () => {
       {/* Scrollable List Content */}
       <div className="flex-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.gray.700)_transparent] space-y-2 overflow-y-auto p-3 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-700 hover:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
         {activeTab === "users"
-          ? MOCK_PLAYERS.map((player) => (
+          ? players.map((player) => (
               <div
                 key={player.id}
                 className="flex items-center justify-between rounded-lg border border-transparent bg-gray-800/40 p-3 transition-colors hover:border-gray-700 hover:bg-gray-800"
@@ -97,7 +70,7 @@ const ActivityLog: React.FC = () => {
                     }
                   />
                   <span className="font-medium text-gray-200">
-                    {player.name}
+                    {player.username}
                   </span>
                 </div>
                 <span className="text-xs tracking-wider text-gray-500 uppercase">
@@ -105,13 +78,13 @@ const ActivityLog: React.FC = () => {
                 </span>
               </div>
             ))
-          : MOCK_LOGS.map((log) => (
+          : moveLogs.map((log) => (
               <div
                 key={log.id}
                 className="flex flex-col rounded-lg border border-transparent bg-gray-800/40 p-3 font-mono text-sm transition-colors hover:border-gray-700 hover:bg-gray-800"
               >
-                <span className="mb-1 text-emerald-400">[{log.time}]</span>
-                <span className="text-gray-300">{log.message}</span>
+                <span className="mb-1 text-emerald-400">[{log.timestamp}]</span>
+                <span className="text-gray-300">{log.action}</span>
               </div>
             ))}
       </div>
@@ -120,7 +93,7 @@ const ActivityLog: React.FC = () => {
       <div className="flex items-center justify-between border-t border-gray-800 bg-gray-950 px-5 py-3 text-xs text-gray-400">
         {activeTab === "users" ? (
           <>
-            <span>Total Registered: {MOCK_PLAYERS.length}</span>
+            <span>Total Registered: {players.length}</span>
             <span className="flex items-center space-x-1">
               <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
               <span className="font-medium text-emerald-400">
@@ -131,7 +104,7 @@ const ActivityLog: React.FC = () => {
         ) : (
           <>
             <span>Log retention: 24h</span>
-            <span>Total entries: {MOCK_LOGS.length}</span>
+            <span>Total entries: {moveLogs.length}</span>
           </>
         )}
       </div>
