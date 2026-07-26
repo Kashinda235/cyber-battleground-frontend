@@ -71,7 +71,7 @@ const ChatBlock = ( { chats, activePlayers, currentPlayer, sendChat }: ChatBlock
                 </div>
             </header>
 
-            <div ref={chatEndRef} className="custom-scrollbar flex-1 space-y-5 overflow-y-auto p-6">
+            <div ref={chatEndRef} className="flex-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.gray.700)_transparent] space-y-5 overflow-y-auto p-6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-700 hover:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
                 {chats.map((msg) => (
                     <div
                         key={msg.id}

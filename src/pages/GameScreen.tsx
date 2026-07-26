@@ -41,21 +41,28 @@ const GameScreen = ({ token, player }: GameProps) => {
                 <Header {...headerData}/>
 
                 {/* The row expands to remaining space and forces children to fill height */}
-                <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
+                <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-                    {/* ActivityFeed */}
-                    <div className="h-[600px] w-full overflow-y-auto lg:w-[30%]">
-                        <ActivityFeed {...feedData}/>
-                    </div>
+                    {/* Grid Layout Container */}
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 w-full">
 
-                    {/* ActivityLog */}
-                    <div className="h-[600px] w-full overflow-y-auto lg:w-[24%]">
-                        <ActivityLog {...logData}/>
-                    </div>
+                        {/* Top/First Row on Large Screens: 3:2 Ratio (3/5ths vs 2/5ths) */}
+                        {/* ActivityFeed (3 parts of 5 -> 60%) */}
+                        <div className="h-[600px] w-full overflow-y-auto lg:col-span-3">
+                            <ActivityFeed {...feedData} />
+                        </div>
 
-                    {/* GameCanvas */}
-                    <div className="h-[600px] w-full overflow-hidden lg:w-[46%]">
-                        <GameCanvas players={players} />
+                        {/* ActivityLog (2 parts of 5 -> 40%) */}
+                        <div className="h-[600px] w-full overflow-y-auto lg:col-span-2">
+                            <ActivityLog {...logData} />
+                        </div>
+
+                        {/* Bottom Row on Large Screens: Full Width (5/5ths) */}
+                        {/* GameCanvas */}
+                        <div className="h-[600px] w-full overflow-hidden lg:col-span-5">
+                            <GameCanvas players={players} currentPlayer={player} />
+                        </div>
+
                     </div>
 
                 </div>

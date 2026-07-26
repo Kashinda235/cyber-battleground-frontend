@@ -59,7 +59,7 @@ const ActionMode = ( {mode, performAction}: ActionProps) => {
                 </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.gray.700)_transparent] overflow-y-auto p-6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-700 hover:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
                 { (mode === 'attack') ?
                 (<div className="grid grid-cols-2 gap-4">
                     {ATTACKS.map((action) => {
