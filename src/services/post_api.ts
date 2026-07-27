@@ -1,7 +1,7 @@
-import {
-    type RegisterRequest, type AuthResponse, type ActionRequest,
-    type ActionResult, type ChatRequest, type ChatLog,
-    type StateUpdateRequest, type GameState,
+import type {
+    RegisterRequest, AuthResponse, ActionRequest,
+    ActionResult, ChatRequest, ChatLog,
+    StateUpdateRequest, GameState, LoginRequest,
 } from '../utils/types';
 import { API_BASE_URL } from '../utils/constants';
 
@@ -72,6 +72,14 @@ async function mutateRequest<T, R>(
  */
 export async function postPlayer(data: RegisterRequest): Promise<AuthDataResponse> {
     return mutateRequest<RegisterRequest, AuthResponse>('/auth/register', data);
+}
+
+/**
+ * POST /auth/login
+ * Logins an old player and returns authentication details.
+ */
+export async function postUser(data: LoginRequest): Promise<AuthDataResponse> {
+    return mutateRequest<LoginRequest, AuthResponse>('/auth/login', data);
 }
 
 /**

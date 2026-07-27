@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import type {
     Player, Ability, ChatLog, GameState, MoveLog, ActionRequest,
-    ChatRequest, StateUpdateRequest, RegisterRequest,
+    ChatRequest, StateUpdateRequest, RegisterRequest, LoginRequest,
 } from '../utils/types';
 import {
     fetchPlayers, fetchAbilities, fetchChats, fetchGameState, fetchMoveLogs,
 } from '../services/fetch_api.ts';
 import {
-    postAction, postChat, postGameState, postPlayer,
+    postAction, postChat, postGameState, postPlayer, postUser,
 } from '../services/post_api.ts'
 import { useWebSocket } from './useWebSocket';
 
@@ -113,6 +113,11 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         return res.data;
     };
 
+    const loginPlayer = async (data: LoginRequest) => {
+        const res = await postUser(data);
+        return res.data;
+    };
+
     const performAction = async (data: ActionRequest) => {
         if (!token) throw new Error('Authentication required for actions');
         const res = await postAction(data, token);
@@ -150,6 +155,7 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         // API Actions
         refreshData,
         registerPlayer,
+        loginPlayer,
         performAction,
         sendChat,
         updateGameState,

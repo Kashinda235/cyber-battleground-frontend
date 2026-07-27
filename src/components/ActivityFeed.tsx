@@ -2,12 +2,11 @@ import { useState, useEffect, useRef } from "react"
 import ChatBlock from './ChatBlock.tsx';
 import ActionMode from './ActionMode.tsx';
 import {
-  Send, MessageSquare, Zap, Shield, Swords,
-  Flame, Heart, Bell, AlertTriangle, Info,
+   MessageSquare, Zap, Bell, AlertTriangle, Info, ShieldCogCorner,
 } from "lucide-react"
 import type {Ability, ActionRequest, ActionResult, ChatLog, Player} from "../utils/types.ts";
 // --- Types ---
-type Mode = "chat" | "actions" | "alerts"
+type Mode = "chat" | "actions" | "defence" | "alerts"
 
 interface FeedProps {
   players: Player[],
@@ -92,6 +91,18 @@ export default function ActivityFeed( { players, currentPlayer, chats, sendChat,
             <Zap size={22} />
           </button>
 
+          <button
+              onClick={() => setMode("defence")}
+              className={`rounded-xl p-3 transition-all duration-200 ${
+                  mode === "defence"
+                      ? "bg-blue-400 text-white shadow-lg shadow-rose-900/50"
+                      : "text-gray-500 hover:bg-gray-800 hover:text-gray-300"
+              }`}
+              title="Defence"
+          >
+            <ShieldCogCorner size={22} />
+          </button>
+
           {/* New Alerts Switch */}
           <button
             onClick={() => setMode("alerts")}
@@ -122,6 +133,9 @@ export default function ActivityFeed( { players, currentPlayer, chats, sendChat,
 
           {/* --- ACTIONS MODE --- */}
           {mode === "actions" && <ActionMode performAction={performAction} mode={'attack'}/>}
+
+          {/* --- DEFENCE MODE --- */}
+          {mode === "defence" && <ActionMode performAction={performAction} mode={'defence'}/>}
 
           {/* --- ALERTS MODE --- */}
           {mode === "alerts" && (

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
 import {useGameData} from "../hooks/useGameData.ts";
+import {Eye, ShieldCogCorner, Zap} from "lucide-react";
 
 // --- SVGs & Design Assets ---
 const Icons = {
@@ -81,7 +82,7 @@ const ROLES = [
     id: "attack",
     role: 'red',
     title: "Attack",
-    badge: "⚔️",
+    badge: <Zap className={'text-red-400'} />,
     description: "Vanguard damage dealer. Decimate enemy lines.",
     color: "rgb(239, 68, 68)", // Red
     glowClass:
@@ -93,7 +94,7 @@ const ROLES = [
     id: "defend",
     role: 'blue',
     title: "Defend",
-    badge: "🛡️",
+    badge: <ShieldCogCorner className={'text-blue-400'}/>,
     description: "Frontline protector. Absorb impact and hold objectives.",
     color: "rgb(6, 182, 212)", // Cyan
     glowClass:
@@ -105,7 +106,7 @@ const ROLES = [
     id: "spectate",
     role: 'spectator',
     title: "Spectate",
-    badge: "👁️",
+    badge: <Eye className={'text-purple-400'} />,
     description: "Tactical observer. Analyze strategies from above.",
     color: "rgb(168, 85, 247)", // Purple
     glowClass:
@@ -115,7 +116,7 @@ const ROLES = [
   },
 ]
 
-export default function GameLobby( { onJoinGame }) {
+export default function GameLobby( { onJoinGame, users, saveUser }) {
   const [username, setUsername] = useState("")
   const [isTouched, setIsTouched] = useState(false)
 
@@ -125,7 +126,7 @@ export default function GameLobby( { onJoinGame }) {
     const foundIdx = ROLES.findIndex((r) => r.id === saved)
     return foundIdx !== -1 ? foundIdx : 1
   })
-  const {registerPlayer} = useGameData();
+  const {registerPlayer, loginPlayer} = useGameData();
 
   const activeRole = ROLES[selectedIndex]
   const isUsernameValid = username.trim().length >= 3
@@ -166,20 +167,31 @@ export default function GameLobby( { onJoinGame }) {
 
     const data = { username: username, role: activeRole.role.toLowerCase() }
     try {
-      const playerData = await registerPlayer(data);
-      const fetchedToken = playerData.token;
-      const fetchedPlayer = playerData.player;
-      onJoinGame(fetchedToken, fetchedPlayer);
-      alert(`Deploying ${username} as ${activeRole.title.toUpperCase()} to the arena!`);
-    } catch (error: any) {
-      // Handle duplicate user error gracefully
-      alert(error.message || "Player already exists. Try logging in instead.");
-    }
+      let playerData;
+      let newPlayer = true;
+      try {
+        playerData = await registerPlayer(data);
+      } catch (error: any) {
+        if (error?.message?.includes("Player already exists")) {
+          playerData = await loginPlayer( {username: username} );
+          newPlayer = false;
+        } else {
+          throw error;
+        }
+      }
+      if (!playerData) {
+        throw new Error("Failed to retrieve player authentication data.");
+      }
+      // Handle successful login/registration in ONE place
+      const { token, player } = playerData;
+      onJoinGame(token, player);
 
-    // if (!playerData) {
-    //   alert(`Unable to Connect servers`);
-    //   return;
-    // }
+      if (newPlayer) saveUser(username);
+      alert(`Deploying ${username} as ${player?.role.toUpperCase()} to the arena!`);
+
+    } catch (error: any) {
+      alert(error?.message || "An unexpected error occurred while deploying to the arena.");
+    }
   }
 
   return (
@@ -259,6 +271,12 @@ export default function GameLobby( { onJoinGame }) {
                         : "border-slate-800 focus:border-slate-600 focus:shadow-[0_0_15px_rgba(255,255,255,0.05)]"
                     }`}
                   />
+                  {/* Suggestion list */}
+                  <datalist id="username-suggestions">
+                    {users.map((name, index) => (
+                        <option key={index} value={name} />
+                    ))}
+                  </datalist>
                 </div>
                 {isTouched && !isUsernameValid && (
                   <motion.p
@@ -412,7 +430,7 @@ export default function GameLobby( { onJoinGame }) {
           </div>
 
           {/* Section 3: Primary Action Interface Control */}
-          <div className="flex items-center justify-end border-t border-slate-800/60 pt-4">
+          <div className="flex items-center justify-center border-t border-slate-800/60 pt-4">
             <motion.button
               type="submit"
               disabled={!isFormValid}

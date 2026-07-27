@@ -18,8 +18,36 @@ const App = () => {
     const [token, setToken] = useState<string>('');
     const [player, setPlayer] = useState<Player | undefined>(undefined);
 
-    // 1. Auto-login check on initial render (optional, but recommended)
+    const [savedUsernames, setSavedUsernames] = useState<string[]>([]);
+
+    // Load saved usernames from localStorage on mount
     useEffect(() => {
+        const history = localStorage.getItem('cyber_battleground_users');
+        if (history) {
+            try {
+                setSavedUsernames(JSON.parse(history));
+            } catch (e) {
+                console.error("Failed to parse username history", e);
+            }
+        }
+    }, []);
+
+    // Helper function to call when authentication succeeds
+    const saveUser = (newUsername: string) => {
+        if (!newUsername.trim()) return;
+
+        // Prevent duplicates and keep the most recent names (limit to top 5)
+        const updatedHistory = [
+            newUsername,
+            ...savedUsernames.filter((name) => name !== newUsername)
+        ].slice(0, 5);
+
+        setSavedUsernames(updatedHistory);
+        localStorage.setItem('cyber_battleground_users', JSON.stringify(updatedHistory));
+    };
+
+    // 1. Auto-login check on initial render (optional, but recommended)
+    const handleLogin = () => {
         const savedToken = localStorage.getItem(TOKEN_KEY);
         const savedPlayer = localStorage.getItem(PLAYER_KEY);
 
@@ -36,44 +64,13 @@ const App = () => {
             }
         }
         setIsLoaded(true);
-    }, []);
-
-    const saveSession = (token: string, player: Player) => {
-        // if (!player.username) {
-        //     console.error('Cannot save session: player username is undefined');
-        //     return;
-        // }
-        // Update the last Join
-        localStorage.setItem(TOKEN_KEY, token);
-        localStorage.setItem(PLAYER_KEY, JSON.stringify(player));
-
-        // // Storing players in the same device for future access
-        // const NEW_PLAYER = player.username;
-        // if (!localStorage.getItem(NEW_PLAYER))
-        //     localStorage.setItem(NEW_PLAYER, JSON.stringify({ token, player }));
-
-        setToken(token);
-        setPlayer(player);
-        setCurrentScreen('game');
     };
 
     const handleJoinGame = (receivedToken: string, receivedPlayer: Player) => {
-        saveSession(receivedToken, receivedPlayer);
+        setToken(receivedToken);
+        setPlayer(receivedPlayer);
+        setCurrentScreen('game');
     };
-
-    // 3. Handle Manual Login
-    const handleLogin = ( username: string) => {
-        const savedData = localStorage.getItem(username);
-        if (savedData) {
-            try {
-                const {token, player} = JSON.parse(savedData);
-                // Note: 'player' is ALREADY an object here because the whole payload was parsed!
-                saveSession(token, player);
-            } catch (error) {
-                console.error('Error logging in:', error);
-            }
-        }
-    }
 
     return (
         <div className="app-container">
@@ -102,7 +99,7 @@ const App = () => {
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.3 }}
                     >
-                        <GameLobby onJoinGame={handleJoinGame} />
+                        <GameLobby onJoinGame={handleJoinGame} users={savedUsernames} saveUser={saveUser}/>
                     </motion.div>
                 )}
 
