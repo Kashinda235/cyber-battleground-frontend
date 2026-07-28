@@ -4,7 +4,7 @@ const Hero = ( { onStart }) => {
     <header className="hero">
     <div className="eyebrow">
       <span className="dot"></span> 
-      HACK — DEFEND — DOMINATEE
+      HACK — DEFEND — DOMINATE
       </div>
     <h1>Welcome to the world
         <br></br>of <em>digital warfare.</em></h1>

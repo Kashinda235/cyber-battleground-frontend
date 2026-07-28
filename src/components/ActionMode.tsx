@@ -20,7 +20,7 @@ interface ActionProps {
 const ActionMode = ( {mode, performAction}: ActionProps) => {
     const [activeCooldowns, setActiveCooldowns] = useState<Record<string, boolean>>({});
 
-    const TARGET = 3;
+    const TARGET = 1;
     const triggerAction = async (actionId: number, effect: string, cooldown: number) => {
         if (activeCooldowns[actionId]) return
 
