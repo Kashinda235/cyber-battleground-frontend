@@ -1,6 +1,18 @@
 import * as Icons from 'lucide-react';
 
-function AbilityIcon({ name, color = "currentColor", size = 20 }) {
+interface AbilityIconProps {
+    name: keyof typeof Icons; // Ensures 'name' must be a valid Lucide icon name
+    color?: string;
+    size?: number;
+}
+
+interface ActionCardProps {
+    ability: any,
+    triggerAction: (actionId: number, effect: string, cooldown: number) => Promise<void>,
+    color: string,
+    isOnCooldown: boolean
+}
+function AbilityIcon({ name, color = "currentColor", size = 20 }: AbilityIconProps) {
     // Grab the icon component dynamically from Lucide using the string key
     const IconComponent = Icons[name];
 
@@ -13,23 +25,7 @@ function AbilityIcon({ name, color = "currentColor", size = 20 }) {
     return <IconComponent size={size} color={color} />;
 }
 
-function TrialCard({ ability }) {
-    return (
-        <div className="card">
-            <div className="card-header">
-                {/* Render the icon directly from the string in JSON */}
-                <AbilityIcon name={ability.icon} size={24} />
-                <h3>{ability.name}</h3>
-            </div>
-
-            <p>Cost: {ability.cost} AP</p>
-            {ability.damage && <p>Damage: {ability.damage}</p>}
-            {ability.heal && <p>Heal: {ability.heal}</p>}
-        </div>
-    );
-}
-
-export function ActionCard({ ability, triggerAction, color, isOnCooldown}) {
+export function ActionCard({ ability, triggerAction, color, isOnCooldown}: ActionCardProps) {
     const action = {
         id: ability.id,
         effect: ability.effect,

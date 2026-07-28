@@ -1,6 +1,6 @@
 import React from "react"
 import { motion } from "framer-motion"
-import {Sword, HatGlasses, ShieldCheck, HeartPulse, Trophy, Radio, Activity, Shield} from "lucide-react"
+import {Sword, HatGlasses, ShieldCheck, HeartPulse, Trophy, Activity, Shield} from "lucide-react"
 import type {GameState, Player} from "../utils/types.ts";
 
 interface PlayerDetailsProps {
@@ -100,21 +100,21 @@ const GameStatesCard: React.FC<GameStateProps> = ({ systemHealth, score }) => {
     )
 }
 
-const LiveBeacon: React.FC = () => (
-  <div className="flex items-center gap-2.5 rounded-full border border-emerald-500/40 bg-emerald-950/40 px-3.5 py-1.5 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-    <div className="relative flex h-2.5 w-2.5 items-center justify-center">
-      <motion.span
-        animate={{ scale: [1, 2.2, 1], opacity: [0.8, 0, 0.8] }}
-        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute inline-flex h-full w-full rounded-full bg-red-400"
-      />
-      <span className="relative inline-flex h-2 w-2 rounded-full bg-red-400" />
-    </div>
-    <span className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-emerald-300 uppercase">
-       Live
-    </span>
-  </div>
-)
+// const LiveBeacon: React.FC = () => (
+//   <div className="flex items-center gap-2.5 rounded-full border border-emerald-500/40 bg-emerald-950/40 px-3.5 py-1.5 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+//     <div className="relative flex h-2.5 w-2.5 items-center justify-center">
+//       <motion.span
+//         animate={{ scale: [1, 2.2, 1], opacity: [0.8, 0, 0.8] }}
+//         transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+//         className="absolute inline-flex h-full w-full rounded-full bg-red-400"
+//       />
+//       <span className="relative inline-flex h-2 w-2 rounded-full bg-red-400" />
+//     </div>
+//     <span className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-emerald-300 uppercase">
+//        Live
+//     </span>
+//   </div>
+// )
 
 export const Header: React.FC<HeaderProps> = ({ player, gameState }: HeaderProps) => {
 

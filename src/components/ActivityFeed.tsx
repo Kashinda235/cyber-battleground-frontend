@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
 import ChatBlock from './ChatBlock.tsx';
 import ActionMode from './ActionMode.tsx';
 import {
    MessageSquare, Zap, Bell, AlertTriangle, Info, ShieldCogCorner,
 } from "lucide-react"
-import type {Ability, ActionRequest, ActionResult, ChatLog, Player} from "../utils/types.ts";
-// --- Types ---
+import type { ActionRequest, ActionResult, ChatLog, Player} from "../utils/types.ts";
+
 type Mode = "chat" | "actions" | "defence" | "alerts"
 
 interface FeedProps {
@@ -14,7 +14,6 @@ interface FeedProps {
   target: Player,
   chats: ChatLog[],
   sendChat: (message: string) => Promise<ChatLog>,
-  abilities: Ability[],
   performAction: (data: ActionRequest) => Promise<ActionResult>
 }
 
@@ -52,7 +51,7 @@ const SYSTEM_ALERTS: Alert[] = [
   },
 ]
 
-export default function ActivityFeed( { players, currentPlayer, target, chats, sendChat, abilities, performAction }: FeedProps ) {
+export default function ActivityFeed( { players, currentPlayer, target, chats, sendChat, performAction }: FeedProps ) {
   const [mode, setMode] = useState<Mode>("chat")
   const activePlayers:number = players.length;
 
