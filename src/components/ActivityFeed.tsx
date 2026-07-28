@@ -11,6 +11,7 @@ type Mode = "chat" | "actions" | "defence" | "alerts"
 interface FeedProps {
   players: Player[],
   currentPlayer: Player,
+  target: Player,
   chats: ChatLog[],
   sendChat: (message: string) => Promise<ChatLog>,
   abilities: Ability[],
@@ -51,7 +52,7 @@ const SYSTEM_ALERTS: Alert[] = [
   },
 ]
 
-export default function ActivityFeed( { players, currentPlayer, chats, sendChat, abilities, performAction }: FeedProps ) {
+export default function ActivityFeed( { players, currentPlayer, target, chats, sendChat, abilities, performAction }: FeedProps ) {
   const [mode, setMode] = useState<Mode>("chat")
   const activePlayers:number = players.length;
 
@@ -132,10 +133,10 @@ export default function ActivityFeed( { players, currentPlayer, chats, sendChat,
           />}
 
           {/* --- ACTIONS MODE --- */}
-          {mode === "actions" && <ActionMode performAction={performAction} mode={'attack'}/>}
+          {mode === "actions" && <ActionMode target={target} performAction={performAction} mode={'attack'}/>}
 
           {/* --- DEFENCE MODE --- */}
-          {mode === "defence" && <ActionMode performAction={performAction} mode={'defence'}/>}
+          {mode === "defence" && <ActionMode target={target} performAction={performAction} mode={'defend'}/>}
 
           {/* --- ALERTS MODE --- */}
           {mode === "alerts" && (

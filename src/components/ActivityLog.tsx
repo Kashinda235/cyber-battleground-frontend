@@ -9,11 +9,12 @@ interface ActionLog {
 }
 
 interface LogProps {
-  players: Player[],
-  moveLogs: MoveLog[]
+    players: Player[],
+    moveLogs: MoveLog[],
+    setTarget:  (targetId: Player) => void
 }
 // --- Component ---
-const ActivityLog = ( {players, moveLogs}: LogProps) => {
+const ActivityLog = ( {players, moveLogs, setTarget}: LogProps) => {
   const [activeTab, setActiveTab] = useState<"users" | "logs">("users")
 
   const onlineCount = players.filter((p) => p.status === "online").length
@@ -57,6 +58,7 @@ const ActivityLog = ( {players, moveLogs}: LogProps) => {
           ? players.map((player) => (
               <div
                 key={player.id}
+                onClick={() => setTarget(player)}
                 className="flex items-center justify-between rounded-lg border border-transparent bg-gray-800/40 p-3 transition-colors hover:border-gray-700 hover:bg-gray-800"
               >
                 <div className="flex items-center space-x-3">

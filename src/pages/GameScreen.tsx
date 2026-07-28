@@ -6,6 +6,7 @@ import NetBackground from "../components/NetBackground.tsx";
 import Footer from "../components/Footer.tsx";
 import {useGameData} from "../hooks/useGameData.ts";
 import type {Player} from "../utils/types.ts";
+import {useState} from "react";
 
 interface GameProps {
     token: string
@@ -23,14 +24,19 @@ const GameScreen = ({ token, player }: GameProps) => {
         performAction, // Log
         isLoading
     } = useGameData({ token, player });
+    const [target, setTarget] = useState(player);
+
+    const handleSetTarget = (target: Player) => {
+        setTarget(target);
+    }
 
     const headerData = { player: player, gameState:gameState }
     const feedData = {
-        players: players, currentPlayer: player,
+        players: players, currentPlayer: player, target: target,
         chats: chats, sendChat: sendChat,
         abilities: abilities, performAction: performAction
     }
-    const logData = { players: players, moveLogs: moveLogs }
+    const logData = { players: players, moveLogs: moveLogs, setTarget: handleSetTarget }
 
     if (isLoading) return <div>Loading battlefield...</div>;
 
