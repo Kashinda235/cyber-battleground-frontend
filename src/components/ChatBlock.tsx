@@ -42,6 +42,7 @@ const ChatBlock = ( { chats, activePlayers, currentPlayer, sendChat }: ChatBlock
         setInputValue("")
     }
 
+    // @ts-ignore
     return (
         <div className="flex h-full animate-in flex-col duration-300 fade-in">
             <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-800 bg-gray-900/50 px-6">

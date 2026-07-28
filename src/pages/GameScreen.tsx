@@ -10,7 +10,7 @@ import {useState} from "react";
 
 interface GameProps {
     token: string
-    player: Player
+    player: Player | undefined
 }
 
 const GameScreen = ({ token, player }: GameProps) => {
@@ -18,7 +18,6 @@ const GameScreen = ({ token, player }: GameProps) => {
         gameState, // Header
         chats, // Feed
         sendChat, // Feed
-        abilities, // Feed
         moveLogs, // Log
         players, // Log, Canvas
         performAction, // Log
@@ -33,8 +32,7 @@ const GameScreen = ({ token, player }: GameProps) => {
     const headerData = { player: player, gameState:gameState }
     const feedData = {
         players: players, currentPlayer: player, target: target,
-        chats: chats, sendChat: sendChat,
-        abilities: abilities, performAction: performAction
+        chats: chats, sendChat: sendChat, performAction: performAction
     }
     const logData = { players: players, moveLogs: moveLogs, setTarget: handleSetTarget }
 

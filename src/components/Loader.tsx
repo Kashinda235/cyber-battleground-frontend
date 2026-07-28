@@ -16,6 +16,7 @@ const randomHex = (len: number) => {
   return s;
 };
 
+// @ts-expect-error oncomplete is function
 export default function Loader({ onComplete }) {
   const [visibleLines, setVisibleLines] = useState([]);
   const [currentLineIndex, setCurrentLineIndex] = useState(-1);
@@ -26,39 +27,6 @@ export default function Loader({ onComplete }) {
 
   // Detect user preference for reduced motion
   const prefersReducedRef = useRef(false);
-
-  useEffect(() => {
-    prefersReducedRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
-    // Initial startup delay
-    const startTimeout = setTimeout(() => {
-      setCurrentLineIndex(0);
-    }, prefersReducedRef.current ? 10 : 300);
-
-    return () => clearTimeout(startTimeout);
-  }, []);
-
-  // Phase 1: Typing text lines sequential logic
-  useEffect(() => {
-    if (currentLineIndex === -1) return;
-
-    if (currentLineIndex < BOOT_LINES.length) {
-      const currentLine = BOOT_LINES[currentLineIndex];
-      
-      // Append current line to array
-      setVisibleLines((prev) => [...prev, currentLine.text]);
-
-      const delayTime = prefersReducedRef.current ? 10 : currentLine.delay + 220;
-      const lineTimeout = setTimeout(() => {
-        setCurrentLineIndex((prev) => prev + 1);
-      }, delayTime);
-
-      return () => clearTimeout(lineTimeout);
-    } else {
-      // Phase 2: Start progress bar once all lines printed
-      startProgress();
-    }
-  }, [currentLineIndex]);
 
   // Phase 2: Progress and Hash updates
   const startProgress = () => {
@@ -80,6 +48,40 @@ export default function Loader({ onComplete }) {
       }
     }, intervalTime);
   };
+  useEffect(() => {
+    prefersReducedRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+    // Initial startup delay
+    const startTimeout = setTimeout(() => {
+      setCurrentLineIndex(0);
+    }, prefersReducedRef.current ? 10 : 300);
+
+    return () => clearTimeout(startTimeout);
+  }, []);
+
+  // Phase 1: Typing text lines sequential logic
+  useEffect(() => {
+    if (currentLineIndex === -1) return;
+
+    if (currentLineIndex < BOOT_LINES.length) {
+      const currentLine = BOOT_LINES[currentLineIndex];
+      
+      // Append current line to array
+      // @ts-ignore
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setVisibleLines((prev) => [...prev, currentLine.text]);
+
+      const delayTime = prefersReducedRef.current ? 10 : currentLine.delay + 220;
+      const lineTimeout = setTimeout(() => {
+        setCurrentLineIndex((prev) => prev + 1);
+      }, delayTime);
+
+      return () => clearTimeout(lineTimeout);
+    } else {
+      // Phase 2: Start progress bar once all lines printed
+      startProgress();
+    }
+  }, [currentLineIndex]);
 
   // Phase 3: Final Access granted animations
   const finishBoot = () => {

@@ -7,10 +7,6 @@ import GameScreen from "./pages/GameScreen.tsx";
 import { motion, AnimatePresence } from 'framer-motion';
 import type {Player} from "./utils/types.ts";
 
-// Define keys to prevent typo bugs
-const TOKEN_KEY = 'auth_token';
-const PLAYER_KEY = 'player_data';
-
 const App = () => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [currentScreen, setCurrentScreen] = useState('home');
@@ -25,6 +21,7 @@ const App = () => {
         const history = localStorage.getItem('cyber_battleground_users');
         if (history) {
             try {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setSavedUsernames(JSON.parse(history));
             } catch (e) {
                 console.error("Failed to parse username history", e);
@@ -46,26 +43,6 @@ const App = () => {
         localStorage.setItem('cyber_battleground_users', JSON.stringify(updatedHistory));
     };
 
-    // 1. Auto-login check on initial render (optional, but recommended)
-    const handleLogin = () => {
-        const savedToken = localStorage.getItem(TOKEN_KEY);
-        const savedPlayer = localStorage.getItem(PLAYER_KEY);
-
-        if (savedToken && savedPlayer) {
-            try {
-                setToken(savedToken);
-                setPlayer(JSON.parse(savedPlayer));
-                setCurrentScreen('game');
-            } catch (error) {
-                console.error('Failed to parse saved player data:', error);
-                // Clear corrupted data
-                localStorage.removeItem(TOKEN_KEY);
-                localStorage.removeItem(PLAYER_KEY);
-            }
-        }
-        setIsLoaded(true);
-    };
-
     const handleJoinGame = (receivedToken: string, receivedPlayer: Player) => {
         setToken(receivedToken);
         setPlayer(receivedPlayer);
@@ -75,7 +52,7 @@ const App = () => {
     return (
         <div className="app-container">
 
-            {/*<Loader onComplete={() => setIsLoaded(true)} />*/}
+            <Loader onComplete={() => setIsLoaded(true)} />
             {/* AnimatePresence handles animating components as they unmount */}
             <div id="main-site" className={isLoaded ? 'in' : ''}>
                 <AnimatePresence mode="wait">

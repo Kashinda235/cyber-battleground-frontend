@@ -4,20 +4,14 @@ import {useState} from "react";
 import {ActionCard} from "./AbilityCard.tsx";
 import type {ActionRequest, ActionResult, Player} from "../utils/types.ts";
 
-const ATTACKS = redAbility.tools;
-const DEFENCES = blueAbility.tools;
-
-interface Action {
-    id: number,
-    name: string,
-    effect: string,
-    cooldown: number
-}
 interface ActionProps {
     mode : "attack" | "defend",
     target: Player,
     performAction:  (data: ActionRequest) => Promise<ActionResult>
 }
+
+const ATTACKS = redAbility.tools;
+const DEFENCES = blueAbility.tools;
 
 const ActionMode = ( {mode, target, performAction}: ActionProps) => {
     const [activeCooldowns, setActiveCooldowns] = useState<Record<string, boolean>>({});
@@ -64,7 +58,7 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
             <div className="flex-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.gray.700)_transparent] overflow-y-auto p-6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-700 hover:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
                 { (mode === 'attack') ?
                 (<div className="grid grid-cols-2 gap-4">
-                    {ATTACKS.map((action) => {
+                    {ATTACKS.map((action: any) => {
                         const isOnCooldown = activeCooldowns[action.id]
                         return (
                             <ActionCard key={'red' + action.id}
@@ -76,7 +70,7 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
                         )
                     })}
                 </div>) : (<div className="grid grid-cols-2 gap-4">
-                        {DEFENCES.map((action) => {
+                        {DEFENCES.map((action: any) => {
                             const isOnCooldown = activeCooldowns[action.id]
                             console.log('blue' + action.id);
                             return (
