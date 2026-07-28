@@ -2,7 +2,7 @@ import blueAbility from '@/data/blue_team_abilities.json';
 import redAbility from '@/data/red_team_abilities.json';
 import {useState} from "react";
 import {ActionCard} from "./AbilityCard.tsx";
-import type {ActionRequest, ActionResult} from "../utils/types.ts";
+import type {ActionRequest, ActionResult, Player} from "../utils/types.ts";
 
 const ATTACKS = redAbility.tools;
 const DEFENCES = blueAbility.tools;
@@ -15,12 +15,13 @@ interface Action {
 }
 interface ActionProps {
     mode : "attack" | "defend",
+    target: Player,
     performAction:  (data: ActionRequest) => Promise<ActionResult>
 }
-const ActionMode = ( {mode, performAction}: ActionProps) => {
+
+const ActionMode = ( {mode, target, performAction}: ActionProps) => {
     const [activeCooldowns, setActiveCooldowns] = useState<Record<string, boolean>>({});
 
-    const TARGET = 1;
     const triggerAction = async (actionId: number, effect: string, cooldown: number) => {
         if (activeCooldowns[actionId]) return
 
@@ -31,7 +32,8 @@ const ActionMode = ( {mode, performAction}: ActionProps) => {
             setActiveCooldowns((prev) => ({ ...prev, [actionId]: false }))
         }, ms)
 
-        const data = { action_type: effect, target_id: TARGET, ability_id: actionId }
+        const log = `${effect} on ${target.username}`;
+        const data = { action_type: log, target_id: target.id, ability_id: actionId }
         const res = await performAction(data);
     }
 // console.log(ATTACKS);
@@ -45,7 +47,7 @@ const ActionMode = ( {mode, performAction}: ActionProps) => {
                             Current Target
                         </p>
                         <h2 className="text-lg leading-tight font-bold text-rose-100 drop-shadow-md">
-                            Void Dragon Sovereign
+                            {target.username}
                         </h2>
                     </div>
                     <div className="ml-auto text-right">
