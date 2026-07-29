@@ -1,75 +1,83 @@
-# React + TypeScript + Vite
+# ⚔️ Cyber Battleground — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 
-Currently, two official plugins are available:
+> **Interactive client UI for Cyber Battleground** — A multiplayer, decision-driven strategy RPG designed to make cybersecurity learning engaging and immersive for beginners.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 🌐 Overview
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Cyber Battleground** bridges the gap between theoretical security concepts and hands-on decision making. Players step into the role of **Red Attackers** or **Blue Defenders**, competing in a dynamic open cyber world to control nodes, manage digital risks, and forge strategic alliances.
 
-## Expanding the ESLint configuration
+This repository houses the front-end user interface built with **React** and **TypeScript**, delivering a responsive, real-time dashboard and game UI.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+* **Backend Repository:** [cyber-battleground-backend](https://github.com/YOUR_USERNAME/cyber-battleground-backend) *(Update link)*
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## ✨ Key Features
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+* **Role Selection:** Choose between **Red Team (Offensive)** and **Blue Team (Defensive)** strategies.
+* **Interactive Cyber World Map:** Visual representation of network nodes, systems, and controlled assets.
+* **Dynamic NPC & Player Interactions:** Engage in tactical encounters, uncover hidden network vulnerabilities, and execute strategic actions.
+* **Real-time Tactical Updates:** Live updates reflecting network control shifts, attacks, and defense maneuvers.
 
+---
+
+## 🛠️ Tech Stack
+
+* **Framework:** React + Vite
+* **Language:** TypeScript
+* **Styling/UI:** Tailwind CSS
+* **Icons:** Lucid-icon
+* **Animations:** Framer-motion
+* **Containerization:** Docker
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+* [Node.js](https://nodejs.org/) (v22 or higher recommended)
+* [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+* [Docker](https://www.docker.com/) (optional, for containerized run)
+
+### Local Development Setup
+
+**Note:** This project requires a backend server and websocket connection. Checkout [**cyber-battleground-backend**](https://github.com/Kashinda235/cyber-battleground-backend)
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Kashinda235/cyber-battleground-frontend.git
+   cd cyber-battleground-frontend
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+
+   Open http://localhost:3000 in your browser.
+
+#### Running with Docker
+To build and run the frontend using Docker:
+
+```bash
+# Build the Docker image
+docker build -t cyber-battleground-frontend .
+
+# Run the container
+docker run -d -p 3000:3000 --name cyber-frontend cyber-battleground-frontend
+Access the app at http://localhost:3000.
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+This project is *Work in Progress*
