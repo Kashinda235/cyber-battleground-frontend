@@ -10,7 +10,7 @@ const MIN_ZOOM = 0.5
 const MAX_ZOOM = 3
 const DRAG_THRESHOLD = 6
 
-const NEON = ["#4de1ff", "#fb1e3f", "#925df5", "#ffd24d", "#a24dff"]
+const NEON = ["#4de1ff", "#fb1e3f", "#a1f55d", "#ffd24d", "#a24dff"]
 const ROLES = ["BLUE", "RED", "SPECTATOR", "ADMIN", "MODERATOR"]
 const FLAVORS = [
   "Patrolling assigned sector without incident.",

@@ -78,13 +78,17 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
             setPlayers((prev) => {
                 // Prevent duplicates by filtering out any existing player with the same ID
                 const filtered = prev.filter((p) => p.id !== newPlayer.id);
-                return [...filtered, newPlayer];
+                return [newPlayer, ...filtered];
             });
         }, []),
 
         // Server broadcasts a player leaving/disconnecting
         onPlayerLeft: useCallback((departedPlayer: Player) => {
-            setPlayers((prev) => prev.filter((p) => p.id !== departedPlayer.id));
+            setPlayers((prev) => {
+                // Prevent duplicates by filtering out any existing player with the same ID
+                const filtered = prev.filter((p) => p.id !== departedPlayer.id);
+                return [...filtered, departedPlayer];
+            });
         }, []),
 
         // Server broadcasts a game state update

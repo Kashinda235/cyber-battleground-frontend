@@ -165,7 +165,7 @@ export default function GameLobby( { onJoinGame, users, saveUser }) {
     e.preventDefault()
     if (!isFormValid) return
 
-    const data = { username: username, role: activeRole.role.toLowerCase() }
+    const data = { username: username.trim(), role: activeRole.role.toLowerCase() }
     try {
       let playerData;
       let newPlayer = true;
@@ -187,6 +187,7 @@ export default function GameLobby( { onJoinGame, users, saveUser }) {
       onJoinGame(token, player);
 
       if (newPlayer) saveUser(username);
+      console.log(users);
       alert(`Deploying ${username} as ${player?.role.toUpperCase()} to the arena!`);
 
     } catch (error: any) {
@@ -265,6 +266,7 @@ export default function GameLobby( { onJoinGame, users, saveUser }) {
                     onChange={(e) => setUsername(e.target.value)}
                     onBlur={() => setIsTouched(true)}
                     placeholder="Enter operator tag..."
+                    list="username-suggestions"
                     className={`w-full rounded-xl border bg-slate-950/80 py-3.5 pr-4 pl-12 text-sm text-slate-200 placeholder-slate-600 transition-all duration-300 outline-none ${
                       isTouched && !isUsernameValid
                         ? "border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.15)] focus:border-rose-500"

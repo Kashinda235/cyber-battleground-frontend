@@ -16,6 +16,26 @@ const App = () => {
 
     const [savedUsernames, setSavedUsernames] = useState<string[]>([]);
 
+    // Restore session on initial load/refresh
+    useEffect(() => {
+        const savedSession = sessionStorage.getItem('cyber_battleground_session');
+
+        if (savedSession) {
+            try {
+                const { token: savedToken, player: savedPlayer } = JSON.parse(savedSession);
+                if (savedToken && savedPlayer) {
+                    setToken(savedToken);
+                    setPlayer(savedPlayer);
+                    setCurrentScreen('game');
+                }
+            } catch (e) {
+                console.error("Failed to restore session from sessionStorage", e);
+                sessionStorage.removeItem('cyber_battleground_session');
+            }
+        }
+        setIsLoaded(true);
+    }, []);
+
     // Load saved usernames from localStorage on mount
     useEffect(() => {
         const history = localStorage.getItem('cyber_battleground_users');
@@ -47,6 +67,18 @@ const App = () => {
         setToken(receivedToken);
         setPlayer(receivedPlayer);
         setCurrentScreen('game');
+
+        sessionStorage.setItem(
+            'cyber_battleground_session',
+            JSON.stringify({ token: receivedToken, player: receivedPlayer })
+        );
+    };
+
+    const handleLogout = () => {
+        setToken('');
+        setPlayer(undefined);
+        setCurrentScreen('home');
+        sessionStorage.removeItem('cyber_battleground_session');
     };
 
     return (
