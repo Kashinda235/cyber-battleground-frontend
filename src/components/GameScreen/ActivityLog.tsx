@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { User } from "lucide-react"
-import type {MoveLog, Player} from "../utils/types.ts";
+import type {MoveLog, Player} from "../../utils/types.ts";
 
 interface LogProps {
     players: Player[],

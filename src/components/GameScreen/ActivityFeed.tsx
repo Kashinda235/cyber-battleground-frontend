@@ -1,12 +1,13 @@
 import { useState } from "react"
-import ChatBlock from './ChatBlock.tsx';
-import ActionMode from './ActionMode.tsx';
+import ChatBlock from '../Feed/ChatBlock.tsx';
+import ActionMode from '../Feed/ActionMode.tsx';
 import {
-   MessageSquare, Zap, Bell, AlertTriangle, Info, ShieldCogCorner,
+  MessageSquare, Zap, Bell, AlertTriangle, Info, ShieldCogCorner, Calendars,
 } from "lucide-react"
-import type { ActionRequest, ActionResult, ChatLog, Player} from "../utils/types.ts";
+import type { ActionRequest, ActionResult, ChatLog, Player} from "../../utils/types.ts";
+import Events from "../Feed/Events.tsx";
 
-type Mode = "chat" | "actions" | "defence" | "alerts"
+type Mode = "chat" | "actions" | "defence" | "events" | "alerts"
 
 interface FeedProps {
   players: Player[],
@@ -91,11 +92,12 @@ export default function ActivityFeed( { players, currentPlayer, target, chats, s
             <Zap size={22} />
           </button>
 
+          {/* SYSTEM DEFENSES */}
           <button
               onClick={() => setMode("defence")}
               className={`rounded-xl p-3 transition-all duration-200 ${
                   mode === "defence"
-                      ? "bg-blue-400 text-white shadow-lg shadow-rose-900/50"
+                      ? "bg-blue-400 text-white shadow-lg shadow-blue-900/50"
                       : "text-gray-500 hover:bg-gray-800 hover:text-gray-300"
               }`}
               title="Defence"
@@ -103,12 +105,25 @@ export default function ActivityFeed( { players, currentPlayer, target, chats, s
             <ShieldCogCorner size={22} />
           </button>
 
+          {/* EVENTS */}
+          <button
+              onClick={() => setMode("events")}
+              className={`rounded-xl p-3 transition-all duration-200 ${
+                  mode === "events"
+                      ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/50"
+                      : "text-gray-500 hover:bg-gray-800 hover:text-gray-300"
+              }`}
+              title="Events"
+          >
+            <Calendars size={22} />
+          </button>
+
           {/* New Alerts Switch */}
           <button
             onClick={() => setMode("alerts")}
             className={`relative rounded-xl p-3 transition-all duration-200 ${
               mode === "alerts"
-                ? "bg-amber-500 text-gray-950 shadow-lg shadow-amber-900/50"
+                ? "bg-orange-500 text-white shadow-lg shadow-orange-900/50"
                 : "text-gray-500 hover:bg-gray-800 hover:text-gray-300"
             }`}
             title="System Alerts"
@@ -136,6 +151,9 @@ export default function ActivityFeed( { players, currentPlayer, target, chats, s
 
           {/* --- DEFENCE MODE --- */}
           {mode === "defence" && <ActionMode target={target} performAction={performAction} mode={'defend'}/>}
+
+          {/* EVENTS MODE */}
+          {mode === "events" && <Events />}
 
           {/* --- ALERTS MODE --- */}
           {mode === "alerts" && (

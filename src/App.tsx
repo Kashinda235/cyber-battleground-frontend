@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react'
-import Loader from "./components/Loader"
+import Loader from "./components/Home/Loader.tsx"
 import Home from "./pages/Home.tsx"
 import GameLobby from "./pages/GameLobby.tsx";
 import "./styles/site.css"
@@ -84,7 +84,7 @@ const App = () => {
     return (
         <div className="app-container">
 
-            <Loader onComplete={() => setIsLoaded(true)} />
+            {/*<Loader onComplete={() => setIsLoaded(true)} />*/}
             {/* AnimatePresence handles animating components as they unmount */}
             <div id="main-site" className={isLoaded ? 'in' : ''}>
                 <AnimatePresence mode="wait">

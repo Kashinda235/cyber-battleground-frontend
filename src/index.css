@@ -127,4 +127,7 @@
   html {
     @apply font-sans;
   }
+  .box-scroll {
+    @apply [scrollbar-width:thin] [scrollbar-color:theme(colors.gray.700)_transparent] space-y-5 overflow-y-auto p-6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-700 hover:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent
+  }
 }

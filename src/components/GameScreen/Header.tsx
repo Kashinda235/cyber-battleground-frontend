@@ -1,7 +1,7 @@
 import React from "react"
 import { motion } from "framer-motion"
 import {Sword, HatGlasses, ShieldCheck, HeartPulse, Trophy, Activity, Shield} from "lucide-react"
-import type {GameState, Player} from "../utils/types.ts";
+import type {GameState, Player} from "../../utils/types.ts";
 
 interface PlayerDetailsProps {
   name: string

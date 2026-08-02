@@ -1,12 +1,13 @@
-import Header from '../components/Header';
-import ActivityFeed from '../components/ActivityFeed.tsx';
-import ActivityLog from '../components/ActivityLog.tsx';
-import GameCanvas from '../components/GameCanvas.tsx';
-import NetBackground from "../components/NetBackground.tsx";
-import Footer from "../components/Footer.tsx";
+import Header from '../components/GameScreen/Header.tsx';
+import ActivityFeed from '../components/GameScreen/ActivityFeed.tsx';
+import ActivityLog from '../components/GameScreen/ActivityLog.tsx';
+import GameCanvas from '../components/GameScreen/GameCanvas.tsx';
+import NetBackground from "../components/Home/NetBackground.tsx";
+import Footer from "../components/Home/Footer.tsx";
 import {useGameData} from "../hooks/useGameData.ts";
 import type {Player} from "../utils/types.ts";
 import {useState} from "react";
+import GameLoader from "../components/GameScreen/GameLoader.tsx";
 
 interface GameProps {
     token: string
@@ -36,7 +37,7 @@ const GameScreen = ({ token, player }: GameProps) => {
     }
     const logData = { players: players, moveLogs: moveLogs, setTarget: handleSetTarget }
 
-    if (isLoading) return <div>Loading battlefield...</div>;
+    if (isLoading) return <GameLoader />;
 
     return (
         <div>

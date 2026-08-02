@@ -2,7 +2,7 @@ import blueAbility from '@/data/blue_team_abilities.json';
 import redAbility from '@/data/red_team_abilities.json';
 import {useState} from "react";
 import {ActionCard} from "./AbilityCard.tsx";
-import type {ActionRequest, ActionResult, Player} from "../utils/types.ts";
+import type {ActionRequest, ActionResult, Player} from "../../utils/types.ts";
 
 interface ActionProps {
     mode : "attack" | "defend",
@@ -55,10 +55,10 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
                 </div>
             </header>
 
-            <div className="flex-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.gray.700)_transparent] overflow-y-auto p-6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-700 hover:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
-                { (mode === 'attack') ?
-                (<div className="grid grid-cols-2 gap-4">
-                    {ATTACKS.map((action: any) => {
+            <div className="flex-1 box-scroll">
+                <div className="grid grid-cols-2 gap-4">
+                { (mode === 'attack')
+                    ? ATTACKS.map((action: any) => {
                         const isOnCooldown = activeCooldowns[action.id]
                         return (
                             <ActionCard key={'red' + action.id}
@@ -68,11 +68,9 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
                                         isOnCooldown={isOnCooldown}
                             />
                         )
-                    })}
-                </div>) : (<div className="grid grid-cols-2 gap-4">
-                        {DEFENCES.map((action: any) => {
+                    })
+                    : DEFENCES.map((action: any) => {
                             const isOnCooldown = activeCooldowns[action.id]
-                            console.log('blue' + action.id);
                             return (
                                 <ActionCard key={action.id}
                                             ability={action}
@@ -81,8 +79,9 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
                                             isOnCooldown={isOnCooldown}
                                 />
                             )
-                        })}
-                    </div>)}
+                        })
+                }
+                </div>
             </div>
         </div>
     )

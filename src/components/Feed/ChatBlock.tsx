@@ -1,6 +1,6 @@
-import type {ChatLog, Player} from "../utils/types.ts";
+import type {ChatLog, Player} from "../../utils/types.ts";
 import {useEffect, useRef, useState} from "react";
-import {Send} from "lucide-react";
+import {MessageSquare, Send} from "lucide-react";
 
 interface ChatBlockProps {
     chats: ChatLog[],
@@ -48,11 +48,13 @@ const ChatBlock = ( { chats, activePlayers, currentPlayer, sendChat }: ChatBlock
             <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-800 bg-gray-900/50 px-6">
                 <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full border border-indigo-500/30 bg-indigo-900/50">
-                        <span className="font-bold text-indigo-400">R1</span>
+                        <span className="font-bold text-indigo-400">
+                            <MessageSquare />
+                        </span>
                     </div>
                     <div>
-                        <h2 className="font-semibold text-gray-100">
-                            Chat Room 1
+                        <h2 className="text-2xl font-bold text-gray-100">
+                            Chat Room
                         </h2>
                         <div className="h-4">
                             {isTyping ? (
@@ -72,7 +74,7 @@ const ChatBlock = ( { chats, activePlayers, currentPlayer, sendChat }: ChatBlock
                 </div>
             </header>
 
-            <div ref={chatEndRef} className="flex-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.gray.700)_transparent] space-y-5 overflow-y-auto p-6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-700 hover:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-transparent">
+            <div ref={chatEndRef} className="flex-1 box-scroll">
                 {chats.map((msg) => (
                     <div
                         key={msg.id}

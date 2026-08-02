@@ -1,8 +1,8 @@
-import Footer from "../components/Footer.tsx"
-import Hero from "../components/Hero.tsx"
-import NavBar from "../components/NavBar.tsx"
-import NetBackground from "../components/NetBackground.tsx"
-import { SectionA, SectionB } from "../components/Section.tsx"
+import Footer from "../components/Home/Footer.tsx"
+import Hero from "../components/Home/Hero.tsx"
+import NavBar from "../components/Home/NavBar.tsx"
+import NetBackground from "../components/Home/NetBackground.tsx"
+import { SectionA, SectionB } from "../components/Home/Section.tsx"
 // import "../styles/site.css"
 
 const Home = ( {onStart}) => {
