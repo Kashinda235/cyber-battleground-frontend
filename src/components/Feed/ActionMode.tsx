@@ -3,6 +3,7 @@ import redAbility from '@/data/red_team_abilities.json';
 import {useState} from "react";
 import {ActionCard} from "./AbilityCard.tsx";
 import type {ActionRequest, ActionResult, Player} from "../../utils/types.ts";
+import CardDescription from "./CardDescription.tsx";
 
 interface ActionProps {
     mode : "attack" | "defend",
@@ -15,9 +16,12 @@ const DEFENCES = blueAbility.tools;
 
 const ActionMode = ( {mode, target, performAction}: ActionProps) => {
     const [activeCooldowns, setActiveCooldowns] = useState<Record<string, boolean>>({});
+    const [viewMode, setViewMode] = useState<"list" | "details">("list");
 
     const triggerAction = async (actionId: number, effect: string, cooldown: number) => {
         if (activeCooldowns[actionId]) return
+
+        setViewMode("details");
 
         setActiveCooldowns((prev) => ({ ...prev, [actionId]: true }))
 
@@ -56,6 +60,7 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
             </header>
 
             <div className="flex-1 box-scroll">
+                { (viewMode === "list") &&
                 <div className="grid grid-cols-2 gap-4">
                 { (mode === 'attack')
                     ? ATTACKS.map((action: any) => {
@@ -82,6 +87,13 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
                         })
                 }
                 </div>
+                }
+                { (viewMode === "details") &&
+                    <CardDescription
+                        onBack={() => setViewMode("list")}
+                        onUseItem={triggerAction}
+                    />
+                }
             </div>
         </div>
     )
