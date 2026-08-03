@@ -62,16 +62,17 @@ export const CardDescription: React.FC<GameItemProps> = ({
     const strokeDashoffset = 100 - (cooldown / COOLDOWN_TIME) * 100;
 
     return (
-        <div className="max-w-md w-full mx-auto bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xl overflow-hidden p-6 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-200">
+        /* Changed max-w-md -> w-full h-full flex flex-col to fill grid slot completely */
+        <div className="w-full h-full flex flex-col mx-auto bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xl overflow-hidden p-6 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-200">
 
-            {/* Navigation Header */}
-            <div className="flex items-center justify-between mb-6">
+            {/* Navigation Header (Fixed Top) */}
+            <div className="flex items-center justify-between mb-6 shrink-0">
                 <motion.button
                     whileTap={{ scale: 0.92 }}
                     onClick={onBack}
-                    className="flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors py-1.5 px-3 rounded-full bg-slate-100 dark:bg-slate-800/60"
+                    className="flex items-center gap-2 text-xm font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors py-1.5 px-3 rounded-full bg-slate-100 dark:bg-slate-800/60"
                 >
-                    <ArrowLeft size={14} />
+                    <ArrowLeft size={22} />
                     Back
                 </motion.button>
 
@@ -87,7 +88,7 @@ export const CardDescription: React.FC<GameItemProps> = ({
                         }`}
                         title="Bookmark"
                     >
-                        <Bookmark size={16} fill={isBookmarked ? 'currentColor' : 'none'} />
+                        <Bookmark size={22} fill={isBookmarked ? 'currentColor' : 'none'} />
                     </motion.button>
 
                     <motion.button
@@ -96,13 +97,13 @@ export const CardDescription: React.FC<GameItemProps> = ({
                         className="p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                         title="Share Link"
                     >
-                        {copied ? <Check size={16} className="text-emerald-500" /> : <Share2 size={16} />}
+                        {copied ? <Check size={16} className="text-emerald-500" /> : <Share2 size={20} />}
                     </motion.button>
                 </div>
             </div>
 
-            {/* Main Item Card Header with SVG Radial Cooldown */}
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/80 mb-5">
+            {/* Main Item Card Header (Fixed Below Nav) */}
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/80 mb-5 shrink-0">
 
                 {/* Radial Cooldown & Icon Ring */}
                 <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-slate-200/50 dark:bg-slate-800">
@@ -138,57 +139,60 @@ export const CardDescription: React.FC<GameItemProps> = ({
                 </div>
 
                 {/* Item Information & Cooldown Status */}
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                        <h3 className={`font-bold text-base transition-colors ${isOnCooldown ? "text-slate-400 dark:text-slate-500" : "text-slate-900 dark:text-white"}`}>
+                        <h3 className={`font-bold text-base truncate transition-colors ${isOnCooldown ? "text-slate-400 dark:text-slate-500" : "text-slate-900 dark:text-white"}`}>
                             Phoenix Essence
                         </h3>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-200/60 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-              LVL 50
-            </span>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-200/60 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shrink-0">
+                        LVL 50
+                    </span>
                     </div>
 
                     {/* Status Indicator Dot */}
                     <div className="mt-1.5 flex items-center gap-1.5">
-                        <div className={`h-2 w-2 rounded-full ${isOnCooldown ? "animate-pulse bg-rose-500" : "bg-emerald-500"}`} />
-                        <span className="text-[11px] font-semibold tracking-wider uppercase text-slate-500 dark:text-slate-400 font-mono">
-              {isOnCooldown ? `On Cooldown (${cooldown.toFixed(1)}s)` : `Ready (${COOLDOWN_TIME}s CD)`}
-            </span>
+                        <div className={`h-2 w-2 rounded-full shrink-0 ${isOnCooldown ? "animate-pulse bg-rose-500" : "bg-emerald-500"}`} />
+                        <span className="text-[11px] font-semibold tracking-wider uppercase text-slate-500 dark:text-slate-400 font-mono truncate">
+                        {isOnCooldown ? `On Cooldown (${cooldown.toFixed(1)}s)` : `Ready (${COOLDOWN_TIME}s CD)`}
+                    </span>
                     </div>
                 </div>
             </div>
 
-            {/* Description Text */}
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-                Unleashes a surge of elemental flame that restores health to the selected target and clears negative status effects.
-            </p>
+            {/* Scrollable Middle Content (Description & Collapsible Details) */}
+            <div className="flex-1 min-h-0 overflow-y-auto pr-1 mb-4">
+                {/* Description Text */}
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+                    Unleashes a surge of elemental flame that restores health to the selected target and clears negative status effects.
+                </p>
 
-            {/* Collapsible Details */}
-            <div className="mb-6">
-                <button
-                    onClick={() => setShowLore(!showLore)}
-                    className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                >
-                    <Info size={13} />
-                    {showLore ? 'Hide Details' : 'Show Details'}
-                </button>
+                {/* Collapsible Details */}
+                <div>
+                    <button
+                        onClick={() => setShowLore(!showLore)}
+                        className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    >
+                        <Info size={13} />
+                        {showLore ? 'Hide Details' : 'Show Details'}
+                    </button>
 
-                <AnimatePresence>
-                    {showLore && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-800/20 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50"
-                        >
-                            Distilled from ancient embers. Grants immunity to burn effects for 5 seconds after application.
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                    <AnimatePresence>
+                        {showLore && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-800/20 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50"
+                            >
+                                Distilled from ancient embers. Grants immunity to burn effects for 5 seconds after application.
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
 
-            {/* Bottom Actions */}
-            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+            {/* Bottom Actions (Pinned to Bottom) */}
+            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 shrink-0">
                 {/* Target Button */}
                 <motion.button
                     whileTap={{ scale: 0.97 }}

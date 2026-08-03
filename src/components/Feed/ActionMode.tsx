@@ -34,7 +34,15 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
         const data = { action_type: log, target_id: target.id, ability_id: actionId }
         const res = await performAction(data);
     }
-// console.log(ATTACKS);
+
+    if (viewMode === "details") return (
+        <>
+        <CardDescription
+            onBack={() => setViewMode("list")}
+            onUseItem={triggerAction}
+        />
+        </>
+    )
     return (
         <div className="flex h-full animate-in flex-col duration-300 fade-in">
             <header className="flex h-16 shrink-0 items-center border-b border-gray-800 bg-red-950/20 px-6">
@@ -60,7 +68,6 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
             </header>
 
             <div className="flex-1 box-scroll">
-                { (viewMode === "list") &&
                 <div className="grid grid-cols-2 gap-4">
                 { (mode === 'attack')
                     ? ATTACKS.map((action: any) => {
@@ -87,13 +94,7 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
                         })
                 }
                 </div>
-                }
-                { (viewMode === "details") &&
-                    <CardDescription
-                        onBack={() => setViewMode("list")}
-                        onUseItem={triggerAction}
-                    />
-                }
+
             </div>
         </div>
     )

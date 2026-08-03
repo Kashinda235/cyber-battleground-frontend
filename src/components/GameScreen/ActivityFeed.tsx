@@ -1,4 +1,4 @@
-import { useState } from "react"
+import {useEffect, useState} from "react"
 import ChatBlock from '../Feed/ChatBlock.tsx';
 import ActionMode from '../Feed/ActionMode.tsx';
 import {
@@ -16,6 +16,7 @@ interface FeedProps {
   chats: ChatLog[],
   sendChat: (message: string) => Promise<ChatLog>,
   performAction: (data: ActionRequest) => Promise<ActionResult>
+  setActiveTab: React.Dispatch<React.SetStateAction<Mode>>
 }
 
 interface Alert {
@@ -52,10 +53,13 @@ const SYSTEM_ALERTS: Alert[] = [
   },
 ]
 
-export default function ActivityFeed( { players, currentPlayer, target, chats, sendChat, performAction }: FeedProps ) {
+export default function ActivityFeed( { players, currentPlayer, target, chats, sendChat, performAction, setActiveTab }: FeedProps ) {
   const [mode, setMode] = useState<Mode>("chat")
   const activePlayers:number = players.length;
 
+  useEffect(() => {
+    setActiveTab(mode);
+  }, [mode]);
   return (
     <>
       <style>{`

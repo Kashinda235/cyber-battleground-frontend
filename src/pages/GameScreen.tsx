@@ -15,6 +15,7 @@ interface GameProps {
 }
 
 const GameScreen = ({ token, player }: GameProps) => {
+    const [activeTab, setActiveTab] = useState<"chat" | "actions" | "defence" | "events" | "alerts" >('chat');
     const {
         gameState, // Header
         chats, // Feed
@@ -33,9 +34,10 @@ const GameScreen = ({ token, player }: GameProps) => {
     const headerData = { player: player, gameState:gameState }
     const feedData = {
         players: players, currentPlayer: player, target: target,
-        chats: chats, sendChat: sendChat, performAction: performAction
+        chats: chats, sendChat: sendChat, performAction: performAction,
+        setActiveTab: setActiveTab
     }
-    const logData = { players: players, moveLogs: moveLogs, setTarget: handleSetTarget }
+    const logData = { players: players, moveLogs: moveLogs, setTarget: handleSetTarget, activeTab: activeTab }
 
     if (isLoading) return <GameLoader />;
 
@@ -49,7 +51,7 @@ const GameScreen = ({ token, player }: GameProps) => {
                 <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                     {/* Grid Layout Container */}
-                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 w-full">
+                    <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 w-full">
 
                         {/* Top/First Row on Large Screens: 3:2 Ratio (3/5ths vs 2/5ths) */}
                         {/* ActivityFeed (3 parts of 5 -> 60%) */}
@@ -58,13 +60,13 @@ const GameScreen = ({ token, player }: GameProps) => {
                         </div>
 
                         {/* ActivityLog (2 parts of 5 -> 40%) */}
-                        <div className="h-[600px] w-full overflow-y-auto lg:col-span-2">
+                        <div className="h-[600px] w-full overflow-y-auto lg:col-span-3">
                             <ActivityLog {...logData} />
                         </div>
 
                         {/* Bottom Row on Large Screens: Full Width (5/5ths) */}
                         {/* GameCanvas */}
-                        <div className="h-[600px] w-full overflow-hidden lg:col-span-5">
+                        <div className="h-[600px] w-full overflow-hidden lg:col-span-6">
                             <GameCanvas players={players} currentPlayer={player} />
                         </div>
 
