@@ -8,6 +8,7 @@ import {useGameData} from "../hooks/useGameData.ts";
 import type {Player} from "../utils/types.ts";
 import {useState} from "react";
 import GameLoader from "../components/GameScreen/GameLoader.tsx";
+import { GameProvider } from "../context/GameContext";
 
 interface GameProps {
     token: string
@@ -48,6 +49,7 @@ const GameScreen = ({ token, player }: GameProps) => {
                 <Header {...headerData}/>
 
                 {/* The row expands to remaining space and forces children to fill height */}
+                <GameProvider>
                 <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                     {/* Grid Layout Container */}
@@ -73,6 +75,7 @@ const GameScreen = ({ token, player }: GameProps) => {
                     </div>
 
                 </div>
+                </GameProvider>
 
                 <Footer />
             </div>

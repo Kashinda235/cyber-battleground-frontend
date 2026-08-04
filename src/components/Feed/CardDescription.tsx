@@ -20,16 +20,12 @@ const ACTIONS = description;
 interface DescriptionProps {
     onBack?: () => void;
     onUseItem?: (actionId: number, effect: string, cooldown: number) => Promise<void> | void;
-    currentAction: number;
+    currentAction: number | null;
     icon: keyof typeof Icons;
+    color: string
 }
 
-export const CardDescription: React.FC<DescriptionProps> = ({
-                                                                onBack,
-                                                                onUseItem,
-                                                                currentAction,
-                                                                icon
-                                                            }: DescriptionProps) => {
+export const CardDescription: React.FC<DescriptionProps> = ({ onBack, onUseItem, currentAction, icon, color }: DescriptionProps) => {
     const action = ACTIONS[currentAction];
     const COOLDOWN_TIME = 8; // seconds
 
@@ -41,7 +37,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({
     const [copiedCommand, setCopiedCommand] = useState<boolean>(false);
     const [showLore, setShowLore] = useState<boolean>(false);
 
-    const color = 'red';
+    // const color = 'red';
 
     // Active cooldown interval loop
     useEffect(() => {
@@ -58,7 +54,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({
         if (cooldown > 0) return;
         setCooldown(COOLDOWN_TIME);
         setIsTargeting(false);
-        onUseItem?.(currentAction, action.name, cooldown);
+        onUseItem?.(action);
     };
 
     const handleShare = async () => {
@@ -187,7 +183,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({
             {/* Scrollable Middle Content (Description, Execution Command & Collapsible Details) */}
             <div className="flex-1 min-h-0 overflow-y-auto pr-1 mb-4 space-y-4">
                 {/* Description Text */}
-                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                <p className="text-xm text-slate-500 dark:text-slate-400 leading-relaxed">
                     {action.description}
                 </p>
 
@@ -229,7 +225,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-800/20 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50"
+                                className="mt-2 text-xm text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-800/20 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50"
                             >
                                 {action.hiddendetails}
                             </motion.div>
