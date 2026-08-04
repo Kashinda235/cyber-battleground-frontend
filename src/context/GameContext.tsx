@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
-import {executeAttack} from "../utils/AttackActionMap.ts";
+import {executeAttack, type LogCallback} from "../utils/AttackActionMap.ts";
 
 export interface LogEntry {
     id: string;
@@ -101,26 +101,47 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const handleAction = async (action: any) => {
         const targetNode = {
             id: "player-101",
-            defense: 10,
-            integrity: 200,
-            isCompromised: false
-        }
+            ip: '192.168.10.58',
+            hostname: 'Hacker',
+            securityLevel: 2, // e.g., 1 to 5
+            defense: 6,
+            integrity: 85,
+            isCompromised: true,
+            isFirewallActive: true,
+        };
+
         const timestamp = new Date().toLocaleTimeString();
-        const result = await executeAttack(action.name, targetNode, "ME");
+
+        // 1. Immediately append user's command input to history
         const userEntry: LogEntry = {
             id: Date.now().toString(),
             type: 'user',
             content: action.command,
             timestamp,
         };
-        const resultEntry: LogEntry = {
-            id: (Date.now() + 1).toString(),
-            type: 'system',
-            content: result.narrativeLog,
-            timestamp,
+        setHistory((prev) => [...prev, userEntry]);
+
+        // 2. Callback to append real-time progress updates directly into state
+        const handleLiveLog: LogCallback = (log) => {
+            const liveEntry: LogEntry = {
+                id: `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+                timestamp: new Date().toLocaleTimeString(),
+                ...log
+            };
+            setHistory((prev) => [...prev, liveEntry]);
         };
-        setHistory((prev) => [...prev, userEntry, resultEntry]);
-    }
+
+        // 3. Execute attack (will fire handleLiveLog periodically)
+        const result = await executeAttack(action.name, targetNode, "ME", handleLiveLog);
+
+        // 4. Append final summary result
+        const resultEntry: LogEntry = {
+            id: Date.now().toString(),
+            timestamp: new Date().toLocaleTimeString(),
+            ...result
+        };
+        setHistory((prev) => [...prev, resultEntry]);
+    };
 
     const clearHistory = () => setHistory([]);
 
