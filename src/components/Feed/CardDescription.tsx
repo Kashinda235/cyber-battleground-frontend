@@ -14,18 +14,18 @@ import {
 } from 'lucide-react';
 import { AbilityIcon } from "./AbilityCard.tsx";
 import * as Icons from "lucide-react";
+import {useGame} from "../../context/GameContext.tsx";
 
 const ACTIONS = description;
 
 interface DescriptionProps {
     onBack?: () => void;
-    onUseItem?: (actionId: number, effect: string, cooldown: number) => Promise<void> | void;
     currentAction: number | null;
     icon: keyof typeof Icons;
     color: string
 }
 
-export const CardDescription: React.FC<DescriptionProps> = ({ onBack, onUseItem, currentAction, icon, color }: DescriptionProps) => {
+export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAction, icon, color }: DescriptionProps) => {
     const action = ACTIONS[currentAction];
     const COOLDOWN_TIME = 8; // seconds
 
@@ -36,6 +36,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, onUseItem,
     const [copied, setCopied] = useState<boolean>(false);
     const [copiedCommand, setCopiedCommand] = useState<boolean>(false);
     const [showLore, setShowLore] = useState<boolean>(false);
+    const { handleAction } = useGame();
 
     // const color = 'red';
 
@@ -54,7 +55,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, onUseItem,
         if (cooldown > 0) return;
         setCooldown(COOLDOWN_TIME);
         setIsTargeting(false);
-        onUseItem?.(action);
+        handleAction?.(action);
     };
 
     const handleShare = async () => {

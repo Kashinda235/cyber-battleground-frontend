@@ -1,13 +1,11 @@
 import blueAbility from '@/data/blue_team_abilities.json';
 import redAbility from '@/data/red_team_abilities.json';
-import React, {useState} from "react";
+import {useState} from "react";
 import {ActionCard} from "./AbilityCard.tsx";
 import type {ActionRequest, ActionResult, Player} from "../../utils/types.ts";
 import CardDescription from "./CardDescription.tsx";
 import {Zap, Shield, ShieldCog, Tickets, Star} from "lucide-react";
 import * as Icons from "lucide-react";
-import {executeAttack} from "../../utils/AttackActionMap.ts";
-import { useGame } from "../../context/GameContext";
 
 interface ActionProps {
     mode : "attack" | "defend",
@@ -23,7 +21,6 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
     const [viewMode, setViewMode] = useState<"list" | "details">("list");
     const [currAction, setCurrAction] = useState<number | null>( null );
     const [icon, setIcon] = useState<keyof typeof Icons>();
-    const { executeAction } = useGame();
 
     const handleSelectAction = (actionId, icon) => {
         setCurrAction(actionId);
@@ -46,20 +43,6 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
         const res = await performAction(data);
     }
 
-    const handleAction = async (action: any) => {
-        const targetNode = {
-            id: "player-101",
-            defense: 10,
-            integrity: 200,
-            isCompromised: false
-        }
-        console.log(action);
-        executeAction('echo "Triggered action from Feed UI!"') // added after suggestion
-        const result = executeAttack(action.name, targetNode, "ME");
-
-        console.log(result);
-    }
-
     if (viewMode === "details") return (
         <>
         <CardDescription
@@ -67,7 +50,6 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
                 setViewMode("list");
                 setCurrAction(null);
             }}
-            onUseItem={handleAction}
             currentAction={currAction}
             icon={icon}
             color={(mode === 'attack') ? 'red' : 'blue'}

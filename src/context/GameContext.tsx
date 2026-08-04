@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
+import {executeAttack} from "../utils/AttackActionMap.ts";
 
 export interface LogEntry {
     id: string;
@@ -10,6 +11,7 @@ export interface LogEntry {
 interface GameContextType {
     history: LogEntry[];
     executeAction: (command: string) => void;
+    handleAction: (action: any) => void;
     clearHistory: () => void;
 }
 
@@ -96,10 +98,34 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setHistory((prev) => [...prev, userEntry, ...resultEntries]);
     };
 
+    const handleAction = async (action: any) => {
+        const targetNode = {
+            id: "player-101",
+            defense: 10,
+            integrity: 200,
+            isCompromised: false
+        }
+        const timestamp = new Date().toLocaleTimeString();
+        const result = await executeAttack(action.name, targetNode, "ME");
+        const userEntry: LogEntry = {
+            id: Date.now().toString(),
+            type: 'user',
+            content: action.command,
+            timestamp,
+        };
+        const resultEntry: LogEntry = {
+            id: (Date.now() + 1).toString(),
+            type: 'system',
+            content: result.narrativeLog,
+            timestamp,
+        };
+        setHistory((prev) => [...prev, userEntry, resultEntry]);
+    }
+
     const clearHistory = () => setHistory([]);
 
     return (
-        <GameContext.Provider value={{ history, executeAction, clearHistory }}>
+        <GameContext.Provider value={{ history, executeAction, handleAction, clearHistory }}>
             {children}
         </GameContext.Provider>
     );
