@@ -1,8 +1,8 @@
-import {useEffect, useState} from "react"
+import React, {useEffect, useState} from "react"
 import ChatBlock from '../Feed/ChatBlock.tsx';
 import ActionMode from '../Feed/ActionMode.tsx';
 import {
-  MessageSquare, Zap, Bell, AlertTriangle, Info, ShieldCogCorner, Calendars,
+  MessageSquare, Zap, Bell, AlertTriangle, Info, ShieldCogCorner, Calendars, Tickets,
 } from "lucide-react"
 import type { ActionRequest, ActionResult, ChatLog, Player} from "../../utils/types.ts";
 import Events from "../Feed/Events.tsx";
@@ -164,18 +164,18 @@ export default function ActivityFeed( { players, currentPlayer, target, chats, s
             <div className="flex h-full animate-in flex-col duration-300 fade-in">
               {/* Alerts Top */}
               <header className="flex h-16 shrink-0 items-center border-b border-gray-800 bg-amber-950/20 px-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-amber-500/30 bg-amber-900/30 text-amber-500">
-                    <Bell size={20} />
-                  </div>
-                  <div>
-                    <h2 className="font-semibold text-gray-100">
+                <div>
+                  <div className='flex items-center gap-3'>
+                    <span className="font-bold text-amber-400">
+                                <Bell size={30}/>
+                            </span>
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
                       System Alerts and Notifications
-                    </h2>
-                    <p className="text-xs text-gray-500">
-                      {SYSTEM_ALERTS.length} Recent entries
-                    </p>
+                    </h1>
                   </div>
+                  <p className="text-xs md:text-sm text-slate-400 mt-1">
+                    {SYSTEM_ALERTS.length} Recent entries
+                  </p>
                 </div>
               </header>
 

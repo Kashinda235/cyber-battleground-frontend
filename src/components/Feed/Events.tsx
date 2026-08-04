@@ -8,7 +8,7 @@ import {
     Swords,
     Shield,
     Gift,
-    Star
+    Star, Zap, Tickets
 } from 'lucide-react';
 
 // --- MOCK DATA ---
@@ -75,9 +75,15 @@ export default function EventHub() {
             {/* Header (Pinned to Top) */}
             <header className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4 shrink-0">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white uppercase italic">
+
+                <div className='flex items-center gap-3'>
+                    <span className="font-bold text-emerald-400">
+                                <Tickets size={35}/>
+                            </span>
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white italic">
                         Active Events
                     </h1>
+                </div>
                     <p className="text-xs md:text-sm text-slate-400 mt-1">
                         Complete challenges to unlock exclusive rewards.
                     </p>

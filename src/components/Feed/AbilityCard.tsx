@@ -8,11 +8,11 @@ interface AbilityIconProps {
 
 interface ActionCardProps {
     ability: any,
-    triggerAction: (actionId: number, effect: string, cooldown: number) => Promise<void>,
+    triggerAction: (actionId: any, icon: any) => void,
     color: string,
     isOnCooldown: boolean
 }
-function AbilityIcon({ name, color = "currentColor", size = 20 }: AbilityIconProps) {
+export function AbilityIcon({ name, color = "currentColor", size = 20 }: AbilityIconProps) {
     // Grab the icon component dynamically from Lucide using the string key
     const IconComponent = Icons[name];
 
@@ -37,7 +37,7 @@ export function ActionCard({ ability, triggerAction, color, isOnCooldown}: Actio
 
     return (
         <button
-            onClick={() => triggerAction(action.id, action.effect, action.cooldown)}
+            onClick={() => triggerAction(action.id, action.icon)}
             disabled={isOnCooldown}
             className={`group flex items-center gap-4 rounded-xl border border-gray-800 bg-gray-900 p-4 text-left transition-all ${isOnCooldown ? "cursor-not-allowed opacity-70" : "hover:border-gray-600 hover:bg-gray-800/80 active:scale-95"}`}
         >

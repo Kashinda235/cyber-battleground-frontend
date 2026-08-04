@@ -1,9 +1,10 @@
 import blueAbility from '@/data/blue_team_abilities.json';
 import redAbility from '@/data/red_team_abilities.json';
-import {useState} from "react";
+import React, {useState} from "react";
 import {ActionCard} from "./AbilityCard.tsx";
 import type {ActionRequest, ActionResult, Player} from "../../utils/types.ts";
 import CardDescription from "./CardDescription.tsx";
+import {Zap, Shield, ShieldCog, Tickets, Star} from "lucide-react";
 
 interface ActionProps {
     mode : "attack" | "defend",
@@ -17,11 +18,17 @@ const DEFENCES = blueAbility.tools;
 const ActionMode = ( {mode, target, performAction}: ActionProps) => {
     const [activeCooldowns, setActiveCooldowns] = useState<Record<string, boolean>>({});
     const [viewMode, setViewMode] = useState<"list" | "details">("list");
+    const [currAction, setCurrAction] = useState<number | null>( null );
+    const [icon, setIcon] = useState();
+
+    const handleSelectAction = (actionId, icon) => {
+        setCurrAction(actionId);
+        setIcon(icon)
+        setViewMode("details");
+    }
 
     const triggerAction = async (actionId: number, effect: string, cooldown: number) => {
         if (activeCooldowns[actionId]) return
-
-        setViewMode("details");
 
         setActiveCooldowns((prev) => ({ ...prev, [actionId]: true }))
 
@@ -38,32 +45,53 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
     if (viewMode === "details") return (
         <>
         <CardDescription
-            onBack={() => setViewMode("list")}
+            onBack={() => {
+                setViewMode("list");
+                setCurrAction(null);
+            }}
             onUseItem={triggerAction}
+            currentAction={currAction}
+            icon={icon}
         />
         </>
     )
     return (
         <div className="flex h-full animate-in flex-col duration-300 fade-in">
-            <header className="flex h-16 shrink-0 items-center border-b border-gray-800 bg-red-950/20 px-6">
-                <div className="flex w-full items-center gap-3">
-                    <div className="h-8 w-2 rounded-full bg-rose-600"></div>
-                    <div>
-                        <p className="text-[10px] font-semibold tracking-wider text-gray-400 uppercase">
-                            Current Target
-                        </p>
-                        <h2 className="text-lg leading-tight font-bold text-rose-100 drop-shadow-md">
-                            {target.username}
-                        </h2>
-                    </div>
-                    <div className="ml-auto text-right">
-                        <p className="mb-1 font-mono text-xs text-gray-400">
-                            75.0% HP
-                        </p>
-                        <div className="h-1.5 w-32 overflow-hidden rounded-full bg-gray-800">
-                            <div className="h-full w-[75%] bg-rose-600 shadow-[0_0_10px_rgba(225,29,72,0.5)]"></div>
-                        </div>
-                    </div>
+            <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-800 bg-gray-900/50 px-6">
+                <div className="flex items-center gap-3">
+
+                    { (mode === 'attack')
+                        ? (
+                            <div>
+                                <div className='flex items-center gap-3'>
+                                <span className="font-bold text-red-400">
+                                    <Zap size={35}/>
+                                </span>
+                                    <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
+                                        Action
+                                    </h1>
+                                </div>
+                                <p className="text-xs md:text-sm text-slate-400 mt-1">
+                                    Gain control overthe network and shor skills.
+                                </p>
+                            </div>
+                        ) : (
+                            <div>
+                                <div className='flex items-center gap-3'>
+                                <span className="font-bold text-sky-400">
+                                    <ShieldCog size={35}/>
+                                </span>
+                                <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
+                                    Security
+                                </h1>
+                                </div>
+                                <p className="text-xs md:text-sm text-slate-400 mt-1">
+                                    Secure your system to pervent attackers.
+                                </p>
+                            </div>
+                        )}
+
+
                 </div>
             </header>
 
@@ -75,7 +103,7 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
                         return (
                             <ActionCard key={'red' + action.id}
                                         ability={action}
-                                        triggerAction={triggerAction}
+                                        triggerAction={handleSelectAction}
                                         color={'text-red-400'}
                                         isOnCooldown={isOnCooldown}
                             />
@@ -86,8 +114,8 @@ const ActionMode = ( {mode, target, performAction}: ActionProps) => {
                             return (
                                 <ActionCard key={action.id}
                                             ability={action}
-                                            triggerAction={triggerAction}
-                                            color={'text-blue-400'}
+                                            triggerAction={handleSelectAction}
+                                            color={'text-sky-500'}
                                             isOnCooldown={isOnCooldown}
                                 />
                             )
