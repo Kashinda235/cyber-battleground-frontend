@@ -6,6 +6,7 @@ import "./styles/site.css"
 import GameScreen from "./pages/GameScreen.tsx";
 import { motion, AnimatePresence } from 'framer-motion';
 import type {Player} from "./utils/types.ts";
+import {ToastProvider} from "./context/ToastContext.tsx";
 
 const App = () => {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -100,6 +101,8 @@ const App = () => {
                     </motion.div>
                 )}
 
+                    <ToastProvider>
+
                 {currentScreen === 'lobby' && (
                     <motion.div
                         key="lobby"
@@ -122,6 +125,8 @@ const App = () => {
                         <GameScreen token={token} player={player} />
                     </motion.div>
                 )}
+
+                    </ToastProvider>
             </AnimatePresence>
             </div>
         </div>

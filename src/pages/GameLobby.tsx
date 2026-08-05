@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
 import {useGameData} from "../hooks/useGameData.ts";
 import {Eye, ShieldCogCorner, Zap} from "lucide-react";
+import {useToast} from "../context/ToastContext.tsx";
 
 // --- SVGs & Design Assets ---
 const Icons = {
@@ -119,6 +120,7 @@ const ROLES = [
 export default function GameLobby( { onJoinGame, users, saveUser }) {
   const [username, setUsername] = useState("")
   const [isTouched, setIsTouched] = useState(false)
+  const { showToast } = useToast();
 
   // Initialize role from localStorage if available, otherwise default to center card ('defend')
   const [selectedIndex, setSelectedIndex] = useState(() => {
@@ -188,8 +190,9 @@ export default function GameLobby( { onJoinGame, users, saveUser }) {
 
       if (newPlayer) saveUser(username);
       console.log(users);
-      alert(`Deploying ${username} as ${player?.role.toUpperCase()} to the arena!`);
-
+      showToast({ type: 'join',
+        title: 'PlayerJoined',
+        description: `Deploying ${username} as ${player?.role.toUpperCase()} to the arena!`})
     } catch (error: any) {
       alert(error?.message || "An unexpected error occurred while deploying to the arena.");
     }

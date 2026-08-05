@@ -1,0 +1,107 @@
+export const defence_description = [
+  {
+    name: "Firewall Upgrade",
+    complexityTier: "Tier 3 (Advanced)",
+    description: "Upgrades network perimeter controls to Next-Gen stateful inspection with integrated deep-packet and application-layer screening.",
+    command: "ngfw-ctl --upgrade-engine --enable-ssl-decryption",
+    hiddenDetails: "Significantly scales total network defense resistance. Slightly increases latency on heavy SSL/TLS traffic."
+  },
+  {
+    name: "Intrusion Detection",
+    complexityTier: "Tier 3 (Advanced)",
+    description: "Monitors network traffic and host system logs against known threat signatures and behavioral anomalies.",
+    command: "suricata -c /etc/suricata/suricata.yaml -i eth0",
+    hiddenDetails: "Automates incident alerts for known attack signatures. Can be overwhelmed by massive encrypted packet volumes."
+  },
+  {
+    name: "Auto Patch",
+    complexityTier: "Tier 2 (Intermediate)",
+    description: "Deploys automated daemon tasks to fetch, test, and apply vendor security patches across OS kernels and software packages.",
+    command: "unattended-upgrade --debug --auto-reboot",
+    hiddenDetails: "Closes known CVE exploits automatically. Has a small chance to destabilize legacy custom services upon reboot."
+  },
+  {
+    name: "Honeypot",
+    complexityTier: "Tier 2 (Intermediate)",
+    description: "Deploys a vulnerable dummy node with simulated high-value data to lure, trap, and study attacker tactics.",
+    command: "cowrie-deploy --port 2222 --emulate-ubuntu",
+    hiddenDetails: "Provides early warning and captures attack methods without risking actual assets. Yields zero operational utility."
+  },
+  {
+    name: "IP Block",
+    complexityTier: "Tier 1 (Novice)",
+    description: "Instantly drops all inbound and outbound network packets originating from a flagged IP address or subnet.",
+    command: "iptables -A INPUT -s <OFFENDER_IP> -j DROP",
+    hiddenDetails: "Immediate fix for active attacks, but vulnerable to IP spoofing and easily bypassed by proxy-hopping attackers."
+  },
+  {
+    name: "Traceback",
+    complexityTier: "Tier 4 (Apex)",
+    description: "Follows network hops and proxy routes backward from an active attack stream to identify the true origin IP and infrastructure.",
+    command: "traceroute-reverse --session-id <ACTIVE_ATTACK> --pivot-depth 5",
+    hiddenDetails: "Exposes the attacker's actual position, enabling direct retaliatory counter-operations or immediate upstream blocks."
+  },
+  {
+    name: "System Scan",
+    complexityTier: "Tier 1 (Novice)",
+    description: "Runs routine local integrity checks to spot modified system binaries, unauthorized processes, and known malware signatures.",
+    command: "clamscan -r /sys /bin /usr --detect-pua",
+    hiddenDetails: "Low resource footprint. Catches common scripts and basic payloads, but blind to encrypted or zero-day execution."
+  },
+  {
+    name: "Multi-Factor Auth",
+    complexityTier: "Tier 2 (Intermediate)",
+    description: "Enforces time-based secondary token validation across critical login portals to neutralize stolen credentials.",
+    command: "pam-config -a --pam_google_authenticator --enforce-all",
+    hiddenDetails: "Neutralizes 99% of brute force, stuffing, and basic phishing attacks. Can still be bypassed via session hijacking."
+  },
+  {
+    name: "Traffic Filter",
+    complexityTier: "Tier 1 (Novice)",
+    description: "Applies basic stateless filtering rules to scrub bad port requests, invalid packet headers, and junk traffic bursts.",
+    command: "ufw deny proto tcp from any to any port 8080",
+    hiddenDetails: "Reduces network overhead during floods, but requires manual rule management to avoid blocking legitimate users."
+  },
+  {
+    name: "Decoy Files",
+    complexityTier: "Tier 2 (Intermediate)",
+    description: "Seeds sensitive file structures with honeytokens that trigger instant high-priority alerts when opened or exfiltrated.",
+    command: "honeytoken-gen --type xlsx --label 'passwords_2026.xlsx' --alert-webhook",
+    hiddenDetails: "Zero false-positive alerts. Signals that an attacker already possesses internal access and is performing lateral movement."
+  },
+  {
+    name: "Emergency Lockdown",
+    complexityTier: "Tier 4 (Apex)",
+    description: "Severely restricts system access—isolating network segments, dropping non-essential ports, and freezing privilege changes.",
+    command: "sys-lockdown --enforce-airgap --kill-active-sessions",
+    hiddenDetails: "Stops ongoing data breaches dead in their tracks. Disconnects all active connections and pauses production workflows."
+  },
+  {
+    name: "Backup Restore",
+    complexityTier: "Tier 3 (Advanced)",
+    description: "Rolls back targeted server images or databases to an uncorrupted, pre-incident snapshot.",
+    command: "restic restore latest --target /var/data --verify-integrity",
+    hiddenDetails: "Completely cleans ransomware, wiped logs, and backdoor persistence. Results in minor data loss from the rollback gap."
+  },
+  {
+    name: "Wireshark",
+    complexityTier: "Tier 2 (Intermediate)",
+    description: "Performs deep packet inspection (DPI) on network interfaces to analyze malformed payloads and uncover active command-and-control channels.",
+    command: "tshark -i eth0 -Y 'http.request.method == POST' -V",
+    hiddenDetails: "Reveals full packet contents in real time, but generates massive volumes of data requiring skilled manual analysis."
+  },
+  {
+    name: "Splunk",
+    complexityTier: "Tier 3 (Advanced)",
+    description: "Aggregates, indexes, and correlates telemetry from across the fleet to detect complex threat patterns in real time.",
+    command: "splunk search 'index=security action=failed_login | stats count by src_ip'",
+    hiddenDetails: "Provides macro-level visibility across all systems. High resource footprint and requires continuous ingest tuning."
+  },
+  {
+    name: "YARA",
+    complexityTier: "Tier 3 (Advanced)",
+    description: "Scans memory and disk storage using rule-based classification to hunt down hidden malware, web shells, and custom implants.",
+    command: "yara -r /rules/apt_signatures.yar /var/www/html/",
+    hiddenDetails: "Highly effective at pinpointing memory-resident threats. Depends entirely on the quality and freshness of rule definitions."
+  },
+]

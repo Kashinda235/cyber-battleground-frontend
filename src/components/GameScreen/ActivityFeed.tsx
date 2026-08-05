@@ -6,6 +6,7 @@ import {
 } from "lucide-react"
 import type { ActionRequest, ActionResult, ChatLog, Player} from "../../utils/types.ts";
 import Events from "../Feed/Events.tsx";
+import {useToast} from "../../context/ToastContext.tsx";
 
 type Mode = "chat" | "actions" | "defence" | "events" | "alerts"
 
@@ -18,6 +19,68 @@ interface FeedProps {
   performAction: (data: ActionRequest) => Promise<ActionResult>
   setActiveTab: React.Dispatch<React.SetStateAction<Mode>>
 }
+
+interface NavButtonProps {
+  mode: Mode; targetMode: Mode; onClick: (mode: Mode) => void;
+  icon: React.ElementType; title: string; activeColorClass: string; // e.g. "bg-indigo-600 shadow-indigo-900/50"
+  hasBadge?: boolean;
+}
+
+const NavButton = ({mode, targetMode, onClick, icon: Icon, title, activeColorClass, hasBadge = false,
+                          }: NavButtonProps) => {
+  const isActive = mode === targetMode;
+
+  return (
+      <button
+          onClick={() => onClick(targetMode)}
+          className={`relative rounded-xl p-3 transition-all duration-200 ${
+              isActive
+                  ? `${activeColorClass} text-white shadow-lg`
+                  : "text-gray-500 hover:bg-gray-800 hover:text-gray-300"
+          }`}
+          title={title}
+      >
+        <Icon size={22} />
+        {hasBadge && !isActive && (
+            <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full border border-gray-900 bg-amber-500" />
+        )}
+      </button>
+  );
+}
+
+const NAV_ITEMS = [
+  {
+    targetMode: "chat" as const,
+    icon: MessageSquare,
+    title: "Chat Room",
+    activeColorClass: "bg-indigo-600 shadow-indigo-900/50",
+  },
+  {
+    targetMode: "actions" as const,
+    icon: Zap,
+    title: "Actions",
+    activeColorClass: "bg-rose-600 shadow-rose-900/50",
+  },
+  {
+    targetMode: "defence" as const,
+    icon: ShieldCogCorner,
+    title: "Defence",
+    activeColorClass: "bg-blue-400 shadow-blue-900/50",
+  },
+  {
+    targetMode: "events" as const,
+    icon: Calendars,
+    title: "Events",
+    activeColorClass: "bg-emerald-600 shadow-emerald-900/50",
+  },
+  {
+    targetMode: "alerts" as const,
+    icon: Bell,
+    title: "System Alerts",
+    activeColorClass: "bg-orange-500 shadow-orange-900/50",
+    hasBadge: true,
+  },
+];
 
 interface Alert {
   id: string
@@ -56,9 +119,11 @@ const SYSTEM_ALERTS: Alert[] = [
 export default function ActivityFeed( { players, currentPlayer, target, chats, sendChat, performAction, setActiveTab }: FeedProps ) {
   const [mode, setMode] = useState<Mode>("chat")
   const activePlayers:number = players.length;
+  const { showToast } = useToast();
 
   useEffect(() => {
     setActiveTab(mode);
+    showToast({ type: 'mission', title: 'New Mission', description: `Mode changed to ${mode.toUpperCase()}` })
   }, [mode]);
   return (
     <>
@@ -72,74 +137,19 @@ export default function ActivityFeed( { players, currentPlayer, target, chats, s
       <div className="relative mx-auto h-full flex w-full max-w-3xl overflow-hidden rounded-xl border border-gray-800 bg-gray-950 font-sans text-gray-100 shadow-2xl">
         {/* Side Navigation */}
         <div className="z-10 flex w-16 shrink-0 flex-col items-center gap-4 border-r border-gray-800 bg-gray-900 py-6">
-          <button
-            onClick={() => setMode("chat")}
-            className={`rounded-xl p-3 transition-all duration-200 ${
-              mode === "chat"
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/50"
-                : "text-gray-500 hover:bg-gray-800 hover:text-gray-300"
-            }`}
-            title="Chat Room"
-          >
-            <MessageSquare size={22} />
-          </button>
-
-          <button
-            onClick={() => setMode("actions")}
-            className={`rounded-xl p-3 transition-all duration-200 ${
-              mode === "actions"
-                ? "bg-rose-600 text-white shadow-lg shadow-rose-900/50"
-                : "text-gray-500 hover:bg-gray-800 hover:text-gray-300"
-            }`}
-            title="Actions"
-          >
-            <Zap size={22} />
-          </button>
-
-          {/* SYSTEM DEFENSES */}
-          <button
-              onClick={() => setMode("defence")}
-              className={`rounded-xl p-3 transition-all duration-200 ${
-                  mode === "defence"
-                      ? "bg-blue-400 text-white shadow-lg shadow-blue-900/50"
-                      : "text-gray-500 hover:bg-gray-800 hover:text-gray-300"
-              }`}
-              title="Defence"
-          >
-            <ShieldCogCorner size={22} />
-          </button>
-
-          {/* EVENTS */}
-          <button
-              onClick={() => setMode("events")}
-              className={`rounded-xl p-3 transition-all duration-200 ${
-                  mode === "events"
-                      ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/50"
-                      : "text-gray-500 hover:bg-gray-800 hover:text-gray-300"
-              }`}
-              title="Events"
-          >
-            <Calendars size={22} />
-          </button>
-
-          {/* New Alerts Switch */}
-          <button
-            onClick={() => setMode("alerts")}
-            className={`relative rounded-xl p-3 transition-all duration-200 ${
-              mode === "alerts"
-                ? "bg-orange-500 text-white shadow-lg shadow-orange-900/50"
-                : "text-gray-500 hover:bg-gray-800 hover:text-gray-300"
-            }`}
-            title="System Alerts"
-          >
-            <Bell size={22} />
-            {/* Unread indicator dot */}
-            {mode !== "alerts" && (
-              <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full border border-gray-900 bg-amber-500"></span>
-            )}
-          </button>
+          {NAV_ITEMS.map((item) => (
+              <NavButton
+                  key={item.targetMode}
+                  mode={mode}
+                  targetMode={item.targetMode}
+                  onClick={setMode}
+                  icon={item.icon}
+                  title={item.title}
+                  activeColorClass={item.activeColorClass}
+                  hasBadge={item.hasBadge}
+              />
+          ))}
         </div>
-
         {/* Main Content Area */}
         <div className="relative flex flex-1 flex-col overflow-hidden bg-gray-950">
           {/* --- CHAT MODE --- */}

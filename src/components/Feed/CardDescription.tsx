@@ -1,4 +1,5 @@
-import { description } from '@/data/action_description.ts';
+import { action_description } from '@/data/action_description.ts';
+import { defence_description } from '@/data/defence_description.ts';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -16,7 +17,8 @@ import { AbilityIcon } from "./AbilityCard.tsx";
 import * as Icons from "lucide-react";
 import {useGame} from "../../context/GameContext.tsx";
 
-const ACTIONS = description;
+const ACTIONS = action_description;
+const DEFENSE = defence_description;
 
 interface DescriptionProps {
     onBack?: () => void;
@@ -26,7 +28,7 @@ interface DescriptionProps {
 }
 
 export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAction, icon, color }: DescriptionProps) => {
-    const action = ACTIONS[currentAction];
+    const action = color.includes('red') ? ACTIONS[currentAction] : DEFENSE[currentAction];
     const COOLDOWN_TIME = 8; // seconds
 
     // States
@@ -204,7 +206,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
                                 {copiedCommand ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
                             </button>
                         </div>
-                        <code className="block font-mono text-xs text-emerald-400 dark:text-emerald-300 break-all bg-slate-900/80 p-2 rounded-lg border border-slate-800/80">
+                        <code className="block font-mono text-xm text-emerald-400 dark:text-emerald-300 break-all bg-slate-900/80 p-2 rounded-lg border border-slate-800/80">
                             {action.command}
                         </code>
                     </div>
@@ -228,7 +230,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
                                 exit={{ opacity: 0, height: 0 }}
                                 className="mt-2 text-xm text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-800/20 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50"
                             >
-                                {action.hiddendetails}
+                                {action.hiddenDetails}
                             </motion.div>
                         )}
                     </AnimatePresence>
