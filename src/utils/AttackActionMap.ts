@@ -30,7 +30,9 @@ export interface AttackResult {
     content: string
 }
 
-export type LogCallback = (entry: { type: "system" | "error"; content: string }) => void;
+export type LogCallback = (entry: {
+    type: "system" | "error" | "test" | "load" ;
+    content: string }) => void;
 export type AttackHandler = (target: NodeState, playerStats: any, onLog?: LogCallback) => Promise<AttackResult>;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -53,7 +55,10 @@ const simulateBruteForce: AttackHandler = async (target, playerStats, onLog) => 
 
     // Emit live logs to the UI sequentially during the attack phase
     for (const stageMessage of stages) {
-        onLog?.({ type: "system", content: stageMessage });
+        let logType:  "system" | "error" | "test" | "load" = 'system';
+        if (stageMessage.includes('[+] ')) logType = 'load';
+        if (stageMessage.includes('[*] ')) logType = 'test';
+        onLog?.({ type: logType, content: stageMessage });
         await delay(500); // UI updates live during each delay!
     }
 
@@ -62,7 +67,7 @@ const simulateBruteForce: AttackHandler = async (target, playerStats, onLog) => 
 
     if (isSuccess) {
         return {
-            type: "system",
+            type: "action",
             content: `[+] SUCCESS: SSH credentials recovered for root@${target.id}\n[+] Match found: "root:admin_9021"`
         };
     } else {
@@ -91,7 +96,10 @@ const simulatePhishingKit: AttackHandler = async (target, playerStats, onLog) =>
 
     // Emit live terminal logs
     for (const stageMessage of stages) {
-        onLog?.({ type: "system", content: stageMessage });
+        let logType:  "system" | "error" | "test" | "load" = 'system';
+        if (stageMessage.includes('[+] ')) logType = 'load';
+        if (stageMessage.includes('[*] ')) logType = 'test';
+        onLog?.({ type: logType, content: stageMessage });
         await delay(600);
     }
 
@@ -105,7 +113,7 @@ const simulatePhishingKit: AttackHandler = async (target, playerStats, onLog) =>
     if (isSuccess) {
         const fakeSessionToken = Math.random().toString(36).substring(2, 15);
         return {
-            type: "system",
+            type: "action",
             content: `[+] SUCCESS: Victim authenticated via cloned portal.\n[+] Captured session token: auth_bearer_${fakeSessionToken}\n[+] Host ${target.id} security bypass complete.`
         };
     } else {
@@ -141,7 +149,10 @@ const useExploitScript: AttackHandler = async (target, playerStats, onLog) => {
 
     // Emit live execution logs
     for (const stageMessage of stages) {
-        onLog?.({ type: "system", content: stageMessage });
+        let logType:  "system" | "error" | "test" | "load" = 'system';
+        if (stageMessage.includes('[+] ')) logType = 'load';
+        if (stageMessage.includes('[*] ')) logType = 'test';
+        onLog?.({ type: logType, content: stageMessage });
         await delay(500);
     }
 
@@ -154,7 +165,7 @@ const useExploitScript: AttackHandler = async (target, playerStats, onLog) => {
     if (isSuccess) {
         const injectedAddress = `0x${Math.floor(Math.random() * 0xFFFFFFFF).toString(16).padStart(8, '0')}`;
         return {
-            type: "system",
+            type: "action",
             content: `[+] SUCCESS: Exploit executed successfully.\n[+] Memory redirected at address [${injectedAddress}]\n[+] System privilege escalated on target node [${target.id}].`
         };
     } else {
@@ -185,7 +196,10 @@ const simulatePortScanner: AttackHandler = async (target, playerStats, onLog) =>
     ];
 
     for (const stageMessage of stages) {
-        onLog?.({ type: "system", content: stageMessage });
+        let logType:  "system" | "error" | "test" | "load" = 'system';
+        if (stageMessage.includes('[+] ')) logType = 'load';
+        if (stageMessage.includes('[*] ')) logType = 'test';
+        onLog?.({ type: logType, content: stageMessage });
         await delay(400 / scanSpeed);
     }
 
@@ -195,10 +209,11 @@ const simulatePortScanner: AttackHandler = async (target, playerStats, onLog) =>
         await delay(250 / scanSpeed);
         const formattedPort = `${p.port}/tcp`.padEnd(9, " ");
         const formattedState = p.state.padEnd(8, " ");
-        onLog?.({
-            type: "system",
-            content: `${formattedPort}${formattedState}${p.service}`
-        });
+        let logType:  "system" | "error" | "test" | "load" = 'system';
+        const content = `${formattedPort}${formattedState}${p.service}`;
+        if (content.includes('[+] ')) logType = 'load';
+        if (content.includes('[*] ')) logType = 'test';
+        onLog?.({ type: logType, content: content });
     }
 
     await delay(500);
@@ -234,7 +249,10 @@ const simulateDeepScanner: AttackHandler = async (target, playerStats, onLog) =>
     ];
 
     for (const stageMessage of stages) {
-        onLog?.({ type: "system", content: stageMessage });
+        let logType:  "system" | "error" | "test" | "load" = 'system';
+        if (stageMessage.includes('[+] ')) logType = 'load';
+        if (stageMessage.includes('[*] ')) logType = 'test';
+        onLog?.({ type: logType, content: stageMessage });
         await delay(500 / scanSpeed);
     }
 
@@ -293,7 +311,10 @@ const simulatePacketSniffer: AttackHandler = async (target, playerStats, onLog) 
     ];
 
     for (const stageMessage of stages) {
-        onLog?.({ type: "system", content: stageMessage });
+        let logType:  "system" | "error" | "test" | "load" = 'system';
+        if (stageMessage.includes('[+] ')) logType = 'load';
+        if (stageMessage.includes('[*] ')) logType = 'test';
+        onLog?.({ type: logType, content: stageMessage });
         await delay(350 / captureSpeed);
     }
 
@@ -316,7 +337,7 @@ const simulatePacketSniffer: AttackHandler = async (target, playerStats, onLog) 
         // Highlight packet payload vs header
         const isPayload = packet.includes("USER") || packet.includes("PASS") || packet.includes("Authorization");
         onLog?.({
-            type: isPayload ? "system" : "system",
+            type: isPayload ? "load" : "system",
             content: packet
         });
     }
@@ -350,7 +371,10 @@ const simulateCredentialStuffing: AttackHandler = async (target, playerStats, on
     ];
 
     for (const stageMessage of stages) {
-        onLog?.({ type: "system", content: stageMessage });
+        let logType:  "system" | "error" | "test" | "load" = 'system';
+        if (stageMessage.includes('[+] ')) logType = 'load';
+        if (stageMessage.includes('[*] ')) logType = 'test';
+        onLog?.({ type: logType, content: stageMessage });
         await delay(450 / attackSpeed);
     }
 
@@ -364,7 +388,10 @@ const simulateCredentialStuffing: AttackHandler = async (target, playerStats, on
 
     for (const logMsg of progressLogs) {
         await delay(400 / attackSpeed);
-        onLog?.({ type: "system", content: logMsg });
+        let logType:  "system" | "error" | "test" | "load" = 'system';
+        if (logMsg.includes('[+] ')) logType = 'load';
+        if (logMsg.includes('[*] ')) logType = 'test';
+        onLog?.({ type: logType, content: logMsg });
     }
 
     await delay(600);
@@ -411,7 +438,10 @@ const simulateSessionHijack: AttackHandler = async (target, playerStats, onLog) 
     ];
 
     for (const stageMessage of stages) {
-        onLog?.({ type: "system", content: stageMessage });
+        let logType:  "system" | "error" | "test" | "load" = 'system';
+        if (stageMessage.includes('[+] ')) logType = 'load';
+        if (stageMessage.includes('[*] ')) logType = 'test';
+        onLog?.({ type: logType, content: stageMessage });
         await delay(400);
     }
 
@@ -463,7 +493,10 @@ const simulateMalwareDrop: AttackHandler = async (target, playerStats, onLog) =>
     ];
 
     for (const stageMessage of stages) {
-        onLog?.({ type: "system", content: stageMessage });
+        let logType:  "system" | "error" | "test" | "load" = 'system';
+        if (stageMessage.includes('[+] ')) logType = 'load';
+        if (stageMessage.includes('[*] ')) logType = 'test';
+        onLog?.({ type: logType, content: stageMessage });
         await delay(450);
     }
 
@@ -513,7 +546,10 @@ const simulateDDoSBurst: AttackHandler = async (target, playerStats, onLog) => {
     ];
 
     for (const stageMessage of stages) {
-        onLog?.({ type: "system", content: stageMessage });
+        let logType:  "system" | "error" | "test" | "load" = 'system';
+        if (stageMessage.includes('[+] ')) logType = 'load';
+        if (stageMessage.includes('[*] ')) logType = 'test';
+        onLog?.({ type: logType, content: stageMessage });
         await delay(350);
     }
 
@@ -567,7 +603,10 @@ const simulateZeroDay: AttackHandler = async (target, playerStats, onLog) => {
     ];
 
     for (const stageMessage of stages) {
-        onLog?.({ type: "system", content: stageMessage });
+        let logType:  "system" | "error" | "test" | "load" = 'system';
+        if (stageMessage.includes('[+] ')) logType = 'load';
+        if (stageMessage.includes('[*] ')) logType = 'test';
+        onLog?.({ type: logType, content: stageMessage });
         await delay(450);
     }
 
@@ -607,7 +646,10 @@ const simulateLogWiper: AttackHandler = async (target, playerStats, onLog) => {
     ];
 
     for (const stageMessage of stages) {
-        onLog?.({ type: "system", content: stageMessage });
+        let logType:  "system" | "error" | "test" | "load" = 'system';
+        if (stageMessage.includes('[+] ')) logType = 'load';
+        if (stageMessage.includes('[*] ')) logType = 'test';
+        onLog?.({ type: logType, content: stageMessage });
         await delay(400);
     }
 

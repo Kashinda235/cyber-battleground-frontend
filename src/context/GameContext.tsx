@@ -3,7 +3,7 @@ import {executeAttack, type LogCallback} from "../utils/AttackActionMap.ts";
 
 export interface LogEntry {
     id: string;
-    type: 'system' | 'user' | 'error' | 'action';
+    type: 'system' | 'user' | 'error' | 'action' | 'load' | 'test' ;
     content: string;
     timestamp: string;
 }

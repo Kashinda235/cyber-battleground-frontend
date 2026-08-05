@@ -66,6 +66,12 @@ export default function ModernTerminal({ currentUser = defaultUser }: TerminalPr
                             </div>
                         ) : item.type === 'error' ? (
                             <div className="text-rose-400">{item.content}</div>
+                        ) : item.type === 'load' ? (
+                            <div className="text-yellow-400">{item.content}</div>
+                        ) : item.type === 'test' ? (
+                            <div className="text-blue-400">{item.content}</div>
+                        ) : item.type === 'action' ? (
+                            <div className="text-green-500">{item.content}</div>
                         ) : (
                             <div className="text-slate-300">{item.content}</div>
                         )}
