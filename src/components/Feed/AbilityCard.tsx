@@ -39,7 +39,7 @@ export function ActionCard({ ability, triggerAction, color, isOnCooldown}: Actio
         <button
             onClick={() => triggerAction(action.id, action.icon)}
             disabled={isOnCooldown}
-            className={`group flex items-center gap-4 rounded-xl border border-gray-800 bg-gray-900 p-4 text-left transition-all ${isOnCooldown ? "cursor-not-allowed opacity-70" : "hover:border-gray-600 hover:bg-gray-800/80 active:scale-95"}`}
+            className={`group flex pop-up items-center gap-4 rounded-xl border border-gray-800 bg-gray-900 p-4 text-left transition-all ${isOnCooldown ? "cursor-not-allowed opacity-70" : "hover:border-gray-600 hover:bg-gray-800/80 active:scale-95"}`}
         >
             <div className="relative flex h-12 w-12 shrink-0 items-center justify-center">
                 <svg

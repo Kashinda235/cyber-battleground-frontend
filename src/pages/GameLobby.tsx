@@ -3,6 +3,7 @@ import { motion } from "framer-motion"
 import {useGameData} from "../hooks/useGameData.ts";
 import {Eye, ShieldCogCorner, Zap} from "lucide-react";
 import {useToast} from "../context/ToastContext.tsx";
+import type {Player} from "../utils/types.ts";
 
 // --- SVGs & Design Assets ---
 const Icons = {
@@ -117,7 +118,13 @@ const ROLES = [
   },
 ]
 
-export default function GameLobby( { onJoinGame, users, saveUser }) {
+interface LobbyProps {
+  onJoinGame: (receivedToken: string, receivedPlayer: Player) => void;
+  users: string[];
+  saveUser: (newUsername: string) => void;
+}
+
+export default function GameLobby( { onJoinGame, users, saveUser }: LobbyProps) {
   const [username, setUsername] = useState("")
   const [isTouched, setIsTouched] = useState(false)
   const { showToast } = useToast();
@@ -170,13 +177,11 @@ export default function GameLobby( { onJoinGame, users, saveUser }) {
     const data = { username: username.trim(), role: activeRole.role.toLowerCase() }
     try {
       let playerData;
-      let newPlayer = true;
       try {
         playerData = await registerPlayer(data);
       } catch (error: any) {
         if (error?.message?.includes("Player already exists")) {
           playerData = await loginPlayer( {username: username} );
-          newPlayer = false;
         } else {
           throw error;
         }
@@ -188,7 +193,7 @@ export default function GameLobby( { onJoinGame, users, saveUser }) {
       const { token, player } = playerData;
       onJoinGame(token, player);
 
-      if (newPlayer) saveUser(username);
+      if (!users.includes(username)) saveUser(username);
       console.log(users);
       showToast({ type: 'join',
         title: 'PlayerJoined',

@@ -123,7 +123,7 @@ export default function ActivityFeed( { players, currentPlayer, target, chats, s
 
   useEffect(() => {
     setActiveTab(mode);
-    showToast({ type: 'mission', title: 'New Mission', description: `Mode changed to ${mode.toUpperCase()}` })
+    // showToast({ type: 'mission', title: 'New Mission', description: `Mode changed to ${mode.toUpperCase()}` })
   }, [mode]);
   return (
     <>

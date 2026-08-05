@@ -87,7 +87,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
 
     return (
         /* Fill grid slot completely */
-        <div className="w-full h-full flex flex-col mx-auto bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xl overflow-hidden p-6 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-200">
+        <div className="w-full h-full pop-up flex flex-col mx-auto bg-white dark:bg-slate-900 overflow-hidden p-6 text-slate-800 dark:text-slate-100 font-sans transition-colors">
 
             {/* Navigation Header (Fixed Top) */}
             <div className="flex items-center justify-between mb-6 shrink-0">
