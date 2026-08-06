@@ -50,10 +50,10 @@ const GameScreen = ({ token, player }: GameProps) => {
 
                 {/* The row expands to remaining space and forces children to fill height */}
                 <GameProvider>
-                <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
 
                     {/* Grid Layout Container */}
-                    <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 w-full">
+                    <div className="grid grid-cols-1 lg:grid-cols-10 gap-4 w-full">
 
                         {/* Top/First Row on Large Screens: 3:2 Ratio (3/5ths vs 2/5ths) */}
                         {/* ActivityFeed (3 parts of 5 -> 60%) */}
@@ -68,7 +68,7 @@ const GameScreen = ({ token, player }: GameProps) => {
 
                         {/* Bottom Row on Large Screens: Full Width (5/5ths) */}
                         {/* GameCanvas */}
-                        <div className="h-[600px] w-full overflow-hidden lg:col-span-6">
+                        <div className="h-[600px] w-full overflow-hidden lg:col-span-4">
                             <GameCanvas players={players} currentPlayer={player} />
                         </div>
 

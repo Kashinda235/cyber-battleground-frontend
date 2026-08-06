@@ -1,6 +1,17 @@
 import React from "react"
 import { motion } from "framer-motion"
-import {Sword, HatGlasses, ShieldCheck, HeartPulse, Trophy, Activity, Shield, Swords, ShieldCog} from "lucide-react"
+import {
+    Sword,
+    HatGlasses,
+    ShieldCheck,
+    HeartPulse,
+    Trophy,
+    Activity,
+    Shield,
+    Swords,
+    ShieldCog,
+    Radio, Flame
+} from "lucide-react"
 import type {GameState, Player} from "../../utils/types.ts";
 
 interface PlayerDetailsProps {
@@ -21,13 +32,13 @@ interface HeaderProps {
 
 const theme = {
     red: 'rose',
-    blue: 'sky',
+    blue: 'blue',
     spectator: 'emerald',
 } as const;
 
 const IconSymbol = {
     red: <Swords size={50}/>,
-    blue: <ShieldCog size={50}/>,
+    blue: <ShieldCheck size={50}/>,
     spectator: <HatGlasses size={50}/>,
 } as const;
 
@@ -45,10 +56,10 @@ const PlayerDetailsCard: React.FC<PlayerDetailsProps> = ({name, ip, role}) => {
             {/* Player Metadata */}
             <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2">
-        <span className="text-sm font-bold tracking-tight text-slate-100">
+        <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
           {name}
-        </span>
-                    <span className={`rounded-md border border-${color}-500/30 bg-${color}-950/80 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-${color}-400 uppercase`}>
+        </h1>
+                    <span className={`rounded-md border border-${color}-500/30 bg-${color}-950/80 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-${color}-300 uppercase`}>
           {role}
         </span>
                 </div>
@@ -123,20 +134,45 @@ export const Header: React.FC<HeaderProps> = ({ player, gameState }: HeaderProps
 
     const gameStateData = { systemHealth: 98, score: 24850 }
 
-  return (
-    <header className="w-full border-b border-slate-800 bg-slate-950/95 text-slate-100 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
-        {/* Left: Player Info */}
-        <PlayerDetailsCard {...playerData} />
+  // return (
+  //   <header className="w-full border-b border-slate-800 bg-slate-950/95 text-slate-100 backdrop-blur-xl">
+  //     <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
+  //       {/* Left: Player Info */}
+  //       <PlayerDetailsCard {...playerData} />
+  //
+  //       {/* Center: Live Beacon */}
+  //       {/*<LiveBeacon />*/}
+  //
+  //       {/* Right: Game Telemetry */}
+  //       <GameStatesCard {...gameStateData} />
+  //     </div>
+  //   </header>
+  // )
 
-        {/* Center: Live Beacon */}
-        {/*<LiveBeacon />*/}
+    let isUnderAttack = true;
+    let defenseState = {
+        emergencyLockdown: { active: true }
+    };
 
-        {/* Right: Game Telemetry */}
-        <GameStatesCard {...gameStateData} />
-      </div>
-    </header>
-  )
+    function toggleDefense() {
+        defenseState.emergencyLockdown.active = !defenseState.emergencyLockdown.active
+    }
+
+    return (
+        <header className="flex flex-col md:flex-row items-center justify-between p-4 bg-slate-900 border border-slate-800 rounded-xl shadow-lg gap-4">
+            {/*<div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">*/}
+                {/* Left: Player Info */}
+                <PlayerDetailsCard {...playerData} />
+
+                {/* Center: Live Beacon */}
+                {/*<LiveBeacon />*/}
+
+                {/* Right: Game Telemetry */}
+                <GameStatesCard {...gameStateData} />
+
+            {/*</div>*/}
+        </header>
+    )
 }
 
 export default Header
