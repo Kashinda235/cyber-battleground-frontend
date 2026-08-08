@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import type {
     Player, Ability, ChatLog, GameState, MoveLog, ActionRequest,
-    ChatRequest, StateUpdateRequest, RegisterRequest, LoginRequest,
+    ChatRequest, StateUpdateRequest, RegisterRequest, LoginRequest, PlayerProfile, Asset, Connection,
 } from '../utils/types';
 import {
-    fetchPlayers, fetchAbilities, fetchChats, fetchGameState, fetchMoveLogs,
+    fetchPlayers, fetchChats, fetchGameState, fetchMoveLogs, fetchMyProfile, fetchMyConnections, fetchMyAsstes,
 } from '../services/fetch_api.ts';
 import {
     postAction, postChat, postGameState, postPlayer, postUser,
@@ -22,7 +22,10 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
     // ==========================================
     const [players, setPlayers] = useState<Player[]>([]);
     const [abilities, setAbilities] = useState<Ability[]>([]);
+    const [profile, setProfile] = useState<PlayerProfile>();
     const [chats, setChats] = useState<ChatLog[]>([]);
+    const [assets, setAssets] = useState<Asset[]>([]);
+    const [connections, setConnections] = useState<Connection[]>([]);
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [moveLogs, setMoveLogs] = useState<MoveLog[]>([]);
 
@@ -37,14 +40,18 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         setError(null);
         try {
             // Execute non-authenticated fetches concurrently
-            const [abilitiesRes, chatsRes, stateRes, movesRes] = await Promise.all([
-                fetchAbilities(),
+            const [profileRes, assetsRes, connectionsRes, chatsRes, stateRes, movesRes] = await Promise.all([
+                fetchMyProfile(),
+                fetchMyAsstes(),
+                fetchMyConnections(),
                 fetchChats(),
                 fetchGameState(),
                 fetchMoveLogs(),
             ]);
 
-            setAbilities(abilitiesRes.data);
+            setProfile(profileRes.data);
+            setAssets(assetsRes.data);
+            setConnections(connectionsRes.data);
             setChats([...chatsRes.data].reverse());
             setGameState(stateRes.data);
             setMoveLogs(movesRes.data);
@@ -108,10 +115,6 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         }, []),
     });
 
-    // ==========================================
-    // API Mutators (Outgoing Actions)
-    // ==========================================
-
     const registerPlayer = async (data: RegisterRequest) => {
         const res = await postPlayer(data);
         return res.data;
@@ -145,6 +148,9 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
 
     return {
         // State
+        profile,
+        assets,
+        connections,
         players,
         abilities,
         chats,

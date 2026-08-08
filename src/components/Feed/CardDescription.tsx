@@ -1,17 +1,9 @@
 import { action_description } from '@/data/action_description.ts';
 import { defence_description } from '@/data/defence_description.ts';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    ArrowLeft,
-    Crosshair,
-    Zap,
-    Bookmark,
-    Share2,
-    Check,
-    Info,
-    Terminal,
-    Copy
+    ArrowLeft, Crosshair, Zap, Bookmark, Share2, Check, Info, Terminal, Copy
 } from 'lucide-react';
 import { AbilityIcon } from "./AbilityCard.tsx";
 import * as Icons from "lucide-react";
@@ -38,7 +30,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
     const [copied, setCopied] = useState<boolean>(false);
     const [copiedCommand, setCopiedCommand] = useState<boolean>(false);
     const [showLore, setShowLore] = useState<boolean>(false);
-    const { handleAction } = useGame();
+    const { handleCommand } = useGame();
 
     // const color = 'red';
 
@@ -57,7 +49,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
         if (cooldown > 0) return;
         setCooldown(COOLDOWN_TIME);
         setIsTargeting(false);
-        handleAction?.(action);
+        handleCommand?.(action);
     };
 
     const handleShare = async () => {

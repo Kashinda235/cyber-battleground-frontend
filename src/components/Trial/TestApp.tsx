@@ -6,8 +6,9 @@ import MaintenancePanel from "./Maintenance.tsx";
 import FirewallPanel from "./Firewall.tsx";
 import IDSPanel from "./IDS.tsx";
 import HoneypotPanel from "./Honeypot.tsx";
+import PlayerProfileCard from "./Profile.tsx";
 
-const TestApp = ( { test = 4 }) => {
+const TestApp = ( { test = 9 }) => {
 
     return (
         <div>
@@ -19,6 +20,7 @@ const TestApp = ( { test = 4 }) => {
             {test === 6 && <FirewallPanel />}
             {test === 7 && <IDSPanel />}
             {test === 8 && <HoneypotPanel />}
+            {test === 9 && <PlayerProfileCard />}
         </div>
     )
 }

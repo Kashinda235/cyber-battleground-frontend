@@ -1,24 +1,63 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import {executeAttack, type LogCallback} from "../utils/AttackActionMap.ts";
+import type { Player, GameState, ChatLog, MoveLog } from '../utils/types';
+import {useGameData} from "../hooks/useGameData.ts";
 
-export interface LogEntry {
+export interface TerminalEntry {
     id: string;
     type: 'system' | 'user' | 'error' | 'action' | 'load' | 'test' ;
     content: string;
     timestamp: string;
 }
 
+export type TabType = 'profile' | 'chat' | 'actions' | 'defence' | 'events' | 'alerts';
+
 interface GameContextType {
-    history: LogEntry[];
-    executeAction: (command: string) => void;
-    handleAction: (action: any) => void;
-    clearHistory: () => void;
+    // Props / Auth Data
+    token: string;
+    currentPlayer: Player | undefined;
+
+    // Core Game Data (from useGameData)
+    gameState: GameState | null;
+    players: Player[];
+    chats: ChatLog[];
+    moveLogs: MoveLog[];
+    isLoading: boolean;
+
+    // Actions (from useGameData)
+    sendChat: (msg: string) => void;
+    performAction: (actionData: any) => void;
+
+    // Local UI State
+    target: Player | undefined;
+    setTarget: (target: Player) => void;
+    activeTab: TabType;
+    setActiveTab: (tab: TabType) => void;
+
+    // Shared Terminal/Command System
+    terminalHistory: TerminalEntry[];
+    executeCommand: (cmd: string) => void;
+    clearTerminal: () => void;
+    handleCommand: (action: any) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
-export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [history, setHistory] = useState<LogEntry[]>([
+interface GameProviderProps {
+    token: string;
+    player: Player | undefined;
+    children: ReactNode;
+}
+
+export const GameProvider: React.FC<GameProviderProps> = ({ token, player, children }) => {
+    const {
+        gameState, chats, sendChat, moveLogs,
+        players, performAction, isLoading
+    } = useGameData({ token, player });
+    const [target, setTarget] = useState<Player | undefined>(undefined);
+    const [activeTab, setActiveTab] = useState<TabType>('profile');
+
+    const [terminalHistory, setTerminalHistory] = useState<TerminalEntry[]>([
         {
             id: '1',
             type: 'system',
@@ -28,7 +67,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     ]);
 
     // Single source of truth for executing any command/action
-    const executeAction = (cmd: string) => {
+    const executeCommand = (cmd: string) => {
         const trimmed = cmd.trim();
         if (!trimmed) return;
 
@@ -36,14 +75,14 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const args = trimmed.split(' ');
         const command = args[0].toLowerCase();
 
-        const userEntry: LogEntry = {
+        const userEntry: TerminalEntry = {
             id: Date.now().toString(),
             type: 'user',
             content: cmd,
             timestamp,
         };
 
-        let resultEntries: LogEntry[] = [];
+        const resultEntries: TerminalEntry[] = [];
 
         switch (command) {
             case 'help':
@@ -83,7 +122,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 break;
 
             case 'clear':
-                setHistory([]);
+                setTerminalHistory([]);
                 return;
 
             default:
@@ -95,10 +134,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 });
         }
 
-        setHistory((prev) => [...prev, userEntry, ...resultEntries]);
+        setTerminalHistory((prev) => [...prev, userEntry, ...resultEntries]);
     };
 
-    const handleAction = async (action: any) => {
+    const handleCommand = async (action: any) => {
         const targetNode = {
             id: "player-101",
             ip: '192.168.10.58',
@@ -113,43 +152,59 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const timestamp = new Date().toLocaleTimeString();
 
         // 1. Immediately append user's command input to history
-        const userEntry: LogEntry = {
+        const userEntry: TerminalEntry = {
             id: Date.now().toString(),
             type: 'user',
             content: action.command,
             timestamp,
         };
-        setHistory((prev) => [...prev, userEntry]);
+        setTerminalHistory((prev) => [...prev, userEntry]);
 
         // 2. Callback to append real-time progress updates directly into state
         const handleLiveLog: LogCallback = (log) => {
-            const liveEntry: LogEntry = {
+            const liveEntry: TerminalEntry = {
                 id: `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
                 timestamp: new Date().toLocaleTimeString(),
                 ...log
             };
-            setHistory((prev) => [...prev, liveEntry]);
+            setTerminalHistory((prev) => [...prev, liveEntry]);
         };
 
         // 3. Execute attack (will fire handleLiveLog periodically)
         const result = await executeAttack(action.name, targetNode, "ME", handleLiveLog);
 
         // 4. Append final summary result
-        const resultEntry: LogEntry = {
+        const resultEntry: TerminalEntry = {
             id: Date.now().toString(),
             timestamp: new Date().toLocaleTimeString(),
             ...result
         };
-        setHistory((prev) => [...prev, resultEntry]);
+        setTerminalHistory((prev) => [...prev, resultEntry]);
     };
 
-    const clearHistory = () => setHistory([]);
+    const clearTerminal = () => setTerminalHistory([]);
 
-    return (
-        <GameContext.Provider value={{ history, executeAction, handleAction, clearHistory }}>
-            {children}
-        </GameContext.Provider>
-    );
+    const value: GameContextType = {
+        token,
+        currentPlayer: player,
+        gameState,
+        players,
+        chats,
+        moveLogs,
+        isLoading,
+        sendChat,
+        performAction,
+        target,
+        setTarget,
+        activeTab,
+        setActiveTab,
+        terminalHistory,
+        executeCommand,
+        clearTerminal,
+        handleCommand
+    };
+
+    return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 };
 
 export const useGame = () => {

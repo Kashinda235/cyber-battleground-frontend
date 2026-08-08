@@ -88,7 +88,7 @@ const App = () => {
             {/*<Loader onComplete={() => setIsLoaded(true)} />*/}
             {/* AnimatePresence handles animating components as they unmount */}
             <div id="main-site" className={isLoaded ? 'in' : ''}>
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode="popLayout">
                 {currentScreen === 'home' && (
                     <motion.div
                         key="home"

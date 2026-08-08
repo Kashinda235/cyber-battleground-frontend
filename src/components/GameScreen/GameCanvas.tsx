@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import type {Player, PlayerStatus} from "../../utils/types.ts"
+import {useGame} from "../../context/GameContext.tsx";
 
 // --- Constants ---
 const COLS = 30
@@ -37,12 +38,8 @@ interface PlayerProfileData {
   flavor: string
 }
 
-interface GameCanvasProps {
-  players: Player[]
-  currentPlayer: Player
-}
-
-export default function GameCanvas({ players, currentPlayer }: GameCanvasProps) {
+export default function GameCanvas() {
+  const { players, currentPlayer } = useGame();
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [profile, setProfile] = useState<PlayerProfileData | null>(null)
 

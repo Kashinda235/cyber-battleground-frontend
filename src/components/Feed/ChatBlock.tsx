@@ -1,15 +1,10 @@
-import type {ChatLog, Player} from "../../utils/types.ts";
 import React, {useEffect, useRef, useState} from "react";
 import {MessageSquareQuote, Send, ShieldCog} from "lucide-react";
+import {useGame} from "../../context/GameContext.tsx";
 
-interface ChatBlockProps {
-    chats: ChatLog[],
-    activePlayers: number,
-    currentPlayer: Player
-    sendChat: (message: string) => Promise<ChatLog>
-}
 
-const ChatBlock = ( { chats, activePlayers, currentPlayer, sendChat }: ChatBlockProps) => {
+const ChatBlock = ( {activePlayers}: {activePlayers: number} ) => {
+    const  { chats, currentPlayer, sendChat } = useGame();
     const [isTyping, setIsTyping] = useState(false);
     const chatEndRef = useRef<HTMLDivElement | null>(null);
     const [inputValue, setInputValue] = useState("");

@@ -1,12 +1,8 @@
 import {User} from "lucide-react";
-import type {Player} from "../../utils/types.ts";
+import {useGame} from "../../context/GameContext.tsx";
 
-interface ListProps {
-    players: Player[],
-    setTarget:  (targetId: Player) => void
-}
-
-const PlayersList = ({players, setTarget}: ListProps) => {
+const PlayersList = () => {
+    const {players, setTarget} = useGame();
     const onlineCount = players.filter((p) => p.status === "online").length
 
     return (

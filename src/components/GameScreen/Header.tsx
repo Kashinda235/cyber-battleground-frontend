@@ -1,18 +1,8 @@
 import React from "react"
-import { motion } from "framer-motion"
 import {
-    Sword,
-    HatGlasses,
-    ShieldCheck,
-    HeartPulse,
-    Trophy,
-    Activity,
-    Shield,
-    Swords,
-    ShieldCog,
-    Radio, Flame
+    HatGlasses, ShieldCheck, HeartPulse, Trophy, Activity, Swords,
 } from "lucide-react"
-import type {GameState, Player} from "../../utils/types.ts";
+import {useGame} from "../../context/GameContext.tsx";
 
 interface PlayerDetailsProps {
   name: string
@@ -23,11 +13,6 @@ interface PlayerDetailsProps {
 interface GameStateProps {
   systemHealth: number
   score: number
-}
-
-interface HeaderProps {
-  player: Player,
-  gameState: GameState | null
 }
 
 const theme = {
@@ -127,27 +112,13 @@ const GameStatesCard: React.FC<GameStateProps> = ({ systemHealth, score }) => {
 //   </div>
 // )
 
-export const Header: React.FC<HeaderProps> = ({ player, gameState }: HeaderProps) => {
+export const Header = () => {
 
-    const playerData = { name: player?.username ?? "Guest", ip: `192.168.1.${player.id}`, role: player.role }
+    const { currentPlayer, gameState } = useGame();
+    const playerData: PlayerDetailsProps = { name: currentPlayer?.username ?? "Guest", ip: `192.168.1.${currentPlayer?.id}`, role: String(currentPlayer?.role) }
     // const playerData = { name:  "Guest", ip: `192.168.1.${10}`, role: 'red' }
 
     const gameStateData = { systemHealth: 98, score: 24850 }
-
-  // return (
-  //   <header className="w-full border-b border-slate-800 bg-slate-950/95 text-slate-100 backdrop-blur-xl">
-  //     <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
-  //       {/* Left: Player Info */}
-  //       <PlayerDetailsCard {...playerData} />
-  //
-  //       {/* Center: Live Beacon */}
-  //       {/*<LiveBeacon />*/}
-  //
-  //       {/* Right: Game Telemetry */}
-  //       <GameStatesCard {...gameStateData} />
-  //     </div>
-  //   </header>
-  // )
 
     let isUnderAttack = true;
     let defenseState = {

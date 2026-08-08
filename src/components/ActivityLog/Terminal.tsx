@@ -1,22 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import type { Player } from "../../utils/types";
 import { useGame } from "../../context/GameContext";
 
-interface TerminalProps {
-    currentUser: Player;
-}
-
-const defaultUser: Player = {
-    id: 121,
-    username: "hacker",
-    role: "red",
-    status: "online",
-    joinedAt: "now",
-    lastSeen: "now"
-};
-
-export default function ModernTerminal({ currentUser = defaultUser }: TerminalProps) {
-    const { history, executeAction } = useGame(); // Shared state
+export default function ModernTerminal() {
+    const { terminalHistory, executeCommand, currentPlayer } = useGame(); // Shared state
     const [input, setInput] = useState('');
 
     const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -30,12 +16,12 @@ export default function ModernTerminal({ currentUser = defaultUser }: TerminalPr
                 behavior: 'smooth'
             });
         }
-    }, [history]);
+    }, [terminalHistory]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim()) return;
-        executeAction(input);
+        executeCommand(input);
         setInput('');
     };
 
@@ -55,12 +41,12 @@ export default function ModernTerminal({ currentUser = defaultUser }: TerminalPr
             </div>
 
             <div ref={viewportRef} className="p-4 flex-1 overflow-y-auto space-y-2 cursor-text">
-                {history.map((item) => (
+                {terminalHistory.map((item) => (
                     <div key={item.id} className="whitespace-pre-wrap leading-relaxed">
                         {item.type === 'user' ? (
                             <div className="flex items-start space-x-2">
                                 <span className="text-emerald-400 font-semibold select-none">
-                                    {currentUser.username}@{currentUser.role}:~$
+                                    {currentPlayer.username}@{currentPlayer.role}:~$
                                 </span>
                                 <span className="text-slate-100">{item.content}</span>
                             </div>
@@ -80,7 +66,7 @@ export default function ModernTerminal({ currentUser = defaultUser }: TerminalPr
 
                 <form onSubmit={handleSubmit} className="flex items-center space-x-2 pt-1">
                     <span className="text-emerald-400 font-semibold select-none">
-                        {currentUser.username}@{currentUser.role}:~$
+                        {currentPlayer.username}@{currentPlayer.role}:~$
                     </span>
                     <input
                         ref={inputRef}

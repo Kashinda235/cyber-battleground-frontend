@@ -1,12 +1,7 @@
 import { API_BASE_URL } from "../utils/constants";
-import {
-    type Player,
-    type Ability,
-    type ChatLog,
-    type GameState,
-    type MoveLog,
-    type PlayerAbility,
-    type GetMovesQueryParams,
+import type {
+    Player, ChatLog, GameState, MoveLog, GetMovesQueryParams, System, Defense, Network, PlayerProfile, Asset,
+    Connection,
 } from '../utils/types.ts';
 
 // ==========================================
@@ -16,13 +11,16 @@ import {
 export interface PlayerResponse {
     data: Player[];
 }
-
-export interface PlayerAbilitiesResponse {
-    data: PlayerAbility[];
+export interface AssetResponse {
+    data: Asset[];
 }
 
-export interface AbilitiesResponse {
-    data: Ability[];
+export interface ConnectionsResponse {
+    data: Connection[];
+}
+
+export interface PlayerProfileResponse {
+    data: PlayerProfile;
 }
 
 export interface MoveLogResponse {
@@ -80,11 +78,27 @@ export async function fetchPlayers(token?: string): Promise<PlayerResponse> {
 }
 
 /**
- * GET /abilities
- * Retrieves all available abilities in the game.
+ * GET /players/me
+ * Retrieves my profile. (Requires bearer auth)
  */
-export async function fetchAbilities(): Promise<AbilitiesResponse> {
-    return getRequest<Ability[]>('/abilities');
+export async function fetchMyProfile(token?: string): Promise<PlayerProfileResponse> {
+    return getRequest<PlayerProfile>('/players/me', token);
+}
+
+/**
+ * GET /system/assets
+ * Retrieves my assets. (Requires bearer auth)
+ */
+export async function fetchMyAsstes(token?: string): Promise<AssetResponse> {
+    return getRequest<Asset[]>('/system/assets', token);
+}
+
+/**
+ * GET /player/connections
+ * Retrieves my connections. (Requires bearer auth)
+ */
+export async function fetchMyConnections(token?: string): Promise<ConnectionsResponse> {
+    return getRequest<Connection[]>('/player/connections', token);
 }
 
 /**
@@ -117,13 +131,3 @@ export async function fetchMoveLogs(params?: GetMovesQueryParams): Promise<MoveL
     return getRequest<MoveLog[]>(`/actions${queryString}`);
 }
 
-/**
- * GET /players/{id}/abilities
- * Retrieves assigned abilities for a specific player. (Requires bearer auth)
- */
-export async function fetchPlayerAbilities(
-    playerId: number,
-    token?: string
-): Promise<PlayerAbilitiesResponse> {
-    return getRequest<PlayerAbility[]>(`/players/${playerId}/abilities`, token);
-}

@@ -6,17 +6,17 @@ import type {ActionRequest, ActionResult, Player} from "../../utils/types.ts";
 import CardDescription from "./CardDescription.tsx";
 import {Zap, Shield, ShieldCog, Tickets, Star} from "lucide-react";
 import * as Icons from "lucide-react";
+import {useGame} from "../../context/GameContext.tsx";
 
 interface ActionProps {
     mode : "attack" | "defend",
-    target: Player,
-    performAction:  (data: ActionRequest) => Promise<ActionResult>
 }
 
 const ATTACKS = redAbility.tools;
 const DEFENCES = blueAbility.tools;
 
-const ActionMode = ( {mode, target, performAction}: ActionProps) => {
+const ActionMode = ( {mode}: ActionProps) => {
+    const { target, performAction } = useGame();
     const [activeCooldowns, setActiveCooldowns] = useState<Record<string, boolean>>({});
     const [viewMode, setViewMode] = useState<"list" | "details">("list");
     const [currAction, setCurrAction] = useState<number | null>( null );

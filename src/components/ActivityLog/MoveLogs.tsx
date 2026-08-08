@@ -1,10 +1,7 @@
-import type {MoveLog} from "../../utils/types.ts";
+import {useGame} from "../../context/GameContext.tsx";
 
-interface LogProps {
-    moveLogs: MoveLog[],
-}
-
-const MoveLogs = ( {moveLogs}: LogProps) => {
+const MoveLogs = () => {
+    const {moveLogs} = useGame();
     return (
         <div className="mx-auto h-full flex w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-gray-900 font-sans text-gray-200 shadow-2xl">
             {/* Dynamic Header */}

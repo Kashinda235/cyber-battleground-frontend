@@ -1,26 +1,16 @@
-import { useState } from "react"
-import { User } from "lucide-react"
-import type {MoveLog, Player} from "../../utils/types.ts";
 import ModernTerminal from "../ActivityLog/Terminal.tsx";
 import PlayersList from "../ActivityLog/PlayersList.tsx";
 import MoveLogs from "../ActivityLog/MoveLogs.tsx";
+import {useGame} from "../../context/GameContext.tsx";
 
-interface LogProps {
-    players: Player[],
-    moveLogs: MoveLog[],
-    setTarget:  (targetId: Player) => void
-    activeTab:  "chat" | "actions" | "defence" | "events" | "alerts"
-}
-// --- Component ---
-const ActivityLog = ( {players, moveLogs, setTarget, activeTab}: LogProps) => {
-  // const [activeTab, setActiveTab] = useState<"users" | "logs">("users")
-
-  const onlineCount = players.filter((p) => p.status === "online").length
+const ActivityLog = () => {
+  const {activeTab} = useGame();
 
   return (
       <>
-      {activeTab === "chat" && <PlayersList players={players} setTarget={setTarget}/>}
-      {activeTab === "defence" && <MoveLogs moveLogs={moveLogs} />}
+      {activeTab === "profile" && <PlayersList />}
+      {activeTab === "chat" && <PlayersList />}
+      {activeTab === "defence" && <MoveLogs />}
       {activeTab === "actions" && <ModernTerminal />}
       {activeTab === "events" && <ModernTerminal />}
       {activeTab === "alerts" && <ModernTerminal />}

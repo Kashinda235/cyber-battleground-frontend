@@ -8,7 +8,7 @@
 // ==========================================
 
 export type PlayerRole = 'admin' | 'moderator' | 'red' | 'blue' | 'spectator' | 'bot';
-
+export type ConnectionStatus = 'blocked' | 'friend' | 'bot';
 export type PlayerStatus = 'online' | 'offline' | 'banned';
 
 // ==========================================
@@ -63,6 +63,62 @@ export interface ChatLog {
     createdAt?: string;
 }
 
+export interface System {
+    id: number;
+    playerId: number;
+    ip: string;
+    hostname: string;
+    password: string;
+    mail: string;
+    createdAt: Date;
+}
+
+export interface Port {
+    id: number;
+    systemId: number;
+    port: number;
+    status: string;
+    metadata: Record<string, unknown>;
+}
+
+export interface Network {
+    network: Port[]
+}
+
+export interface Connection {
+    id: number;
+    systemId: number;
+    targetIp: string;
+    status: ConnectionStatus;
+}
+
+export interface Defense {
+    id: number;
+    systemId: number;
+    firewallLevel: number;
+    idsStatus: boolean;
+    honeypotActive: boolean;
+    lockdownActive: boolean;
+    autoPayThreshold: number;
+}
+
+export interface Asset {
+    id: number,
+    systemId: number;
+    name: string;
+    value: number;
+    size: number;
+    isDecoy: boolean;
+    isTrap: boolean;
+}
+
+export interface PlayerProfile {
+    player: Player;
+    system: System;
+    defense: Defense;
+    network: Network;
+}
+
 export interface GameState {
     gameStatus?: string;
     turn?: number;
@@ -86,22 +142,42 @@ export interface StatusUpdateRequest {
     status: PlayerStatus;
 }
 
-export interface AssignAbilityRequest {
-    ability_id: number;
+export interface NetworkUpdateRequest {
+    port: number
+    status?: string
+    metadata?: Record<string, unknown>
 }
 
-export interface CreateAbilityRequest {
-    name: string;
-    description: string;
-    type: string;
-    stats?: Record<string, unknown>;
+export interface DefenseUpdateRequest {
+    firewallLevel?: number
+    idsStatus?: boolean
+    honeypotActive?: boolean
+    lockdownActive?: boolean
+    autoPayThreshold?: number
 }
 
-export interface UpdateAbilityRequest {
-    name?: string;
-    description?: string;
-    type?: string;
-    stats?: Record<string, unknown>;
+export interface ConnectionRequest {
+    target_ip: string
+    status: ConnectionStatus
+}
+export interface ConnectionUpdateRequest  {
+    status: ConnectionStatus
+}
+
+export interface AssetRequest {
+    name: string
+    is_decoy: boolean
+    is_trap: boolean
+    value?: number | undefined
+    size?: number | undefined
+}
+
+export interface AssetUpdateRequest  {
+    name?: string | undefined
+    value?: number | undefined
+    size?: number | undefined
+    is_decoy?: boolean | undefined
+    is_trap?: boolean | undefined
 }
 
 export interface ActionRequest {

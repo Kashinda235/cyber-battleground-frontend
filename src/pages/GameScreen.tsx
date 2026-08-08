@@ -6,7 +6,6 @@ import NetBackground from "../components/Home/NetBackground.tsx";
 import Footer from "../components/Home/Footer.tsx";
 import {useGameData} from "../hooks/useGameData.ts";
 import type {Player} from "../utils/types.ts";
-import {useState} from "react";
 import GameLoader from "../components/GameScreen/GameLoader.tsx";
 import { GameProvider } from "../context/GameContext";
 
@@ -16,29 +15,7 @@ interface GameProps {
 }
 
 const GameScreen = ({ token, player }: GameProps) => {
-    const [activeTab, setActiveTab] = useState<"chat" | "actions" | "defence" | "events" | "alerts" >('chat');
-    const {
-        gameState, // Header
-        chats, // Feed
-        sendChat, // Feed
-        moveLogs, // Log
-        players, // Log, Canvas
-        performAction, // Log
-        isLoading
-    } = useGameData({ token, player });
-    const [target, setTarget] = useState(player);
-
-    const handleSetTarget = (target: Player) => {
-        setTarget(target);
-    }
-
-    const headerData = { player: player, gameState:gameState }
-    const feedData = {
-        players: players, currentPlayer: player, target: target,
-        chats: chats, sendChat: sendChat, performAction: performAction,
-        setActiveTab: setActiveTab
-    }
-    const logData = { players: players, moveLogs: moveLogs, setTarget: handleSetTarget, activeTab: activeTab }
+    const { isLoading } = useGameData({ token, player });
 
     if (isLoading) return <GameLoader />;
 
@@ -46,10 +23,10 @@ const GameScreen = ({ token, player }: GameProps) => {
         <div>
             <NetBackground />
             <div className="app-content flex flex-col overflow-hidden">
-                <Header {...headerData}/>
+                <GameProvider token={token} player={player}>
+                    <Header />
 
                 {/* The row expands to remaining space and forces children to fill height */}
-                <GameProvider>
                 <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
 
                     {/* Grid Layout Container */}
@@ -58,18 +35,18 @@ const GameScreen = ({ token, player }: GameProps) => {
                         {/* Top/First Row on Large Screens: 3:2 Ratio (3/5ths vs 2/5ths) */}
                         {/* ActivityFeed (3 parts of 5 -> 60%) */}
                         <div className="h-[600px] w-full overflow-y-auto lg:col-span-3">
-                            <ActivityFeed {...feedData} />
+                            <ActivityFeed />
                         </div>
 
                         {/* ActivityLog (2 parts of 5 -> 40%) */}
                         <div className="h-[600px] w-full overflow-y-auto lg:col-span-3">
-                            <ActivityLog {...logData} />
+                            <ActivityLog />
                         </div>
 
                         {/* Bottom Row on Large Screens: Full Width (5/5ths) */}
                         {/* GameCanvas */}
                         <div className="h-[600px] w-full overflow-hidden lg:col-span-4">
-                            <GameCanvas players={players} currentPlayer={player} />
+                            <GameCanvas />
                         </div>
 
                     </div>
