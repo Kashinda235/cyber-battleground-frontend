@@ -21,6 +21,8 @@ import {
     ShieldCheck,
     CircleDollarSign, Cpu, MemoryStick
 } from 'lucide-react';
+import {useGame} from "../../context/GameContext.tsx";
+import type {PlayerProfile} from "../../utils/types.ts";
 
 export interface PlayerStats {
     player: {
@@ -63,10 +65,10 @@ interface PlayerProfileProps {
     onUpdate?: (updatedData: PlayerStats) => void;
 }
 
-const defaultData: PlayerStats = {
+const defaultData: PlayerProfile = {
     player: {
         id: 11,
-        username: "test-player",
+        username: "---Loading---",
         role: "blue",
         status: "online",
         joinedAt: "2026-08-07T07:09:41.703Z",
@@ -116,7 +118,8 @@ const defaultData: PlayerStats = {
 }
 
 const PlayerProfileCard: React.FC<PlayerProfileProps> = ({ initialData = defaultData, onUpdate }) => {
-    const [data, setData] = useState<PlayerStats>(initialData);
+    const { profile } = useGame();
+    const [data, setData] = useState<PlayerProfile>(profile? profile : defaultData);
 
     // System credentials editing state
     const [isEditingHost, setIsEditingHost] = useState(false);

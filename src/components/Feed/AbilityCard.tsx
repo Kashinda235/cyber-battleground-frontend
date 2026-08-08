@@ -8,7 +8,7 @@ interface AbilityIconProps {
 
 interface ActionCardProps {
     ability: any,
-    triggerAction: (actionId: any, icon: any) => void,
+    whenClicked: (actionId: any, icon: any) => void,
     color: string,
     isOnCooldown: boolean
 }
@@ -25,7 +25,7 @@ export function AbilityIcon({ name, color = "currentColor", size = 20 }: Ability
     return <IconComponent size={size} color={color} />;
 }
 
-export function ActionCard({ ability, triggerAction, color, isOnCooldown}: ActionCardProps) {
+export function ActionCard({ ability, whenClicked, color, isOnCooldown}: ActionCardProps) {
     const action = {
         id: ability.id,
         effect: ability.effect,
@@ -37,7 +37,7 @@ export function ActionCard({ ability, triggerAction, color, isOnCooldown}: Actio
 
     return (
         <button
-            onClick={() => triggerAction(action.id, action.icon)}
+            onClick={() => whenClicked(action.id, action.icon)}
             disabled={isOnCooldown}
             className={`group flex pop-up items-center gap-4 rounded-xl border border-gray-800 bg-gray-900 p-4 text-left transition-all ${isOnCooldown ? "cursor-not-allowed opacity-70" : "hover:border-gray-600 hover:bg-gray-800/80 active:scale-95"}`}
         >

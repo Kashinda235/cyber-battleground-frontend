@@ -7,6 +7,7 @@ import Events from "../Feed/Events.tsx";
 import {useToast} from "../../context/ToastContext.tsx";
 import PlayerProfileCard from "../Trial/Profile.tsx";
 import {type TabType, useGame} from "../../context/GameContext.tsx";
+import SecurityControlPanel from "../Feed/DefenseMode.tsx";
 
 interface NavButtonProps {
   activeTab: TabType; targetTab: TabType; onClick: (tab: TabType) => void;
@@ -152,7 +153,7 @@ export default function ActivityFeed() {
           {activeTab === "actions" && <ActionMode mode={'attack'}/>}
 
           {/* --- DEFENCE MODE --- */}
-          {activeTab === "defence" && <ActionMode mode={'defend'}/>}
+          {activeTab === "defence" && <SecurityControlPanel />}
 
           {/* EVENTS MODE */}
           {activeTab === "events" && <Events />}

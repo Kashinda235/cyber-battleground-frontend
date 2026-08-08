@@ -41,9 +41,9 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         try {
             // Execute non-authenticated fetches concurrently
             const [profileRes, assetsRes, connectionsRes, chatsRes, stateRes, movesRes] = await Promise.all([
-                fetchMyProfile(),
-                fetchMyAsstes(),
-                fetchMyConnections(),
+                fetchMyProfile(token),
+                fetchMyAsstes(token),
+                fetchMyConnections(token),
                 fetchChats(),
                 fetchGameState(),
                 fetchMoveLogs(),

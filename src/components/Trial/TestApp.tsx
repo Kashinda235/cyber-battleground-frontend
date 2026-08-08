@@ -8,7 +8,7 @@ import IDSPanel from "./IDS.tsx";
 import HoneypotPanel from "./Honeypot.tsx";
 import PlayerProfileCard from "./Profile.tsx";
 
-const TestApp = ( { test = 9 }) => {
+const TestApp = ( { test = 6 }) => {
 
     return (
         <div>
