@@ -70,7 +70,7 @@ export interface System {
     hostname: string;
     password: string;
     mail: string;
-    createdAt: Date;
+    createdAt: string;
 }
 
 export interface Port {
@@ -116,7 +116,7 @@ export interface PlayerProfile {
     player: Player;
     system: System;
     defense: Defense;
-    network: Network;
+    network: Port[];
 }
 
 export interface GameState {

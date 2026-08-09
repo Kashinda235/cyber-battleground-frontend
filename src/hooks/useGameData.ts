@@ -40,8 +40,7 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         setError(null);
         try {
             // Execute non-authenticated fetches concurrently
-            const [profileRes, assetsRes, connectionsRes, chatsRes, stateRes, movesRes] = await Promise.all([
-                fetchMyProfile(token),
+            const [assetsRes, connectionsRes, chatsRes, stateRes, movesRes] = await Promise.all([
                 fetchMyAsstes(token),
                 fetchMyConnections(token),
                 fetchChats(),
@@ -49,7 +48,6 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
                 fetchMoveLogs(),
             ]);
 
-            setProfile(profileRes.data);
             setAssets(assetsRes.data);
             setConnections(connectionsRes.data);
             setChats([...chatsRes.data].reverse());
@@ -59,6 +57,9 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
             // Fetch authenticated data if token exists[cite: 1]
             if (token) {
                 const playersRes = await fetchPlayers(token);
+                const profileRes = await fetchMyProfile(token);
+
+                setProfile(profileRes.data);
                 setPlayers(playersRes.data);
             }
         } catch (err: any) {

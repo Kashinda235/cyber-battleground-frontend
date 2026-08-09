@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     User,
     Shield,
@@ -19,56 +19,19 @@ import {
     AlertOctagon,
     ShieldAlert,
     ShieldCheck,
-    CircleDollarSign, Cpu, MemoryStick
+    CircleDollarSign, Cpu, MemoryStick, MessageSquareQuote
 } from 'lucide-react';
 import {useGame} from "../../context/GameContext.tsx";
 import type {PlayerProfile} from "../../utils/types.ts";
 
-export interface PlayerStats {
-    player: {
-        id: number;
-        username: string;
-        role: string;
-        status: string;
-        joinedAt: string;
-        lastSeen: string;
-    };
-    system: {
-        id: number;
-        playerId: number;
-        ip: string;
-        hostname: string;
-        password: string;
-        mail: string;
-        createdAt: string;
-    };
-    defense: {
-        id: number;
-        systemId: number;
-        firewallLevel: number;
-        idsStatus: boolean;
-        honeypotActive: boolean;
-        lockdownActive: boolean;
-        autoPayThreshold: number;
-    };
-    network: Array<{
-        id: number;
-        systemId: number;
-        port: number;
-        status: string;
-        metadata: Record<string, unknown>;
-    }>;
-}
-
 interface PlayerProfileProps {
-    initialData: PlayerStats;
-    onUpdate?: (updatedData: PlayerStats) => void;
+    onUpdate?: (updatedData: PlayerProfile) => void;
 }
 
 const defaultData: PlayerProfile = {
     player: {
         id: 11,
-        username: "---Loading---",
+        username: "Loading...",
         role: "blue",
         status: "online",
         joinedAt: "2026-08-07T07:09:41.703Z",
@@ -117,9 +80,12 @@ const defaultData: PlayerProfile = {
     ]
 }
 
-const PlayerProfileCard: React.FC<PlayerProfileProps> = ({ initialData = defaultData, onUpdate }) => {
+const PlayerProfileCard: React.FC<PlayerProfileProps> = ({ onUpdate }) => {
     const { profile } = useGame();
-    const [data, setData] = useState<PlayerProfile>(profile? profile : defaultData);
+    const [data, setData] = useState<PlayerProfile>(profile ?? defaultData);
+    useEffect(() => {
+        setData(profile ?? defaultData);
+    }, [profile])
 
     // System credentials editing state
     const [isEditingHost, setIsEditingHost] = useState(false);
@@ -133,7 +99,7 @@ const PlayerProfileCard: React.FC<PlayerProfileProps> = ({ initialData = default
     const [newPort, setNewPort] = useState<string>('');
 
     // Save updated state and trigger callback
-    const updateData = (newData: PlayerStats) => {
+    const updateData = (newData: PlayerProfile) => {
         setData(newData);
         if (onUpdate) onUpdate(newData);
     };
@@ -152,7 +118,7 @@ const PlayerProfileCard: React.FC<PlayerProfileProps> = ({ initialData = default
     };
 
     // Handlers for Defense Toggles
-    const toggleDefense = (key: keyof Omit<PlayerStats['defense'], 'id' | 'systemId' | 'firewallLevel' | 'autoPayThreshold'>) => {
+    const toggleDefense = (key: keyof Omit<PlayerProfile['defense'], 'id' | 'systemId' | 'firewallLevel' | 'autoPayThreshold'>) => {
         const updated = {
             ...data,
             defense: {
@@ -213,54 +179,60 @@ const PlayerProfileCard: React.FC<PlayerProfileProps> = ({ initialData = default
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto h-full bg-zinc-900 border border-zinc-800 rounded-2xl shadow-xl overflow-hidden font-sans text-zinc-200 flex flex-col">
+        <div className="flex h-full animate-in flex-col duration-300 fade-in w-full max-w-4xl mx-auto bg-zinc-900 border border-zinc-800 rounded-2xl shadow-xl overflow-hidden font-sans text-zinc-200">
+                <header className="flex h-20 shrink-0 items-center justify-between border-b border-gray-800 bg-gray-900/50 px-6">
+                    <div className="flex items-center gap-3">
 
-            {/* Header */}
-            <div className="shrink-0 bg-zinc-900/80 border-b border-zinc-800 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center space-x-4">
-                    <div className="relative">
-                        <div className="w-14 h-14 rounded-full bg-indigo-950/60 border border-indigo-800/50 flex items-center justify-center text-indigo-400 font-semibold text-lg">
-                            <User size={26} />
-                        </div>
-                        <span
-                            className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-zinc-900 ${
-                                data.player.status === 'online' ? 'bg-emerald-500' : 'bg-zinc-600'
-                            }`}
-                        />
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-xl font-semibold text-zinc-100 tracking-tight">{data.player.username}</h1>
-                            <span className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-indigo-950 text-indigo-300 border border-indigo-800/40 capitalize">
+                        <div>
+                            <div className='flex items-center gap-3'>
+                                <div className="relative">
+                                    <div className="w-8 h-8 rounded-full bg-indigo-950/60 border border-indigo-800/50 flex items-center justify-center text-indigo-400 font-semibold text-lg">
+                                        <User size={32} />
+                                    </div>
+                                <span
+                                    className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-zinc-900 ${
+                                        data.player.status === 'online' ? 'bg-emerald-500' : 'bg-zinc-600'
+                                    }`}
+                                />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">{data.player.username}</h1>
+                                    <span className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-indigo-950 text-indigo-300 border border-indigo-800/40 capitalize">
                         {data.player.role}
                     </span>
+                                </div>
+                            </div>
+                            <div className="h-4">
+                                <p className="text-xs md:text-sm text-slate-400 mt-1">
+                                        <span className="text-xs text-gray-500">
+                                       ID: #{data.player.id}
+                                    </span>
+
+                                </p>
+                            </div>
                         </div>
-                        <p className="text-xs text-zinc-400 mt-0.5">ID: #{data.player.id}</p>
                     </div>
-                </div>
+                    {/* Stats Box - synchronized with sm: breakpoint */}
+                    <div className="flex flex-wrap flex-col items-start gap-1.5 text-xs text-zinc-400 bg-zinc-950 px-3.5 py-2 rounded-xl border border-zinc-800 self-start sm:self-auto shrink-0">
+                        <div className='flex items-center gap-1.5'>
+                            <Server size={15} className="text-zinc-500 shrink-0" />
+                            <span>System ID: <strong className="text-zinc-200 font-medium">1.{data.system.id}</strong></span>
+                        </div>
 
-                {/* Stats Box - synchronized with sm: breakpoint */}
-                <div className="flex flex-row flex-wrap sm:flex-col items-start sm:items-stretch gap-3 sm:gap-1.5 text-xs text-zinc-400 bg-zinc-950 px-3.5 py-2 rounded-xl border border-zinc-800 self-start sm:self-auto shrink-0">
-                    <div className='flex items-center gap-1.5'>
-                        <Server size={15} className="text-zinc-500 shrink-0" />
-                        <span>System ID: <strong className="text-zinc-200 font-medium">1.{data.system.id}</strong></span>
+                        <div className='flex items-center gap-1.5'>
+                            <Cpu size={15} className="text-zinc-500 shrink-0" />
+                            <span>Cores: <strong className="text-zinc-200 font-medium">2</strong></span>
+                        </div>
+
+                        <div className='flex items-center gap-1.5'>
+                            <MemoryStick size={15} className="text-zinc-500 shrink-0" />
+                            <span>RAM: <strong className="text-zinc-200 font-medium">8 GB</strong></span>
+                        </div>
                     </div>
-
-                    <div className='flex items-center gap-1.5'>
-                        <Cpu size={15} className="text-zinc-500 shrink-0" />
-                        <span>Cores: <strong className="text-zinc-200 font-medium">2</strong></span>
-                    </div>
-
-                    <div className='flex items-center gap-1.5'>
-                        <MemoryStick size={15} className="text-zinc-500 shrink-0" />
-                        <span>RAM: <strong className="text-zinc-200 font-medium">8 GB</strong></span>
-                    </div>
-                </div>
-
-            </div>
+                </header>
 
             {/* Main Grid */}
-            <div className="flex-1 overflow-y-auto p-4 grid grid-cols-1 gap-2 scrollbar-thin scrollbar-thumb-zinc-700">
+            <div className="flex-1 overflow-y-auto p-2 grid grid-cols-1 gap-2 scrollbar-thin scrollbar-thumb-zinc-700">
 
                 {/* Section 1: System Credentials */}
                 <div className="bg-zinc-950/60 rounded-xl border border-zinc-800/80 p-5 space-y-6">

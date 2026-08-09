@@ -150,7 +150,7 @@ export default function ActivityFeed() {
           {activeTab === "chat" && <ChatBlock activePlayers={activePlayers} />}
 
           {/* --- ACTIONS MODE --- */}
-          {activeTab === "actions" && <ActionMode mode={'attack'}/>}
+          {activeTab === "actions" && <ActionMode />}
 
           {/* --- DEFENCE MODE --- */}
           {activeTab === "defence" && <SecurityControlPanel />}
@@ -169,7 +169,7 @@ export default function ActivityFeed() {
                                 <Bell size={30}/>
                             </span>
                     <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
-                      System Alerts and Notifications
+                      System Alerts
                     </h1>
                   </div>
                   <p className="text-xs md:text-sm text-slate-400 mt-1">
