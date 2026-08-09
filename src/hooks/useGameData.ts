@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import type {
     Player, Ability, ChatLog, GameState, MoveLog, ActionRequest,
-    ChatRequest, StateUpdateRequest, RegisterRequest, LoginRequest, PlayerProfile, Asset, Connection,
+    ChatRequest, StateUpdateRequest, RegisterRequest, LoginRequest, PlayerProfile, Asset, Connection, System,
 } from '../utils/types';
 import {
     fetchPlayers, fetchChats, fetchGameState, fetchMoveLogs, fetchMyProfile, fetchMyConnections, fetchMyAsstes,
+    fetchSystems,
 } from '../services/fetch_api.ts';
 import {
     postAction, postChat, postGameState, postPlayer, postUser,
@@ -21,6 +22,7 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
     // Local State Management
     // ==========================================
     const [players, setPlayers] = useState<Player[]>([]);
+    const [systems, setSystems] = useState<System[]>([]);
     const [abilities, setAbilities] = useState<Ability[]>([]);
     const [profile, setProfile] = useState<PlayerProfile>();
     const [chats, setChats] = useState<ChatLog[]>([]);
@@ -40,27 +42,31 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         setError(null);
         try {
             // Execute non-authenticated fetches concurrently
-            const [assetsRes, connectionsRes, chatsRes, stateRes, movesRes] = await Promise.all([
-                fetchMyAsstes(token),
-                fetchMyConnections(token),
+            const [chatsRes, stateRes, movesRes] = await Promise.all([
                 fetchChats(),
                 fetchGameState(),
                 fetchMoveLogs(),
             ]);
 
-            setAssets(assetsRes.data);
-            setConnections(connectionsRes.data);
             setChats([...chatsRes.data].reverse());
             setGameState(stateRes.data);
             setMoveLogs(movesRes.data);
 
             // Fetch authenticated data if token exists[cite: 1]
             if (token) {
-                const playersRes = await fetchPlayers(token);
-                const profileRes = await fetchMyProfile(token);
+                const [profileRes, playersRes, systemsRes, assetsRes, connectionsRes] = await Promise.all([
+                    fetchMyProfile(token),
+                    fetchPlayers(token),
+                    fetchSystems(token),
+                    fetchMyAsstes(token),
+                    fetchMyConnections(token),
+                ]);
 
                 setProfile(profileRes.data);
                 setPlayers(playersRes.data);
+                setSystems(systemsRes.data);
+                setAssets(assetsRes.data);
+                setConnections(connectionsRes.data);
             }
         } catch (err: any) {
             setError(err.message || 'Failed to load initial game data');
@@ -153,6 +159,7 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         assets,
         connections,
         players,
+        systems,
         abilities,
         chats,
         gameState,

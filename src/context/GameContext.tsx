@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import {executeAttack, type LogCallback} from "../utils/AttackActionMap.ts";
-import type {Player, GameState, ChatLog, MoveLog, PlayerProfile} from '../utils/types';
+import type {Player, GameState, ChatLog, MoveLog, PlayerProfile, System} from '../utils/types';
 import {useGameData} from "../hooks/useGameData.ts";
 
 export interface TerminalEntry {
@@ -21,6 +21,7 @@ interface GameContextType {
     profile: PlayerProfile | undefined;
     gameState: GameState | null;
     players: Player[];
+    systems: System[];
     chats: ChatLog[];
     moveLogs: MoveLog[];
     isLoading: boolean;
@@ -53,7 +54,7 @@ interface GameProviderProps {
 export const GameProvider: React.FC<GameProviderProps> = ({ token, player, children }) => {
     const {
         profile, gameState, chats, sendChat, moveLogs,
-        players, performAction, isLoading
+        players, systems, performAction, isLoading
     } = useGameData({ token, player });
     const [target, setTarget] = useState<Player | undefined>(undefined);
     const [activeTab, setActiveTab] = useState<TabType>('profile');
@@ -191,6 +192,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         profile,
         gameState,
         players,
+        systems,
         chats,
         moveLogs,
         isLoading,

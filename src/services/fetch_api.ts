@@ -10,6 +10,9 @@ import type {
 export interface PlayerResponse {
     data: Player[];
 }
+export interface SystemResponse {
+    data: System[];
+}
 export interface AssetResponse {
     data: Asset[];
 }
@@ -62,6 +65,10 @@ async function getRequest<T>(endpoint: string, token?: string): Promise<{ data: 
 
 export async function fetchPlayers(token?: string): Promise<PlayerResponse> {
     return getRequest<Player[]>('/players', token);
+}
+
+export async function fetchSystems(token?: string): Promise<SystemResponse> {
+    return getRequest<System[]>('/systems', token);
 }
 
 export async function fetchMyProfile(token?: string): Promise<PlayerProfileResponse> {
