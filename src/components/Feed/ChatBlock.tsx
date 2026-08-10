@@ -2,9 +2,9 @@ import React, {useEffect, useRef, useState} from "react";
 import {MessageSquareQuote, Send, ShieldCog} from "lucide-react";
 import {useGame} from "../../context/GameContext.tsx";
 
-
-const ChatBlock = ( {activePlayers}: {activePlayers: number} ) => {
-    const  { chats, currentPlayer, sendChat } = useGame();
+const ChatBlock = () => {
+    const  { players, chats, currentPlayer, sendChat } = useGame();
+    const activePlayers: number = players.length;
     const [isTyping, setIsTyping] = useState(false);
     const chatEndRef = useRef<HTMLDivElement | null>(null);
     const [inputValue, setInputValue] = useState("");

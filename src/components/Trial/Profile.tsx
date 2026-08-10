@@ -1,25 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {
-    User,
-    Shield,
-    Server,
-    Network,
-    Lock,
-    Eye,
-    EyeOff,
-    Mail,
-    Globe,
-    Edit2,
-    Check,
-    X,
-    Plus,
-    Trash2,
-    Clock,
-    Calendar,
-    AlertOctagon,
-    ShieldAlert,
-    ShieldCheck,
-    CircleDollarSign, Cpu, MemoryStick, MessageSquareQuote
+    User, Shield, Server, Network, Lock, Eye,
+    EyeOff, Mail, Globe, Edit2, Check, X,
+    Plus, Trash2, Clock, Calendar, AlertOctagon, ShieldAlert,
+    ShieldCheck, CircleDollarSign, Cpu, MemoryStick,
 } from 'lucide-react';
 import {useGame} from "../../context/GameContext.tsx";
 import type {PlayerProfile} from "../../utils/types.ts";
