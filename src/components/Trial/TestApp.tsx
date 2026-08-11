@@ -7,7 +7,7 @@ import FirewallPanel from "./Firewall.tsx";
 import IDSPanel from "./IDS.tsx";
 import HoneypotPanel from "./Honeypot.tsx";
 import PlayerProfileCard from "./Profile.tsx";
-import NetworkLogger from "./NetworkLogger.tsx";
+import NetworkLogger from "../ActivityLog/NetworkLogger.tsx";
 
 const TestApp = ( { test = 2 }) => {
 

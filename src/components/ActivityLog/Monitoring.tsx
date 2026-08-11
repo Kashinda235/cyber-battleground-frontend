@@ -1,6 +1,6 @@
 import {AnimatePresence, motion} from "framer-motion";
 import {AlertTriangle, Server} from "lucide-react";
-import {type AttackEvent, useCyberSecurityCenter} from "./useCyberSecurityCenter.ts";
+import {type AttackEvent, useCyberSecurityCenter} from "../../hooks/useCyberSecurityCenter.ts";
 import {useEffect} from "react";
 
 

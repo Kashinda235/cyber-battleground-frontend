@@ -1,8 +1,7 @@
 import ModernTerminal from "../ActivityLog/Terminal.tsx";
 import PlayersList from "../ActivityLog/PlayersList.tsx";
-import MoveLogs from "../ActivityLog/MoveLogs.tsx";
 import {useGame} from "../../context/GameContext.tsx";
-import Monitoring from "../Trial/Monitoring.tsx";
+import Monitoring from "../ActivityLog/Monitoring.tsx";
 
 const ActivityLog = () => {
   const {activeTab} = useGame();

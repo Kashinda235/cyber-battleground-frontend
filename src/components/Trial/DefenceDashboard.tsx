@@ -24,7 +24,7 @@ import {
     History,
     RotateCcw, Download, X
 } from 'lucide-react';
-import { useCyberSecurityCenter, type DefenseToolId, type AttackEvent } from './useCyberSecurityCenter';
+import { useCyberSecurityCenter, type DefenseToolId, type AttackEvent } from '../../hooks/useCyberSecurityCenter.ts';
 import {NetworkTopologyMap} from "./TopologyMap.tsx";
 
 export const DefenseDashboard: React.FC = () => {

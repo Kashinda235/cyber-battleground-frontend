@@ -1,6 +1,6 @@
 import ActivityFeed from "./ActivityFeed.tsx";
 import ActivityLog from "./ActivityLog.tsx";
-import NetworkLogger from "../Trial/NetworkLogger.tsx";
+import NetworkLogger from "../ActivityLog/NetworkLogger.tsx";
 import {useGame} from "../../context/GameContext.tsx";
 import GameCanvas from "./GameCanvas.tsx";
 

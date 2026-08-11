@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, Shield, Server, Database, Zap, Lock } from 'lucide-react';
-import type { AttackEvent, DefenseState } from './useCyberSecurityCenter';
+import type { AttackEvent, DefenseState } from '../../hooks/useCyberSecurityCenter.ts';
 
 interface TopologyProps {
     activeAlert: AttackEvent | null;
