@@ -7,8 +7,9 @@ import FirewallPanel from "./Firewall.tsx";
 import IDSPanel from "./IDS.tsx";
 import HoneypotPanel from "./Honeypot.tsx";
 import PlayerProfileCard from "./Profile.tsx";
+import NetworkLogger from "./NetworkLogger.tsx";
 
-const TestApp = ( { test = 6 }) => {
+const TestApp = ( { test = 2 }) => {
 
     return (
         <div>
@@ -21,6 +22,7 @@ const TestApp = ( { test = 6 }) => {
             {test === 7 && <IDSPanel />}
             {test === 8 && <HoneypotPanel />}
             {test === 9 && <PlayerProfileCard />}
+            {test === 10 && <NetworkLogger />}
         </div>
     )
 }

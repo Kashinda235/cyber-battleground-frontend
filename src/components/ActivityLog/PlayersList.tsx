@@ -15,7 +15,7 @@ const PlayersList = () => {
             </div>
 
             {/* Scrollable List Content */}
-            <div className="flex-1 box-scroll">
+            <div className="flex-1 pop-up box-scroll">
                 {
                     players.map((player) => (
                         <div

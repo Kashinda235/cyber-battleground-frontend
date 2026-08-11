@@ -1,15 +1,12 @@
-import blueAbility from '@/data/blue_team_abilities.json';
 import redAbility from '@/data/red_team_abilities.json';
 import {useState} from "react";
 import {ActionCard} from "./AbilityCard.tsx";
-import type {ActionRequest, ActionResult, Player} from "../../utils/types.ts";
 import CardDescription from "./CardDescription.tsx";
-import {Zap, Shield, ShieldCog, Tickets, Star} from "lucide-react";
+import {Zap} from "lucide-react";
 import * as Icons from "lucide-react";
 import {useGame} from "../../context/GameContext.tsx";
 
 const ATTACKS = redAbility.tools;
-const DEFENCES = blueAbility.tools;
 
 const ActionMode = () => {
     const { target, performAction } = useGame();
@@ -73,7 +70,7 @@ const ActionMode = () => {
             </header>
 
             <div className="flex-1 box-scroll">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid sm:grid-cols-2 gap-4">
                 {  ATTACKS.map((action: any) => {
                         const isOnCooldown = activeCooldowns[action.id]
                         return (

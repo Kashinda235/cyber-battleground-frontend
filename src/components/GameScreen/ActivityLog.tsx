@@ -2,6 +2,7 @@ import ModernTerminal from "../ActivityLog/Terminal.tsx";
 import PlayersList from "../ActivityLog/PlayersList.tsx";
 import MoveLogs from "../ActivityLog/MoveLogs.tsx";
 import {useGame} from "../../context/GameContext.tsx";
+import Monitoring from "../Trial/Monitoring.tsx";
 
 const ActivityLog = () => {
   const {activeTab} = useGame();
@@ -10,7 +11,7 @@ const ActivityLog = () => {
       <>
       {activeTab === "profile" && <PlayersList />}
       {activeTab === "chat" && <PlayersList />}
-      {activeTab === "defence" && <MoveLogs />}
+      {activeTab === "defence" && <Monitoring />}
       {activeTab === "actions" && <ModernTerminal />}
       {activeTab === "events" && <ModernTerminal />}
       {activeTab === "alerts" && <ModernTerminal />}
