@@ -9,6 +9,7 @@ import {
 } from '../services/fetch_api.ts';
 import {
     postAction, postChat, postGameState, postPlayer, postUser,
+    updateNetworkPort, updateSystemConfig, updateSystemDefense,
 } from '../services/post_api.ts'
 import { useWebSocket } from './useWebSocket';
 
@@ -132,6 +133,16 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         return res.data;
     };
 
+    const updatePlayerProfile = async (data: PlayerProfile) => {
+        if (!token) throw new Error('Authentication required for actions');
+        const resSystem = await updateSystemConfig(data.system, token);
+        const resDefense = await updateSystemDefense(data.defense, token);
+        await Promise.all(
+            data.network.map(port => updateNetworkPort(port.id, port, token))
+        );
+        return ({system: resSystem.data, defense: resDefense.data});
+    }
+
     const performAction = async (data: ActionRequest) => {
         if (!token) throw new Error('Authentication required for actions');
         const res = await postAction(data, token);
@@ -177,6 +188,7 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         performAction,
         sendChat,
         updateGameState,
+        updatePlayerProfile,
 
         // WS Manual Controls
         connectWs: connect,

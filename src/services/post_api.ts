@@ -9,11 +9,11 @@ import type {
     GameState,
     LoginRequest,
     NetworkUpdateRequest,
-    Network,
     Defense,
     Connection,
     Asset,
-    Port, DefenseUpdateRequest, ConnectionRequest, ConnectionUpdateRequest, AssetUpdateRequest, AssetRequest,
+    Port, DefenseUpdateRequest, ConnectionRequest, ConnectionUpdateRequest, AssetUpdateRequest, AssetRequest, System,
+    SystemUpdateRequest,
 } from '../utils/types';
 import { API_BASE_URL } from '../utils/constants';
 
@@ -24,6 +24,9 @@ export interface AuthDataResponse {
 }
 export interface NetworkResponse {
     data: Port;
+}
+export interface SystemResponse {
+    data: System;
 }
 export interface DefenseResponse {
     data: Defense;
@@ -98,6 +101,14 @@ export async function postChat(
     return mutateRequest<ChatRequest, ChatLog>('/chat', data, token);
 }
 
+export async function updateSystemConfig(
+    data: SystemUpdateRequest,
+    token: string
+): Promise<SystemResponse> {
+    // Using 'PATCH' here as defined in the OpenAPI documentation
+    return mutateRequest<SystemUpdateRequest, System>('/system', data, token, 'PATCH');
+}
+
 export async function updateNetworkPort(
     id: number,
     data: NetworkUpdateRequest,
@@ -108,11 +119,18 @@ export async function updateNetworkPort(
 }
 
 export async function updateSystemDefense(
-    data: DefenseUpdateRequest,
+    data: Defense,
     token: string
 ): Promise<DefenseResponse> {
     // Using 'PATCH' here as defined in the OpenAPI documentation
-    return mutateRequest<DefenseUpdateRequest, Defense>('/system/defense', data, token, 'PATCH');
+    const updatePayload: DefenseUpdateRequest = {
+        firewall_level: data.firewallLevel,
+        ids_status: data.idsStatus,
+        honeypot_active: data.honeypotActive,
+        lockdown_active: data.lockdownActive,
+        autopay_threshold: data.autoPayThreshold,
+    };
+    return mutateRequest<DefenseUpdateRequest, Defense>('/system/defense', updatePayload, token, 'PATCH');
 }
 
 export async function postConnection(

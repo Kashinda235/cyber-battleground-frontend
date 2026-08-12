@@ -8,9 +8,6 @@ import {
 import {useGame} from "../../context/GameContext.tsx";
 import type {PlayerProfile} from "../../utils/types.ts";
 
-interface PlayerProfileProps {
-    onUpdate?: (updatedData: PlayerProfile) => void;
-}
 
 const defaultData: PlayerProfile = {
     player: {
@@ -64,8 +61,8 @@ const defaultData: PlayerProfile = {
     ]
 }
 
-const PlayerProfileCard: React.FC<PlayerProfileProps> = ({ onUpdate }) => {
-    const { profile } = useGame();
+const PlayerProfileCard: React.FC = () => {
+    const { profile, updatePlayerProfile } = useGame();
     const [data, setData] = useState<PlayerProfile>(profile ?? defaultData);
     useEffect(() => {
         setData(profile ?? defaultData);
@@ -85,7 +82,7 @@ const PlayerProfileCard: React.FC<PlayerProfileProps> = ({ onUpdate }) => {
     // Save updated state and trigger callback
     const updateData = (newData: PlayerProfile) => {
         setData(newData);
-        if (onUpdate) onUpdate(newData);
+        if (updatePlayerProfile) updatePlayerProfile(newData);
     };
 
     // Handlers for Hostname & Password
@@ -154,7 +151,8 @@ const PlayerProfileCard: React.FC<PlayerProfileProps> = ({ onUpdate }) => {
         updateData(updated);
     };
 
-    const formatDate = (dateString: string) => {
+    const formatDate = (dateString: string | undefined) => {
+        if (!dateString) return ("No date string available");
         return new Date(dateString).toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',

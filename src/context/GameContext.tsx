@@ -29,6 +29,7 @@ interface GameContextType {
     // Actions (from useGameData)
     sendChat: (msg: string) => void;
     performAction: (actionData: any) => void;
+    updatePlayerProfile:  (data: PlayerProfile) => void;
 
     // Local UI State
     target: Player | undefined;
@@ -54,7 +55,7 @@ interface GameProviderProps {
 export const GameProvider: React.FC<GameProviderProps> = ({ token, player, children }) => {
     const {
         profile, gameState, chats, sendChat, moveLogs,
-        players, systems, performAction, isLoading
+        players, systems, performAction, updatePlayerProfile, isLoading
     } = useGameData({ token, player });
     const [target, setTarget] = useState<Player | undefined>(undefined);
     const [activeTab, setActiveTab] = useState<TabType>('profile');
@@ -198,6 +199,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         isLoading,
         sendChat,
         performAction,
+        updatePlayerProfile,
         target,
         setTarget,
         activeTab,

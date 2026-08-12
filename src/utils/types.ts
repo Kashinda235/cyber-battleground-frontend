@@ -142,6 +142,11 @@ export interface StatusUpdateRequest {
     status: PlayerStatus;
 }
 
+export interface SystemUpdateRequest {
+    hostname?: string;
+    password?: string;
+}
+
 export interface NetworkUpdateRequest {
     port: number
     status?: string
@@ -149,11 +154,11 @@ export interface NetworkUpdateRequest {
 }
 
 export interface DefenseUpdateRequest {
-    firewallLevel?: number
-    idsStatus?: boolean
-    honeypotActive?: boolean
-    lockdownActive?: boolean
-    autoPayThreshold?: number
+    firewall_level?: number;
+    ids_status?: boolean;
+    honeypot_active?: boolean;
+    lockdown_active?: boolean;
+    autopay_threshold?: number;
 }
 
 export interface ConnectionRequest {
