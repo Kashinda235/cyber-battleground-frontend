@@ -1,9 +1,9 @@
 import { action_description } from '@/data/action_description.ts';
 import { defence_description } from '@/data/defence_description.ts';
-import { useState, useEffect } from 'react';
+import {useState, useEffect, useRef} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    ArrowLeft, Crosshair, Zap, Bookmark, Share2, Check, Info, Terminal, Copy
+    ArrowLeft, Crosshair, Zap, Bookmark, Share2, Check, Info, Terminal, Copy, X, Search, Mail, Globe
 } from 'lucide-react';
 import { AbilityIcon } from "./AbilityCard.tsx";
 import * as Icons from "lucide-react";
@@ -16,21 +16,25 @@ interface DescriptionProps {
     onBack?: () => void;
     currentAction: number | null;
     icon: keyof typeof Icons;
-    color: string
+    color: string;
 }
 
 export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAction, icon, color }: DescriptionProps) => {
     const action = color.includes('red') ? ACTIONS[currentAction] : DEFENSE[currentAction];
     const COOLDOWN_TIME = 8; // seconds
+    const listType = action.targets ?? 'ip';
 
     // States
     const [cooldown, setCooldown] = useState<number>(0);
     const [isTargeting, setIsTargeting] = useState<boolean>(false);
+    const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const targetRef = useRef<HTMLDivElement>(null);
     const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
     const [copied, setCopied] = useState<boolean>(false);
     const [copiedCommand, setCopiedCommand] = useState<boolean>(false);
     const [showLore, setShowLore] = useState<boolean>(false);
-    const { handleCommand } = useGame();
+    const { handleCommand, systems } = useGame();
 
     // const color = 'red';
 
@@ -49,7 +53,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
         if (cooldown > 0) return;
         setCooldown(COOLDOWN_TIME);
         setIsTargeting(false);
-        handleCommand?.(action);
+        handleCommand?.(action, selectedTarget);
     };
 
     const handleShare = async () => {
@@ -76,6 +80,48 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
     const isOnCooldown = cooldown > 0;
     // Calculate SVG stroke offset for smooth radial progress (Circumference ~ 100)
     const strokeDashoffset = 100 - (cooldown / COOLDOWN_TIME) * 100;
+
+    // Click outside handler
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (targetRef.current && !targetRef.current.contains(event.target as Node)) {
+                setIsTargeting(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Build target options
+    const rawTargets: Array<{ id: string | number; value: string; label?: string }> = [];
+    if (listType === 'email') {
+        systems.forEach((sys) => {
+            if (sys.mail) rawTargets.push({ id: sys.id, value: sys.mail, label: sys.hostname });
+        });
+    } else {
+        systems.forEach((sys) => {
+            if (sys.ip) rawTargets.push({ id: `sys-${sys.id}`, value: sys.ip, label: sys.hostname });
+        });
+        // connections.forEach((conn) => {
+        //     if (conn.targetIp) rawTargets.push({ id: `conn-${conn.id}`, value: conn.targetIp, label: `Conn #${conn.id}` });
+        // });
+    }
+
+    const uniqueTargets = Array.from(new Map(rawTargets.map((item) => [item.value, item])).values());
+    const filteredTargets = uniqueTargets.filter(
+        (t) =>
+            t.value.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (t.label && t.label.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
+    const handleSelectTarget = (targetVal: string) => {
+        if (selectedTarget === targetVal) {
+            setSelectedTarget(null);
+        } else {
+            setSelectedTarget(targetVal);
+        }
+        setIsTargeting(false);
+    };
 
     return (
         /* Fill grid slot completely */
@@ -178,7 +224,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
             {/* Scrollable Middle Content (Description, Execution Command & Collapsible Details) */}
             <div className="flex-1 min-h-0 overflow-y-auto pr-1 mb-4 space-y-4">
                 {/* Description Text */}
-                <p className="text-xm text-slate-500 dark:text-slate-400 leading-relaxed">
+                <p className="text-[14px] text-slate-500 dark:text-slate-400 leading-relaxed">
                     {action.description}
                 </p>
 
@@ -198,7 +244,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
                                 {copiedCommand ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
                             </button>
                         </div>
-                        <code className="block font-mono text-xm text-emerald-400 dark:text-emerald-300 break-all bg-slate-900/80 p-2 rounded-lg border border-slate-800/80">
+                        <code className="block font-mono text-[14px] text-emerald-400 dark:text-emerald-300 break-all bg-slate-900/80 p-2 rounded-lg border border-slate-800/80">
                             {action.command}
                         </code>
                     </div>
@@ -220,7 +266,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="mt-2 text-xm text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-800/20 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50"
+                                className="mt-2 text-[14px] text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-800/20 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50"
                             >
                                 {action.hiddenDetails}
                             </motion.div>
@@ -230,38 +276,126 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
             </div>
 
             {/* Bottom Actions (Pinned to Bottom) */}
-            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 shrink-0">
-                {/* Target Button */}
-                <motion.button
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => setIsTargeting(!isTargeting)}
-                    disabled={isOnCooldown}
-                    className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all border ${
-                        isTargeting
-                            ? `bg-${color}-50 dark:bg-${color}-950/60 border-${color}-500 text-${color}-600 dark:text-${color}-400`
-                            : isOnCooldown
-                                ? 'border-slate-200 dark:border-slate-800 text-slate-300 dark:text-slate-700 cursor-not-allowed opacity-60'
-                                : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'
-                    }`}
-                >
-                    <Crosshair size={15} />
-                    {isTargeting ? 'Targeting' : 'Choose Target'}
-                </motion.button>
+            {/* Bottom Actions Container with Target Dropdown */}
+            <div className="relative pt-3 border-t border-slate-100 dark:border-slate-800 shrink-0" ref={targetRef}>
 
-                {/* Use Item Button */}
-                <motion.button
-                    whileTap={!isOnCooldown ? { scale: 0.97 } : {}}
-                    onClick={handleUse}
-                    disabled={isOnCooldown}
-                    className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all text-white ${
-                        isOnCooldown
-                            ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-70'
-                            : `bg-${color}-600 hover:bg-${color}-700 dark:bg-${color}-500 dark:hover:bg-${color}-600 shadow-lg shadow-${color}-500/20`
-                    }`}
-                >
-                    <Zap size={15} />
-                    {isOnCooldown ? 'Recharging...' : 'Use Item'}
-                </motion.button>
+                {/* Expandable Target Selection Drawer */}
+                <AnimatePresence>
+                    {isTargeting && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                            transition={{ duration: 0.15, ease: 'easeOut' }}
+                            className="absolute bottom-full left-0 right-0 mb-3 z-50 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-2xl"
+                        >
+                            <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                                <span className="text-[11px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500">
+                                    Select {listType === 'email' ? 'Email Target' : 'IP Target'}
+                                </span>
+                                <button
+                                    onClick={() => setIsTargeting(false)}
+                                    className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+
+                            {/* Search Field */}
+                            <div className="relative mb-2">
+                                <Search size={14} className="absolute left-3 top-2.5 text-slate-400" />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder={`Search ${listType === 'email' ? 'email address' : 'IP address'}...`}
+                                    className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-slate-600"
+                                    autoFocus
+                                />
+                            </div>
+
+                            {/* Target Options List */}
+                            <div className="max-h-44 overflow-y-auto space-y-1 pr-1">
+                                {filteredTargets.length > 0 ? (
+                                    filteredTargets.map((item) => {
+                                        const isSelected = selectedTarget === item.value;
+                                        return (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => handleSelectTarget(item.value)}
+                                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs transition-all ${
+                                                    isSelected
+                                                        ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold shadow-sm'
+                                                        : 'hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-2.5 truncate pr-2">
+                                                    {listType === 'email' ? (
+                                                        <Mail size={13} className={isSelected ? 'text-white dark:text-slate-900' : 'text-slate-400'} />
+                                                    ) : (
+                                                        <Globe size={13} className={isSelected ? 'text-white dark:text-slate-900' : 'text-slate-400'} />
+                                                    )}
+                                                    <span className="font-mono text-[11px] truncate">{item.value}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                    {item.label && (
+                                                        <span
+                                                            className={`text-[10px] truncate max-w-[90px] ${
+                                                                isSelected ? 'text-slate-300 dark:text-slate-600' : 'text-slate-400 dark:text-slate-500'
+                                                            }`}
+                                                        >
+                                                            {item.label}
+                                                        </span>
+                                                    )}
+                                                    {isSelected && <Check size={12} />}
+                                                </div>
+                                            </button>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="py-6 text-center text-xs text-slate-400 dark:text-slate-500">
+                                        No matching targets found
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Grid Action Buttons */}
+                <div className="grid grid-cols-2 gap-3">
+                    {/* Target Button */}
+                    <motion.button
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => setIsTargeting(!isTargeting)}
+                        disabled={isOnCooldown}
+                        className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all border ${
+                            isTargeting
+                                ? `bg-${color}-50 dark:bg-${color}-950/60 border-${color}-500 text-${color}-600 dark:text-${color}-400`
+                                : isOnCooldown
+                                    ? 'border-slate-200 dark:border-slate-800 text-slate-300 dark:text-slate-700 cursor-not-allowed opacity-60'
+                                    : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'
+                        }`}
+                    >
+                        <Crosshair size={15} className={selectedTarget ? 'animate-pulse' : ''} />
+                        <span className="truncate">{selectedTarget ? selectedTarget : 'Choose Target'}</span>
+                    </motion.button>
+
+                    {/* Use Item Button */}
+                    <motion.button
+                        whileTap={!isOnCooldown ? { scale: 0.97 } : {}}
+                        onClick={handleUse}
+                        disabled={isOnCooldown}
+                        className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all text-white ${
+                            isOnCooldown
+                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-70'
+                                : `bg-${color}-600 hover:bg-${color}-700 dark:bg-${color}-500 dark:hover:bg-${color}-600 shadow-lg shadow-${color}-500/20`
+                        }`}
+                    >
+                        <Zap size={15} />
+                        {isOnCooldown ? 'Recharging...' : 'Use Item'}
+                    </motion.button>
+                </div>
             </div>
 
         </div>

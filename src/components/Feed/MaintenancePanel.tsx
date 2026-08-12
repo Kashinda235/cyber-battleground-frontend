@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     Search,
     Database,
@@ -60,7 +60,7 @@ const MaintenanceControlPanel = ({ onBack }) => {
             </div>
 
             {/* Scrollable Content Region */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+            <div className="flex-1 overflow-y-auto box-scroll p-5 space-y-4">
                 {controlItems.map((item) => (
                     <div
                         key={item.id}

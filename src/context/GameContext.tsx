@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
-import {executeAttack, type LogCallback} from "../utils/AttackActionMap.ts";
+import {executeAttack, type LogCallback, type NodeState} from "../utils/AttackActionMap.ts";
 import type {Player, GameState, ChatLog, MoveLog, PlayerProfile, System} from '../utils/types';
 import {useGameData} from "../hooks/useGameData.ts";
 
@@ -140,8 +140,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         setTerminalHistory((prev) => [...prev, userEntry, ...resultEntries]);
     };
 
-    const handleCommand = async (action: any) => {
-        const targetNode = {
+    const handleCommand = async (action: any, target: string | null) => {
+        const targetNode: NodeState = {
             id: "player-101",
             ip: '192.168.10.58',
             hostname: 'Hacker',
@@ -158,7 +158,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         const userEntry: TerminalEntry = {
             id: Date.now().toString(),
             type: 'user',
-            content: action.command,
+            content: action.command.replace("<TARGET_IP>", target),
             timestamp,
         };
         setTerminalHistory((prev) => [...prev, userEntry]);

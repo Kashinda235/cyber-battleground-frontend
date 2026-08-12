@@ -40,7 +40,7 @@ export default function ModernTerminal() {
                 <div className="w-12" />
             </div>
 
-            <div ref={viewportRef} className="p-4 flex-1 overflow-y-auto space-y-2 cursor-text">
+            <div ref={viewportRef} className="p-4 flex-1 overflow-y-auto box-scroll space-y-2 cursor-text">
                 {terminalHistory.map((item) => (
                     <div key={item.id} className="whitespace-pre-wrap leading-relaxed">
                         {item.type === 'user' ? (

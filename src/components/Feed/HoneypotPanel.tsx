@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Monitor, Settings, Bell, ShieldAlert } from 'lucide-react';
 
@@ -33,7 +33,7 @@ const HoneyPotControlPanel = ({ onBack }) => {
             </div>
 
             {/* Scrollable Content Region */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+            <div className="flex-1 overflow-y-auto box-scroll p-5 space-y-4">
 
                 {/* CONTROL 1: HONEYPOT (Staggered Wave Animation) */}
                 <div className={`flex items-center justify-between p-4 rounded-xl border transition-colors duration-300 ${

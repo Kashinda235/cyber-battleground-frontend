@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     Activity,
     Route,
@@ -83,7 +83,7 @@ const IDSControlPanel = ({ onBack }) => {
             </div>
 
             {/* Scrollable Content Region */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+            <div className="flex-1 overflow-y-box-scroll auto p-5 space-y-4">
                 {controlItems.map((item) => (
                     <div
                         key={item.id}

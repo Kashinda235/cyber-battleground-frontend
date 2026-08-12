@@ -214,7 +214,7 @@ const PlayerProfileCard: React.FC = () => {
                 </header>
 
             {/* Main Grid */}
-            <div className="flex-1 overflow-y-auto p-2 grid grid-cols-1 gap-2 scrollbar-thin scrollbar-thumb-zinc-700">
+            <div className="flex-1 overflow-y-auto p-2 grid grid-cols-1 gap-2 box-scroll">
 
                 {/* Section 1: System Credentials */}
                 <div className="bg-zinc-950/60 rounded-xl border border-zinc-800/80 p-5 space-y-6">
