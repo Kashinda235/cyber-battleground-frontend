@@ -1,3 +1,5 @@
+import {PASSWORDS_LIST, WORD_LIST} from "../constants/ActionTools.ts";
+
 export type GameAttackAction =
     | 'Brute Force'
     | 'Phishing Kit'
@@ -17,6 +19,7 @@ export interface NodeState {
     id: string;
     ip: string;
     hostname: string;
+    password: string;
     securityLevel: number; // e.g., 1 to 5
     defense: number;
     integrity: number;
@@ -37,43 +40,100 @@ export type AttackHandler = (target: NodeState, playerStats: any, onLog?: LogCal
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Helper to format timestamps as [HH:MM:SS.mmm]
+const getTimestamp = (): string => {
+    const now = new Date();
+    return now.toTimeString().split(' ')[0] + '.' + now.getMilliseconds().toString().padStart(3, '0');
+};
+
 // ============================================================================
 // Simulated Game Attack Handlers
 // ============================================================================
 
 const simulateBruteForce: AttackHandler = async (target, playerStats, onLog) => {
-    const wordlists = ["rockyou_top1000.txt", "common_ssh_passwords.dic", "cisco_default_creds.lst"];
+    const wordlistName = (typeof WORD_LIST !== "undefined" && WORD_LIST[0]) ? WORD_LIST[0] : "rockyou.txt";
+    const passwordList = PASSWORDS_LIST || ["admin", "root", "123456", "admin_9021", "password"];
     const targetPort = 22;
+    const targetUser = target.hostname || "root";
+    const totalAttempts = passwordList.length;
 
-    const stages = [
-        `[+] Initializing Hydra v9.4 brute-force engine against target ${target.id}:${targetPort}...`,
-        `[+] Loaded wordlist [${wordlists[0]}] (14,582 combinations)...`,
-        `[*] Testing SSH-2.0-OpenSSH_8.2p1 handshake...`,
-        `[*] Cracking in progress: 25% (3,645/14,582) | 480 req/s...`,
-        `[*] Cracking in progress: 68% (9,915/14,582) | 512 req/s...`,
-    ];
+    // Target password to match against
+    const actualTargetPassword = target.password || "admin_9021";
 
-    // Emit live logs to the UI sequentially during the attack phase
-    for (const stageMessage of stages) {
-        let logType:  "system" | "error" | "test" | "load" = 'system';
-        if (stageMessage.includes('[+] ')) logType = 'load';
-        if (stageMessage.includes('[*] ')) logType = 'test';
-        onLog?.({ type: logType, content: stageMessage });
-        await delay(500); // UI updates live during each delay!
+    // 1. Initial Handshake & Engine Initialization Logs
+    onLog?.({
+        type: "load",
+        content: `[${getTimestamp()}] [+] Initializing Hydra v9.4 brute-force engine against ${target.ip}:${targetPort}...`
+    });
+    await delay(300);
+
+    onLog?.({
+        type: "load",
+        content: `[${getTimestamp()}] [+] Loaded wordlist [${wordlistName}] (${totalAttempts.toLocaleString()} entries)...`
+    });
+    await delay(300);
+
+    onLog?.({
+        type: "test",
+        content: `[${getTimestamp()}] [*] Establishing SSH-2.0-OpenSSH_8.2p1 handshake...`
+    });
+    await delay(400);
+
+    let matchFound = false;
+    let matchedPassword = "";
+
+    // 2. Iterate through EVERY password attempt in the list
+    for (let index = 0; index < passwordList.length; index++) {
+        const attemptNum = index + 1;
+        const currentPassword = passwordList[index];
+        const timestamp = getTimestamp();
+
+        // Check if current password matches target password
+        const isMatch = currentPassword === actualTargetPassword;
+
+        if (isMatch) {
+            matchFound = true;
+            matchedPassword = currentPassword;
+
+            // Log successful attempt
+            onLog?.({
+                type: "system",
+                content: `[${timestamp}] [ATTEMPT ${attemptNum}/${totalAttempts}] Testing "${currentPassword}" -> STATUS: 200 OK (MATCH FOUND)`
+            });
+            await delay(150); // Optional small pause on success highlight
+            break; // Stop brute forcing once found
+        } else {
+            // Log failed attempt
+            onLog?.({
+                type: "test",
+                content: `[${timestamp}] [ATTEMPT ${attemptNum}/${totalAttempts}] Testing "${currentPassword}" -> STATUS: 401 ACCESS DENIED`
+            });
+        }
+
+        // Delay between each password attempt (adjust ms to speed up or slow down live logs)
+        await delay(100);
     }
 
-    // Determine final outcome
-    const isSuccess = Math.random() > 0.3;
+    // 3. Output Final Result
+    if (matchFound) {
+        onLog?.({
+            type: "system",
+            content: `[${getTimestamp()}] [+] SUCCESS: Valid credentials recovered!`
+        });
 
-    if (isSuccess) {
         return {
             type: "action",
-            content: `[+] SUCCESS: SSH credentials recovered for root@${target.id}\n[+] Match found: "root:admin_9021"`
+            content: `[+] SUCCESS: SSH credentials recovered for ${targetUser}@${target.ip}\n[+] Match found: "${targetUser}:${matchedPassword}"`
         };
     } else {
+        onLog?.({
+            type: "error",
+            content: `[${getTimestamp()}] [-] FAIL: Wordlist exhausted without matching hash.`
+        });
+
         return {
             type: "error",
-            content: `[-] FAIL: Wordlist exhausted without matching hash.`
+            content: `[-] FAIL: Wordlist exhausted without matching hash against ${target.ip}.`
         };
     }
 };

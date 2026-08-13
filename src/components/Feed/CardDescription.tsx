@@ -22,7 +22,7 @@ interface DescriptionProps {
 export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAction, icon, color }: DescriptionProps) => {
     const action = color.includes('red') ? ACTIONS[currentAction] : DEFENSE[currentAction];
     const COOLDOWN_TIME = 8; // seconds
-    const listType = action.targets ?? 'ip';
+    const listType = action.target ?? 'sys_ip';
 
     // States
     const [cooldown, setCooldown] = useState<number>(0);

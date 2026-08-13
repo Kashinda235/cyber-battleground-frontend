@@ -2,13 +2,7 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 import {executeAttack, type LogCallback, type NodeState} from "../utils/AttackActionMap.ts";
 import type {Player, GameState, ChatLog, MoveLog, PlayerProfile, System} from '../utils/types';
 import {useGameData} from "../hooks/useGameData.ts";
-
-export interface TerminalEntry {
-    id: string;
-    type: 'system' | 'user' | 'error' | 'action' | 'load' | 'test' ;
-    content: string;
-    timestamp: string;
-}
+import {type TerminalEntry, terminalCommand} from "../utils/terminalCommands.ts";
 
 export type TabType = 'profile' | 'chat' | 'actions' | 'defence' | 'events' | 'alerts';
 
@@ -41,7 +35,7 @@ interface GameContextType {
     terminalHistory: TerminalEntry[];
     executeCommand: (cmd: string) => void;
     clearTerminal: () => void;
-    handleCommand: (action: any) => void;
+    handleCommand: (action: any, target: string | null) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -71,80 +65,15 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
 
     // Single source of truth for executing any command/action
     const executeCommand = (cmd: string) => {
-        const trimmed = cmd.trim();
-        if (!trimmed) return;
-
-        const timestamp = new Date().toLocaleTimeString();
-        const args = trimmed.split(' ');
-        const command = args[0].toLowerCase();
-
-        const userEntry: TerminalEntry = {
-            id: Date.now().toString(),
-            type: 'user',
-            content: cmd,
-            timestamp,
-        };
-
-        const resultEntries: TerminalEntry[] = [];
-
-        switch (command) {
-            case 'help':
-                resultEntries.push({
-                    id: (Date.now() + 1).toString(),
-                    type: 'system',
-                    content: `Available commands:\n  help       - Show available options\n  about      - Display system information\n  echo <msg> - Print a message\n  date       - Output timestamp\n  clear      - Clear history`,
-                    timestamp,
-                });
-                break;
-
-            case 'about':
-                resultEntries.push({
-                    id: (Date.now() + 1).toString(),
-                    type: 'system',
-                    content: 'DevOS Terminal — Integrated central command.',
-                    timestamp,
-                });
-                break;
-
-            case 'date':
-                resultEntries.push({
-                    id: (Date.now() + 1).toString(),
-                    type: 'system',
-                    content: new Date().toLocaleString(),
-                    timestamp,
-                });
-                break;
-
-            case 'echo':
-                resultEntries.push({
-                    id: (Date.now() + 1).toString(),
-                    type: 'system',
-                    content: args.slice(1).join(' ') || '',
-                    timestamp,
-                });
-                break;
-
-            case 'clear':
-                setTerminalHistory([]);
-                return;
-
-            default:
-                resultEntries.push({
-                    id: (Date.now() + 1).toString(),
-                    type: 'error',
-                    content: `Command not found: ${command}`,
-                    timestamp,
-                });
-        }
-
-        setTerminalHistory((prev) => [...prev, userEntry, ...resultEntries]);
-    };
+        terminalCommand(cmd, setTerminalHistory);
+    }
 
     const handleCommand = async (action: any, target: string | null) => {
         const targetNode: NodeState = {
             id: "player-101",
             ip: '192.168.10.58',
             hostname: 'Hacker',
+            password: "powershamsher",
             securityLevel: 2, // e.g., 1 to 5
             defense: 6,
             integrity: 85,
@@ -158,7 +87,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         const userEntry: TerminalEntry = {
             id: Date.now().toString(),
             type: 'user',
-            content: action.command.replace("<TARGET_IP>", target),
+            content: action.command.replace("<TARGET>", target),
             timestamp,
         };
         setTerminalHistory((prev) => [...prev, userEntry]);
