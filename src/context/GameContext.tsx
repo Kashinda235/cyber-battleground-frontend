@@ -68,12 +68,20 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         terminalCommand(cmd, setTerminalHistory);
     }
 
-    const handleCommand = async (action: any, target: string | null) => {
+    const handleCommand = async (action: any, target: string | null, targetId: number | null) => {
+        const targetPlayer = players.find( player => player.id === targetId);
+        const targetSystem = systems.find( system => system.playerId === targetId);
+
+        if (!targetPlayer || !targetSystem) {
+            console.log("target not found");
+            return;
+        }
+
         const targetNode: NodeState = {
-            id: "player-101",
-            ip: '192.168.10.58',
-            hostname: 'Hacker',
-            password: "powershamsher",
+            id: `player-0${targetPlayer.id}`,
+            ip: targetSystem.ip,
+            hostname: targetSystem.hostname,
+            password: targetSystem.password,
             securityLevel: 2, // e.g., 1 to 5
             defense: 6,
             integrity: 85,

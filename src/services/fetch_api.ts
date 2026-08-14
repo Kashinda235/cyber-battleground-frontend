@@ -1,7 +1,7 @@
 import { API_BASE_URL } from "../utils/constants";
 import type {
     Player, ChatLog, GameState, MoveLog, GetMovesQueryParams, System, Defense, Network, PlayerProfile, Asset,
-    Connection,
+    Connection, Mail,
 } from '../utils/types.ts';
 
 
@@ -16,7 +16,9 @@ export interface SystemResponse {
 export interface AssetResponse {
     data: Asset[];
 }
-
+export interface MailResponse {
+    data: Mail[];
+}
 export interface ConnectionsResponse {
     data: Connection[];
 }
@@ -86,6 +88,14 @@ export async function fetchMyConnections(token?: string): Promise<ConnectionsRes
 export async function fetchChats(limit?: number): Promise<ChatsResponse> {
     const query = limit ? `?limit=${limit}` : '';
     return getRequest<ChatLog[]>(`/chat${query}`);
+}
+
+export async function fetchInboxMails(token?: string): Promise<MailResponse> {
+    return getRequest<Mail[]>('/mail/inbox', token);
+}
+
+export async function fetchSentMails(token?: string): Promise<MailResponse> {
+    return getRequest<Mail[]>('/mail/sent', token);
 }
 
 export async function fetchGameState(): Promise<GameStateResponse> {

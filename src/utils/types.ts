@@ -63,6 +63,21 @@ export interface ChatLog {
     createdAt?: string;
 }
 
+interface MailMeta {
+    reward: number; sender: string;
+}
+export interface Mail {
+    id: number;
+    senderId: number;
+    receiverId: number;
+    message: string;
+    isSeen: boolean;
+    phishingPayload: boolean;
+    metadata: MailMeta;
+    createdAt: Date;
+    timestamp: Date;
+}
+
 export interface System {
     id: number;
     playerId: number;
@@ -140,6 +155,12 @@ export interface LoginRequest {
 
 export interface StatusUpdateRequest {
     status: PlayerStatus;
+}
+
+export interface MailRequest {
+    receiverId: number;
+    message: string;
+    phishingPayload: boolean;
 }
 
 export interface SystemUpdateRequest {

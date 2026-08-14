@@ -27,6 +27,7 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
     const [abilities, setAbilities] = useState<Ability[]>([]);
     const [profile, setProfile] = useState<PlayerProfile>();
     const [chats, setChats] = useState<ChatLog[]>([]);
+    const [mails, setMails] = useState<ChatLog[]>([]);
     const [assets, setAssets] = useState<Asset[]>([]);
     const [connections, setConnections] = useState<Connection[]>([]);
     const [gameState, setGameState] = useState<GameState | null>(null);
@@ -49,7 +50,8 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
                 fetchMoveLogs(),
             ]);
 
-            setChats([...chatsRes.data].reverse());
+            setChats(chatsRes.data.reverse());
+            setMails([]);
             setGameState(stateRes.data);
             setMoveLogs(movesRes.data);
 

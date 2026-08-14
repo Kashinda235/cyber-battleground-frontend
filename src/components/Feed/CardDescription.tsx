@@ -28,6 +28,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
     const [cooldown, setCooldown] = useState<number>(0);
     const [isTargeting, setIsTargeting] = useState<boolean>(false);
     const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
+    const [targetId, setTargetId] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const targetRef = useRef<HTMLDivElement>(null);
     const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
@@ -53,7 +54,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
         if (cooldown > 0) return;
         setCooldown(COOLDOWN_TIME);
         setIsTargeting(false);
-        handleCommand?.(action, selectedTarget);
+        handleCommand?.(action, selectedTarget, targetId);
     };
 
     const handleShare = async () => {
@@ -93,14 +94,14 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
     }, []);
 
     // Build target options
-    const rawTargets: Array<{ id: string | number; value: string; label?: string }> = [];
+    const rawTargets: Array<{ id: number; value: string; label?: string }> = [];
     if (listType === 'email') {
         systems.forEach((sys) => {
-            if (sys.mail) rawTargets.push({ id: sys.id, value: sys.mail, label: sys.hostname });
+            if (sys.mail) rawTargets.push({ id: sys.playerId, value: sys.mail, label: sys.hostname });
         });
     } else {
         systems.forEach((sys) => {
-            if (sys.ip) rawTargets.push({ id: `sys-${sys.id}`, value: sys.ip, label: sys.hostname });
+            if (sys.ip) rawTargets.push({ id: sys.playerId, value: sys.ip, label: sys.hostname });
         });
         // connections.forEach((conn) => {
         //     if (conn.targetIp) rawTargets.push({ id: `conn-${conn.id}`, value: conn.targetIp, label: `Conn #${conn.id}` });
@@ -114,11 +115,13 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
             (t.label && t.label.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
-    const handleSelectTarget = (targetVal: string) => {
+    const handleSelectTarget = (targetVal: string, targetId: number) => {
         if (selectedTarget === targetVal) {
             setSelectedTarget(null);
+            setTargetId(null);
         } else {
             setSelectedTarget(targetVal);
+            setTargetId(targetId);
         }
         setIsTargeting(false);
     };
@@ -322,7 +325,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
                                         return (
                                             <button
                                                 key={item.id}
-                                                onClick={() => handleSelectTarget(item.value)}
+                                                onClick={() => handleSelectTarget(item.value, item.id)}
                                                 className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs transition-all ${
                                                     isSelected
                                                         ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold shadow-sm'

@@ -13,7 +13,7 @@ import type {
     Connection,
     Asset,
     Port, DefenseUpdateRequest, ConnectionRequest, ConnectionUpdateRequest, AssetUpdateRequest, AssetRequest, System,
-    SystemUpdateRequest,
+    SystemUpdateRequest, MailRequest, Mail,
 } from '../utils/types';
 import { API_BASE_URL } from '../utils/constants';
 
@@ -21,6 +21,9 @@ import { API_BASE_URL } from '../utils/constants';
 
 export interface AuthDataResponse {
     data: AuthResponse;
+}
+export interface MailResponse {
+    data: Mail;
 }
 export interface NetworkResponse {
     data: Port;
@@ -101,11 +104,24 @@ export async function postChat(
     return mutateRequest<ChatRequest, ChatLog>('/chat', data, token);
 }
 
+export async function postMail(
+    data: MailRequest,
+    token: string
+): Promise<MailResponse> {
+    return mutateRequest<MailRequest, Mail>('/mail', data, token);
+}
+
+export async function updateSeenMail(
+    data: Mail,
+    token: string
+): Promise<MailResponse> {
+    return mutateRequest<MailRequest, Mail>(`/mail/${data.id}`, data, token, 'PATCH');
+}
+
 export async function updateSystemConfig(
     data: SystemUpdateRequest,
     token: string
 ): Promise<SystemResponse> {
-    // Using 'PATCH' here as defined in the OpenAPI documentation
     return mutateRequest<SystemUpdateRequest, System>('/system', data, token, 'PATCH');
 }
 
