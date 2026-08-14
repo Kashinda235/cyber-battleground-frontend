@@ -1,8 +1,9 @@
 import {
-    MessageSquare, Zap, Bell, ShieldCogCorner, Calendars, User,
+    MessageSquare, Zap,  ShieldCogCorner, Calendars, User, AtSign,
 } from "lucide-react"
 import {type TabType} from "../context/GameContext.tsx";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const NAV_ITEMS = [
     {
         targetTab: "profile" as const,
@@ -36,7 +37,7 @@ export const NAV_ITEMS = [
     },
     {
         targetTab: "alerts" as const,
-        icon: Bell,
+        icon: AtSign,
         title: "System Alerts",
         activeColorClass: "bg-orange-500 shadow-orange-900/50",
         hasBadge: true,
@@ -50,6 +51,7 @@ export interface Alert {
     time: string
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const SYSTEM_ALERTS: Alert[] = [
     {
         id: "1",

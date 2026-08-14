@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import type {
     Player, Ability, ChatLog, GameState, MoveLog, ActionRequest,
-    ChatRequest, StateUpdateRequest, RegisterRequest, LoginRequest, PlayerProfile, Asset, Connection, System,
+    ChatRequest, StateUpdateRequest, RegisterRequest, LoginRequest, PlayerProfile, Asset, Connection, System, Mail,
+    MailRequest,
 } from '../utils/types';
 import {
     fetchPlayers, fetchChats, fetchGameState, fetchMoveLogs, fetchMyProfile, fetchMyConnections, fetchMyAsstes,
-    fetchSystems,
+    fetchSystems, fetchInboxMails, fetchSentMails,
 } from '../services/fetch_api.ts';
 import {
-    postAction, postChat, postGameState, postPlayer, postUser,
-    updateNetworkPort, updateSystemConfig, updateSystemDefense,
+    postAction, postChat, postGameState, postMail, postPlayer, postUser,
+    updateNetworkPort, updateSeenMail, updateSystemConfig, updateSystemDefense,
 } from '../services/post_api.ts'
 import { useWebSocket } from './useWebSocket';
 
@@ -27,7 +28,8 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
     const [abilities, setAbilities] = useState<Ability[]>([]);
     const [profile, setProfile] = useState<PlayerProfile>();
     const [chats, setChats] = useState<ChatLog[]>([]);
-    const [mails, setMails] = useState<ChatLog[]>([]);
+    const [inboxMails, setInboxMails] = useState<Mail[]>([]);
+    const [sentMails, setSentMails] = useState<Mail[]>([]);
     const [assets, setAssets] = useState<Asset[]>([]);
     const [connections, setConnections] = useState<Connection[]>([]);
     const [gameState, setGameState] = useState<GameState | null>(null);
@@ -51,14 +53,15 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
             ]);
 
             setChats(chatsRes.data.reverse());
-            setMails([]);
             setGameState(stateRes.data);
             setMoveLogs(movesRes.data);
 
             // Fetch authenticated data if token exists[cite: 1]
             if (token) {
-                const [profileRes, playersRes, systemsRes, assetsRes, connectionsRes] = await Promise.all([
+                const [profileRes, inboxRes, sentMailRes, playersRes, systemsRes, assetsRes, connectionsRes] = await Promise.all([
                     fetchMyProfile(token),
+                    fetchInboxMails(token),
+                    fetchSentMails(token),
                     fetchPlayers(token),
                     fetchSystems(token),
                     fetchMyAsstes(token),
@@ -66,6 +69,8 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
                 ]);
 
                 setProfile(profileRes.data);
+                setInboxMails(inboxRes.data);
+                setSentMails(sentMailRes.data);
                 setPlayers(playersRes.data);
                 setSystems(systemsRes.data);
                 setAssets(assetsRes.data);
@@ -157,6 +162,18 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         return res.data;
     };
 
+    const sendMail = async (data: MailRequest) => {
+        if (!token) throw new Error('Authentication required for chat');
+        const res = await postMail(data, token);
+        return res.data;
+    }
+
+    const updateSeen = async (data: Mail) => {
+        if (!token) throw new Error('Authentication required for chat');
+        const res = await updateSeenMail(data, token);
+        return res.data;
+    }
+
     const updateGameState = async (data: StateUpdateRequest) => {
         if (!token) throw new Error('Authentication required to update state');
         const res = await postGameState(data, token);
@@ -170,6 +187,8 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         // State
         profile,
         assets,
+        inboxMails,
+        sentMails,
         connections,
         players,
         systems,
@@ -189,6 +208,8 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         loginPlayer,
         performAction,
         sendChat,
+        sendMail,
+        updateSeen,
         updateGameState,
         updatePlayerProfile,
 

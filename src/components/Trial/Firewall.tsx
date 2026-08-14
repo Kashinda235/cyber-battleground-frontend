@@ -65,7 +65,7 @@ export default function FirewallPanel({ onBack }: { onBack?: () => void }) {
     const [ipToBlock, setIpToBlock] = useState('');
     const [blockReason, setBlockReason] = useState('');
 
-    // 4. MFA & Security Admin Access Controls
+    // 4. MFA & Defense Admin Access Controls
     const [mfaSettings, setMfaSettings] = useState({
         requireMFAForChanges: true,
         mfaMethod: 'TOTP_HARDWARE_KEY',

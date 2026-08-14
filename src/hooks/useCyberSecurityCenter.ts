@@ -68,7 +68,7 @@ const initialDefenseState: DefenseState = {
     backupRestore: { availableSnapshots: ['snap_2026_08_05', 'snap_2026_08_06'], lastRestoreTime: null },
 };
 
-// --- Security Center Reducer ---
+// --- Defense Center Reducer ---
 type Action =
     | { type: 'TOGGLE_TOOL'; tool: DefenseToolId; payload?: any }
     | { type: 'TRIGGER_ATTACK'; attack: AttackEvent }

@@ -84,7 +84,7 @@ export const DefenseDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Global Security Status & Emergency Lockdown */}
+                {/* Global Defense Status & Emergency Lockdown */}
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-3 px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg">
                         <Radio className={`w-4 h-4 ${isUnderAttack ? 'text-red-500 animate-pulse' : 'text-emerald-500'}`} />

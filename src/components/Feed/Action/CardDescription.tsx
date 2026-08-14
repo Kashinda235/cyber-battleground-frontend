@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { AbilityIcon } from "./AbilityCard.tsx";
 import * as Icons from "lucide-react";
-import {useGame} from "../../context/GameContext.tsx";
+import {useGame} from "../../../context/GameContext.tsx";
 
 const ACTIONS = action_description;
 const DEFENSE = defence_description;

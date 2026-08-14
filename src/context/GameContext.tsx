@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import {executeAttack, type LogCallback, type NodeState} from "../utils/AttackActionMap.ts";
-import type {Player, GameState, ChatLog, MoveLog, PlayerProfile, System} from '../utils/types';
+import type {Player, GameState, ChatLog, MoveLog, PlayerProfile, System, Mail, MailRequest} from '../utils/types';
 import {useGameData} from "../hooks/useGameData.ts";
 import {type TerminalEntry, terminalCommand} from "../utils/terminalCommands.ts";
 
@@ -17,16 +17,20 @@ interface GameContextType {
     players: Player[];
     systems: System[];
     chats: ChatLog[];
+    inboxMails: Mail[]
+    sentMails: Mail[]
     moveLogs: MoveLog[];
     isLoading: boolean;
 
     // Actions (from useGameData)
     sendChat: (msg: string) => void;
+    updateSeen: (data: Mail) => Promise<Mail>
     performAction: (actionData: any) => void;
     updatePlayerProfile:  (data: PlayerProfile) => void;
 
     // Local UI State
     target: Player | undefined;
+    sendMail: (data: MailRequest) => Promise<Mail>
     setTarget: (target: Player) => void;
     activeTab: TabType;
     setActiveTab: (tab: TabType) => void;
@@ -48,8 +52,9 @@ interface GameProviderProps {
 
 export const GameProvider: React.FC<GameProviderProps> = ({ token, player, children }) => {
     const {
-        profile, gameState, chats, sendChat, moveLogs,
-        players, systems, performAction, updatePlayerProfile, isLoading
+        profile, gameState, chats, sendChat, moveLogs, inboxMails, sentMails,
+        players, systems, performAction, updatePlayerProfile, sendMail,
+        updateSeen, isLoading,
     } = useGameData({ token, player });
     const [target, setTarget] = useState<Player | undefined>(undefined);
     const [activeTab, setActiveTab] = useState<TabType>('profile');
@@ -132,9 +137,13 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         players,
         systems,
         chats,
+        inboxMails,
+        sentMails,
         moveLogs,
         isLoading,
         sendChat,
+        sendMail,
+        updateSeen,
         performAction,
         updatePlayerProfile,
         target,

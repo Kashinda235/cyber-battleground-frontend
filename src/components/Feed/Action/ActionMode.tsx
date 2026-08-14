@@ -4,7 +4,7 @@ import {ActionCard} from "./AbilityCard.tsx";
 import CardDescription from "./CardDescription.tsx";
 import {Zap} from "lucide-react";
 import * as Icons from "lucide-react";
-import {useGame} from "../../context/GameContext.tsx";
+import {useGame} from "../../../context/GameContext.tsx";
 
 const ATTACKS = redAbility.tools;
 
