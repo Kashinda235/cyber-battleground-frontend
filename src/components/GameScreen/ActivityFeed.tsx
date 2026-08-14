@@ -6,7 +6,7 @@ import PlayerProfileCard from "../Feed/Profile.tsx";
 import {useGame} from "../../context/GameContext.tsx";
 import SecurityControlPanel from "../Feed/Defense/DefenseMode.tsx";
 import {NAV_ITEMS, NavButton} from "../../utils/FeedUtils.tsx";
-import Notifications from "../Feed/Notifications.tsx";
+import MailFeature from "../Feed/Notifications.tsx";
 
 export default function ActivityFeed() {
   const { activeTab, setActiveTab } = useGame();
@@ -55,7 +55,7 @@ export default function ActivityFeed() {
           {activeTab === "events" && <Events />}
 
           {/* --- ALERTS MODE --- */}
-          {activeTab === "alerts" && <Notifications />}
+          {activeTab === "alerts" && <MailFeature />}
         </div>
       </div>
     </>
