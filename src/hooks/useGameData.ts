@@ -170,7 +170,12 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
 
     const updateSeen = async (data: Mail) => {
         if (!token) throw new Error('Authentication required for chat');
-        const res = await updateSeenMail(data, token);
+        const res = await updateSeenMail({...data, isSeen: true}, token);
+        setInboxMails(prevMails =>
+            prevMails.map(mail =>
+                mail.id === data.id ? { ...mail, isSeen: true } : mail
+            )
+        );
         return res.data;
     }
 

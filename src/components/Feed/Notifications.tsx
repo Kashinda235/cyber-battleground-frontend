@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Inbox,
     Send,
@@ -9,7 +9,9 @@ import {
     Gift,
     ArrowLeft,
     User,
-    X
+    X,
+    CheckCircle2,
+    Sparkles
 } from 'lucide-react';
 import {useGame} from "../../context/GameContext.tsx";
 
@@ -38,23 +40,32 @@ export interface Player {
     mail: string;
 }
 
-// Mock useGame import - replace with your actual import
-// import { useGame } from '@/hooks/useGame';
-
 export default function MailFeature() {
-    // Replace this with your actual useGame hook
+    // Extracting methods from useGame (including optional claimReward if available)
     const {
-        inboxMails = [],
-        sentMails = [],
-        systems = [],
+        inboxMails,
+        sentMails,
+        players,
         sendMail,
-        updateSeen
+        updateSeen,
+         // Added claim hook if present in your useGame implementation
     } = useGame();
+    useEffect(() =>{
+        console.log(inboxMails);
+    }, []);
 
-    // Navigation State
+    const claimReward = (reward: number) => {
+        console.log(`Reward earned ${reward}`);
+
+    };
+    // Navigation & View State
     const [activeFolder, setActiveFolder] = useState<'inbox' | 'sent'>('inbox');
     const [selectedMail, setSelectedMail] = useState<Mail | null>(null);
     const [isComposing, setIsComposing] = useState(false);
+
+    // Local Claim Tracking State
+    const [claimedMailIds, setClaimedMailIds] = useState<Set<number>>(new Set());
+    const [claimingId, setClaimingId] = useState<number | null>(null);
 
     // Compose Form State
     const [receiverId, setReceiverId] = useState<number | ''>('');
@@ -67,12 +78,32 @@ export default function MailFeature() {
     // --- Handlers ---
     const handleOpenMail = async (mail: Mail) => {
         setSelectedMail(mail);
+        // Mark as seen if opening an unread inbox mail
         if (activeFolder === 'inbox' && !mail.isSeen) {
             try {
                 await updateSeen(mail);
             } catch (error) {
                 console.error("Failed to mark mail as seen", error);
             }
+        }
+    };
+
+    const handleClaimReward = async (mail: Mail) => {
+        if (!mail.metadata?.reward || claimedMailIds.has(mail.id)) return;
+
+        setClaimingId(mail.id);
+        try {
+            if (claimReward) {
+                await claimReward(mail.metadata.reward);
+            } else {
+                // Fallback simulation delay if claimReward isn't passed in useGame yet
+                await new Promise((resolve) => setTimeout(resolve, 600));
+            }
+            setClaimedMailIds((prev) => new Set(prev).add(mail.id));
+        } catch (error) {
+            console.error("Failed to claim reward", error);
+        } finally {
+            setClaimingId(null);
         }
     };
 
@@ -87,7 +118,7 @@ export default function MailFeature() {
                 message,
                 phishingPayload,
             });
-            // Reset and close compose
+            // Reset state and switch to sent folder
             setReceiverId('');
             setMessage('');
             setPhishingPayload(false);
@@ -101,8 +132,8 @@ export default function MailFeature() {
     };
 
     const getPlayerName = (id: number) => {
-        const player = systems.find(p => p.playerId === id);
-        return player ? player.hostname : `Player #${id}`;
+        const player = players.find(p => p.id === id);
+        return player ? player.username : `Player #${id}`;
     };
 
     const formatDate = (date: Date) => {
@@ -114,15 +145,15 @@ export default function MailFeature() {
         });
     };
 
-    // --- Sub-components ---
+    // --- Render Sections ---
 
-    // 1. TOP HEADER
+    // 1. HEADER
     const renderHeader = () => (
         <header className="flex min-h-[5rem] shrink-0 items-center border-b border-gray-800 bg-amber-950/20 px-6 py-3">
             <div>
-                <div className='flex items-center gap-3'>
+                <div className="flex items-center gap-3">
           <span className="font-bold text-amber-400">
-            <MailIcon size={28}/>
+            <MailIcon size={28} />
           </span>
                     <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
                         Messages
@@ -137,7 +168,7 @@ export default function MailFeature() {
         </header>
     );
 
-    // 2. FOLDER NAVIGATION
+    // 2. FOLDER TOGGLE BAR
     const renderTopBar = () => (
         <div className="flex items-center justify-between border-b border-gray-800 bg-gray-950/80 p-3 backdrop-blur-sm z-10 shrink-0">
             <div className="flex space-x-1 bg-gray-900 rounded-lg p-1 border border-gray-800">
@@ -150,7 +181,7 @@ export default function MailFeature() {
                     <Inbox className="w-4 h-4" />
                     Inbox
                     {unreadCount > 0 && (
-                        <span className="ml-1 bg-amber-500/20 text-amber-400 text-[10px] px-1.5 py-0.5 rounded-full">
+                        <span className="ml-1 bg-amber-500/20 text-amber-400 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
               {unreadCount}
             </span>
                     )}
@@ -176,7 +207,7 @@ export default function MailFeature() {
         </div>
     );
 
-    // 3. LIST VIEW
+    // 3. MAIL LIST (With Read/Unread styling and Reward Badges)
     const renderMailList = () => {
         const mails = activeFolder === 'inbox' ? inboxMails : sentMails;
 
@@ -191,65 +222,97 @@ export default function MailFeature() {
 
         return (
             <div className="flex-1 overflow-y-auto divide-y divide-gray-800/50">
-                {mails.map((mail) => (
-                    <div
-                        key={mail.id}
-                        onClick={() => handleOpenMail(mail)}
-                        className={`p-4 cursor-pointer hover:bg-gray-900 transition-colors flex items-start gap-3 ${
-                            !mail.isSeen && activeFolder === 'inbox' ? 'bg-gray-900/40' : ''
-                        }`}
-                    >
-                        <div className="pt-1 shrink-0">
-                            {activeFolder === 'inbox' ? (
-                                mail.isSeen ? <MailOpen className="w-4 h-4 text-gray-500" /> : <MailIcon className="w-4 h-4 text-amber-400" />
-                            ) : (
-                                <Send className="w-4 h-4 text-gray-500" />
-                            )}
-                        </div>
+                {mails.map((mail) => {
+                    const isUnread = activeFolder === 'inbox' && !mail.isSeen;
+                    const hasReward = (mail.metadata?.reward ?? 0) > 0;
+                    const isClaimed = claimedMailIds.has(mail.id);
 
-                        <div className="flex-1 min-w-0">
-                            <div className="flex justify-between items-baseline mb-1">
-                <span className={`text-sm truncate ${!mail.isSeen && activeFolder === 'inbox' ? 'text-gray-100 font-semibold' : 'text-gray-300 font-medium'}`}>
-                  {activeFolder === 'inbox'
-                      ? mail.metadata?.sender || getPlayerName(mail.senderId)
-                      : `To: ${getPlayerName(mail.receiverId)}`}
-                </span>
-                                <span className="text-[11px] text-gray-500 whitespace-nowrap ml-2 shrink-0">
-                  {formatDate(mail.timestamp || mail.createdAt)}
-                </span>
+                    return (
+                        <div
+                            key={mail.id}
+                            onClick={() => handleOpenMail(mail)}
+                            className={`p-4 cursor-pointer transition-all flex items-start gap-3 relative border-l-2 ${
+                                isUnread
+                                    ? 'bg-amber-950/20 border-l-amber-500 hover:bg-amber-950/30'
+                                    : 'bg-transparent border-l-transparent hover:bg-gray-900/60'
+                            }`}
+                        >
+                            {/* Icon */}
+                            <div className="pt-0.5 shrink-0">
+                                {activeFolder === 'inbox' ? (
+                                    isUnread ? (
+                                        <MailIcon className="w-4 h-4 text-amber-400 animate-pulse" />
+                                    ) : (
+                                        <MailOpen className="w-4 h-4 text-gray-600" />
+                                    )
+                                ) : (
+                                    <Send className="w-4 h-4 text-gray-500" />
+                                )}
                             </div>
-                            <p className={`text-xs truncate ${!mail.isSeen && activeFolder === 'inbox' ? 'text-gray-300' : 'text-gray-500'}`}>
-                                {mail.message}
-                            </p>
 
-                            {/* Badges */}
-                            {(mail.phishingPayload || (mail.metadata?.reward ?? 0) > 0) && (
-                                <div className="flex gap-2 mt-2">
-                                    {mail.phishingPayload && (
-                                        <span className="flex items-center gap-1 bg-red-500/10 text-red-400 text-[10px] px-1.5 py-0.5 rounded border border-red-500/20">
-                      <AlertTriangle className="w-3 h-3" /> Payload
+                            {/* Text Body */}
+                            <div className="flex-1 min-w-0">
+                                <div className="flex justify-between items-baseline mb-1">
+                                    <div className="flex items-center gap-2 truncate">
+                    <span className={`text-sm truncate ${isUnread ? 'text-white font-bold' : 'text-gray-300 font-normal'}`}>
+                      {activeFolder === 'inbox'
+                          ? mail.metadata?.sender || getPlayerName(mail.senderId)
+                          : `To: ${getPlayerName(mail.receiverId)}`}
                     </span>
-                                    )}
-                                    {(mail.metadata?.reward ?? 0) > 0 && (
-                                        <span className="flex items-center gap-1 bg-green-500/10 text-green-400 text-[10px] px-1.5 py-0.5 rounded border border-green-500/20">
-                      <Gift className="w-3 h-3" /> Reward
-                    </span>
-                                    )}
+                                        {isUnread && (
+                                            <span className="text-[9px] bg-amber-500/20 text-amber-400 font-semibold px-1.5 py-0.2 rounded border border-amber-500/30">
+                        NEW
+                      </span>
+                                        )}
+                                    </div>
+                                    <span className={`text-[11px] whitespace-nowrap ml-2 shrink-0 ${isUnread ? 'text-amber-400/80 font-medium' : 'text-gray-500'}`}>
+                    {formatDate(mail.timestamp || mail.createdAt)}
+                  </span>
                                 </div>
-                            )}
+
+                                <p className={`text-xs truncate ${isUnread ? 'text-gray-200 font-medium' : 'text-gray-500'}`}>
+                                    {mail.message}
+                                </p>
+
+                                {/* Badges / Rewards */}
+                                {(mail.phishingPayload || hasReward) && (
+                                    <div className="flex items-center gap-2 mt-2">
+                                        {mail.phishingPayload && (
+                                            <span className="flex items-center gap-1 bg-red-500/10 text-red-400 text-[10px] px-1.5 py-0.5 rounded border border-red-500/20">
+                        <AlertTriangle className="w-3 h-3" /> Payload
+                      </span>
+                                        )}
+                                        {hasReward && activeFolder === 'inbox' && (
+                                            <span className={`flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border ${
+                                                isClaimed
+                                                    ? 'bg-gray-800 text-gray-400 border-gray-700'
+                                                    : 'bg-amber-500/10 text-amber-300 border-amber-500/30 font-semibold'
+                                            }`}>
+                        <Gift className="w-3 h-3" />
+                                                {isClaimed ? 'Claimed' : `+${mail.metadata.reward} Reward`}
+                      </span>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         );
     };
 
-    // 4. DETAIL VIEW
+    // 4. MAIL DETAIL VIEW (Includes Reward Claiming Card)
     const renderMailDetail = () => {
         if (!selectedMail) return null;
 
+        const hasReward = (selectedMail.metadata?.reward ?? 0) > 0;
+        const isClaimed = claimedMailIds.has(selectedMail.id);
+        const isClaiming = claimingId === selectedMail.id;
+
         return (
             <div className="flex flex-col h-full bg-gray-950 animate-in fade-in slide-in-from-right-4 duration-200 absolute inset-0 z-20">
+                {/* Header */}
                 <div className="flex items-center gap-3 border-b border-gray-800 p-3 bg-amber-950/10">
                     <button
                         onClick={() => setSelectedMail(null)}
@@ -269,21 +332,53 @@ export default function MailFeature() {
                     </div>
                 </div>
 
+                {/* Message Content */}
                 <div className="p-4 flex-1 overflow-y-auto">
-                    {(selectedMail.phishingPayload || (selectedMail.metadata?.reward ?? 0) > 0) && (
-                        <div className="flex flex-col gap-2 mb-6">
-                            {selectedMail.phishingPayload && (
-                                <div className="flex items-center gap-2 bg-red-500/10 text-red-400 p-2.5 rounded-lg text-xs border border-red-500/20">
-                                    <AlertTriangle className="w-4 h-4 shrink-0" />
-                                    <span><strong>Warning:</strong> Suspicious Payload Detected</span>
+                    {/* Warnings */}
+                    {selectedMail.phishingPayload && (
+                        <div className="flex items-center gap-2 bg-red-500/10 text-red-400 p-2.5 rounded-lg text-xs border border-red-500/20 mb-4">
+                            <AlertTriangle className="w-4 h-4 shrink-0" />
+                            <span><strong>Warning:</strong> Suspicious Payload Detected in Mail</span>
+                        </div>
+                    )}
+
+                    {/* REWARD CLAIM BOX (Only for receiver inbox) */}
+                    {hasReward && activeFolder === 'inbox' && (
+                        <div className="flex items-center justify-between bg-gradient-to-r from-amber-950/40 via-amber-900/20 to-gray-900 border border-amber-500/30 p-3.5 rounded-xl mb-6 shadow-lg">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/30">
+                                    <Gift className="w-5 h-5" />
                                 </div>
-                            )}
-                            {(selectedMail.metadata?.reward ?? 0) > 0 && (
-                                <div className="flex items-center gap-2 bg-green-500/10 text-green-400 p-2.5 rounded-lg text-xs border border-green-500/20">
-                                    <Gift className="w-4 h-4 shrink-0" />
-                                    <span><strong>Reward Included:</strong> {selectedMail.metadata.reward}</span>
+                                <div>
+                                    <div className="text-[11px] font-semibold text-amber-400/80 uppercase tracking-wider flex items-center gap-1">
+                                        <Sparkles className="w-3 h-3" /> Attached Reward
+                                    </div>
+                                    <div className="text-sm font-bold text-white">
+                                        +{selectedMail.metadata.reward} Rewards
+                                    </div>
                                 </div>
-                            )}
+                            </div>
+
+                            <button
+                                onClick={() => handleClaimReward(selectedMail)}
+                                disabled={isClaimed || isClaiming}
+                                className={`px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${
+                                    isClaimed
+                                        ? 'bg-gray-800 text-gray-400 cursor-not-allowed border border-gray-700'
+                                        : 'bg-amber-500 hover:bg-amber-400 text-gray-950 shadow-md shadow-amber-950/50'
+                                }`}
+                            >
+                                {isClaiming ? (
+                                    <span className="w-4 h-4 border-2 border-gray-950/20 border-t-gray-950 rounded-full animate-spin" />
+                                ) : isClaimed ? (
+                                    <>
+                                        <CheckCircle2 className="w-4 h-4 text-green-400" />
+                                        Claimed
+                                    </>
+                                ) : (
+                                    'Claim'
+                                )}
+                            </button>
                         </div>
                     )}
 
@@ -323,9 +418,9 @@ export default function MailFeature() {
                             className="w-full bg-gray-900 border border-gray-800 text-sm text-gray-100 rounded-lg p-2.5 focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all"
                         >
                             <option value="" disabled>Select a player...</option>
-                            {systems.map(player => (
-                                <option key={player.id} value={player.playerId}>
-                                    {player.hostname}
+                            {players.map(player => (
+                                <option key={player.id} value={player.id}>
+                                    {player.username}
                                 </option>
                             ))}
                         </select>
@@ -377,22 +472,17 @@ export default function MailFeature() {
         </div>
     );
 
-    // --- Main Layout ---
+    // --- Main Render ---
     return (
         <div className="flex flex-col h-full w-full bg-gray-950 relative overflow-hidden">
-
-            {/* 1. Header (Always visible unless deep in an overlay and you want it hidden. Here it stays at top) */}
             {renderHeader()}
 
-            {/* 2. Controls (Hidden when viewing mail or composing) */}
             {!isComposing && !selectedMail && renderTopBar()}
 
-            {/* 3. Base List Layer */}
             <div className="flex-1 overflow-hidden flex flex-col relative">
                 {renderMailList()}
             </div>
 
-            {/* 4. Overlay Layers */}
             {selectedMail && renderMailDetail()}
             {isComposing && renderCompose()}
         </div>
