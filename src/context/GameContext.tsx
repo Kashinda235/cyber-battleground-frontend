@@ -13,6 +13,8 @@ interface GameContextType {
 
     // Core Game Data (from useGameData)
     profile: PlayerProfile | undefined;
+    systemHealth: number;
+    playerXp: number;
     gameState: GameState | null;
     players: Player[];
     systems: System[];
@@ -52,9 +54,9 @@ interface GameProviderProps {
 
 export const GameProvider: React.FC<GameProviderProps> = ({ token, player, children }) => {
     const {
-        profile, gameState, chats, sendChat, moveLogs, inboxMails, sentMails,
-        players, systems, performAction, updatePlayerProfile, sendMail,
-        updateSeen, isLoading,
+        profile, gameState, systemHealth, playerXp, chats, sendChat, moveLogs,
+        inboxMails, sentMails, players, systems, performAction,
+        updatePlayerProfile, sendMail, updateSeen, isLoading,
     } = useGameData({ token, player });
     const [target, setTarget] = useState<Player | undefined>(undefined);
     const [activeTab, setActiveTab] = useState<TabType>('profile');
@@ -133,6 +135,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         token,
         currentPlayer: player,
         profile,
+        systemHealth,
+        playerXp,
         gameState,
         players,
         systems,
