@@ -13,7 +13,7 @@ import type {
     Connection,
     Asset,
     Port, DefenseUpdateRequest, ConnectionRequest, ConnectionUpdateRequest, AssetUpdateRequest, AssetRequest, System,
-    SystemUpdateRequest, MailRequest, Mail,
+    SystemUpdateRequest, MailRequest, Mail, PlayerStatsRequest,
 } from '../utils/types';
 import { API_BASE_URL } from '../utils/constants';
 
@@ -24,6 +24,15 @@ export interface AuthDataResponse {
 }
 export interface MailResponse {
     data: Mail;
+}
+export interface Stats {
+    id: number
+    xp: number
+    health: number
+    lastSeen: Date
+}
+export interface StatsResponse {
+    data: Stats
 }
 export interface NetworkResponse {
     data: Port;
@@ -88,6 +97,13 @@ export async function postPlayer(data: RegisterRequest): Promise<AuthDataRespons
 
 export async function postUser(data: LoginRequest): Promise<AuthDataResponse> {
     return mutateRequest<LoginRequest, AuthResponse>('/auth/login', data);
+}
+
+export async function patchPlayerStats(
+    data: PlayerStatsRequest,
+    token: string
+): Promise<StatsResponse> {
+    return mutateRequest<PlayerStatsRequest, Stats>('/players/stats', data, token, 'PATCH');
 }
 
 export async function postAction(

@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import type {
     Player, Ability, ChatLog, GameState, MoveLog, ActionRequest,
-    ChatRequest, StateUpdateRequest, RegisterRequest, LoginRequest, PlayerProfile, Asset, Connection, System, Mail,
-    MailRequest,
+    StateUpdateRequest, RegisterRequest, LoginRequest, PlayerProfile, Asset, Connection, System, Mail,
+    MailRequest, PlayerStatsRequest,
 } from '../utils/types';
 import {
     fetchPlayers, fetchChats, fetchGameState, fetchMoveLogs, fetchMyProfile, fetchMyConnections, fetchMyAsstes,
     fetchSystems, fetchInboxMails, fetchSentMails,
 } from '../services/fetch_api.ts';
 import {
+    patchPlayerStats,
     postAction, postChat, postGameState, postMail, postPlayer, postUser,
     updateNetworkPort, updateSeenMail, updateSystemConfig, updateSystemDefense,
 } from '../services/post_api.ts'
@@ -25,6 +26,8 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
     // ==========================================
     const [players, setPlayers] = useState<Player[]>([]);
     const [systems, setSystems] = useState<System[]>([]);
+    const [systemHealth, setSystemHealth] = useState<number>(0);
+    const [playerXp, setPlayerXp] = useState<number>(0);
     const [abilities, setAbilities] = useState<Ability[]>([]);
     const [profile, setProfile] = useState<PlayerProfile>();
     const [chats, setChats] = useState<ChatLog[]>([]);
@@ -69,6 +72,8 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
                 ]);
 
                 setProfile(profileRes.data);
+                setPlayerXp(profileRes.data.player.xp)
+                setSystemHealth(profileRes.data.system.health);
                 setInboxMails(inboxRes.data);
                 setSentMails(sentMailRes.data);
                 setPlayers(playersRes.data);
@@ -179,6 +184,15 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         return res.data;
     }
 
+    const updatePlayerStats = async (data: PlayerStatsRequest) => {
+        if (!token) throw new Error('Authentication required to update state');
+        const res = await patchPlayerStats(data, token);
+        setSystemHealth(res.data.health);
+        setPlayerXp(res.data.xp);
+
+        return res.data;
+    }
+
     const updateGameState = async (data: StateUpdateRequest) => {
         if (!token) throw new Error('Authentication required to update state');
         const res = await postGameState(data, token);
@@ -191,6 +205,8 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
     return {
         // State
         profile,
+        systemHealth,
+        playerXp,
         assets,
         inboxMails,
         sentMails,
@@ -212,6 +228,7 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         registerPlayer,
         loginPlayer,
         performAction,
+        updatePlayerStats,
         sendChat,
         sendMail,
         updateSeen,

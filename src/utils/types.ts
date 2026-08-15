@@ -20,6 +20,7 @@ export interface Player {
     username?: string;
     role?: PlayerRole;
     status?: PlayerStatus;
+    xp: number;
     /** ISO Date-Time string */
     joinedAt?: string;
     /** ISO Date-Time string */
@@ -85,6 +86,7 @@ export interface System {
     hostname: string;
     password: string;
     mail: string;
+    health: number;
     createdAt: string;
 }
 
@@ -155,6 +157,11 @@ export interface LoginRequest {
 
 export interface StatusUpdateRequest {
     status: PlayerStatus;
+}
+
+export interface PlayerStatsRequest {
+    health: number;
+    xp: number;
 }
 
 export interface MailRequest {
