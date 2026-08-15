@@ -1,4 +1,5 @@
 import {PASSWORDS_LIST, WORD_LIST} from "../constants/ActionTools.ts";
+import type {GameContextServices} from "../context/GameContext.tsx";
 
 export type GameAttackAction =
     | 'Brute Force'
@@ -14,9 +15,12 @@ export type GameAttackAction =
     | 'Zero-Day Attack'
     | 'Log Wiper';
 
+export type LogType = "system" | "error" | "test" | "load" ;
+
 // Represents the state of a target node in the game
 export interface NodeState {
-    id: string;
+    id: number;
+    name: string;
     ip: string;
     hostname: string;
     password: string;
@@ -29,14 +33,18 @@ export interface NodeState {
 
 // Represents the result of a turn/action
 export interface AttackResult {
-    type: "system" | "error";
+    type: "system" | "error" | "action";
     content: string
 }
 
 export type LogCallback = (entry: {
-    type: "system" | "error" | "test" | "load" ;
+    type: LogType ;
     content: string }) => void;
-export type AttackHandler = (target: NodeState, playerStats: any, onLog?: LogCallback) => Promise<AttackResult>;
+
+export type AttackHandler = (
+    services: GameContextServices,
+    onLog?: LogCallback
+) => Promise<AttackResult>;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -50,14 +58,19 @@ const getTimestamp = (): string => {
 // Simulated Game Attack Handlers
 // ============================================================================
 
-const simulateBruteForce: AttackHandler = async (target, playerStats, onLog) => {
+const simulateBruteForce: AttackHandler = async (services, onLog) => {
+    const { target, performAction, stateConnection, updatePlayerStats} = services;
     const wordlistName = (typeof WORD_LIST !== "undefined" && WORD_LIST[0]) ? WORD_LIST[0] : "rockyou.txt";
     const passwordList = PASSWORDS_LIST || ["admin", "root", "123456", "admin_9021", "password"];
     const targetPort = 22;
     const targetUser = target.hostname || "root";
     const totalAttempts = passwordList.length;
-
-    // Target password to match against
+    const action = {
+        action_type: "Login Attempt",
+        target_id: target.id,
+        ability_id: 1.
+    }
+        // Target password to match against
     const actualTargetPassword = target.password || "admin_9021";
 
     // 1. Initial Handshake & Engine Initialization Logs
@@ -87,6 +100,8 @@ const simulateBruteForce: AttackHandler = async (target, playerStats, onLog) => 
         const attemptNum = index + 1;
         const currentPassword = passwordList[index];
         const timestamp = getTimestamp();
+        performAction(action);
+        updatePlayerStats({health: -2, xp: 21});
 
         // Check if current password matches target password
         const isMatch = currentPassword === actualTargetPassword;
@@ -94,6 +109,9 @@ const simulateBruteForce: AttackHandler = async (target, playerStats, onLog) => 
         if (isMatch) {
             matchFound = true;
             matchedPassword = currentPassword;
+            performAction({...action, action_type: "User Login Successful"});
+            stateConnection({target_ip: target.ip, status: "bot"});
+            updatePlayerStats({health: 95, xp: 1245});
 
             // Log successful attempt
             onLog?.({
@@ -111,7 +129,7 @@ const simulateBruteForce: AttackHandler = async (target, playerStats, onLog) => 
         }
 
         // Delay between each password attempt (adjust ms to speed up or slow down live logs)
-        await delay(100);
+        await delay(200);
     }
 
     // 3. Output Final Result
@@ -138,16 +156,27 @@ const simulateBruteForce: AttackHandler = async (target, playerStats, onLog) => 
     }
 };
 
-const simulatePhishingKit: AttackHandler = async (target, playerStats, onLog) => {
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-    const socialEngineeringSkill = playerStats?.socialEngineering ?? 1;
+const simulatePhishingKit: AttackHandler = async (services, onLog) => {
+    const { target, performAction, sendMail, playerXp, stateConnection, updatePlayerStats } = services;
+    performAction({
+        action_type: "Mail",
+        target_id: target.id,
+        ability_id: 2, // Cleaned up dangling trailing decimal
+    });
+    sendMail({
+        receiverId: target.id,
+        message: "Hello! What side are you on?",
+        phishingPayload: true,
+    });
+    stateConnection({target_ip: target.ip, status: "friend"});
+    const socialEngineeringSkill = playerXp / 10000 * 3;
     const targetPort = 443;
+    const targetName = target.hostname || target.name;
 
     // Phishing campaign simulation stages
     const stages = [
         `[+] Initializing Social Engineering Toolkit (SET) v8.2...`,
-        `[+] Cloning login portal interface for host domain: ${target.hostname || target.id}...`,
+        `[+] Cloning login portal interface for host domain: ${targetName}...`,
         `[*] Generating spoofed SSL certificate and temporary redirect payload...`,
         `[+] Crafting spear-phishing email vector targeting host administrator...`,
         `[*] Campaign launched. Monitoring target response on port ${targetPort}...`,
@@ -156,39 +185,51 @@ const simulatePhishingKit: AttackHandler = async (target, playerStats, onLog) =>
 
     // Emit live terminal logs
     for (const stageMessage of stages) {
-        let logType:  "system" | "error" | "test" | "load" = 'system';
-        if (stageMessage.includes('[+] ')) logType = 'load';
-        if (stageMessage.includes('[*] ')) logType = 'test';
+        let logType: LogType = 'system';
+        if (stageMessage.startsWith('[+]')) logType = 'load';
+        else if (stageMessage.startsWith('[*]')) logType = 'test';
+
         onLog?.({ type: logType, content: stageMessage });
         await delay(600);
+        updatePlayerStats({health: -2, xp: 2});
     }
 
     // Success probability based on player skill vs target defense/integrity
     const baseSuccessChance = 0.60;
     const skillBonus = socialEngineeringSkill * 0.05;
-    const isSuccess = Math.random() < Math.min(Math.max(baseSuccessChance + skillBonus, 0.15), 0.90);
+    const totalChance = Math.min(Math.max(baseSuccessChance + skillBonus, 0.15), 0.90);
+    const isSuccess = Math.random() < totalChance;
 
     await delay(800);
+    updatePlayerStats({health: 94, xp: 2});
 
     if (isSuccess) {
         const fakeSessionToken = Math.random().toString(36).substring(2, 15);
+        updatePlayerStats({health: 96, xp: 1324});
+        stateConnection({target_ip: target.ip, status: "bot"});
         return {
             type: "action",
             content: `[+] SUCCESS: Victim authenticated via cloned portal.\n[+] Captured session token: auth_bearer_${fakeSessionToken}\n[+] Host ${target.id} security bypass complete.`
         };
-    } else {
-        return {
-            type: "error",
-            content: `[-] FAIL: Phishing email flagged by target email filter / MFA verification failed.\n[-] Target security awareness triggered on node ${target.id}.`
-        };
     }
+
+    return {
+        type: "error",
+        content: `[-] FAIL: Phishing email flagged by target email filter / MFA verification failed.\n[-] Target security awareness triggered on node ${target.id}.`
+    };
 };
 
-const useExploitScript: AttackHandler = async (target, playerStats, onLog) => {
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-    const exploitSkill = playerStats?.exploitRating ?? playerStats?.hacking ?? 1;
+const useExploitScript: AttackHandler = async (services, onLog) => {
+    const { target, performAction, updatePlayerStats, playerXp } = services;
+    const exploitSkill = playerXp / 10000 * 3;
     const targetDefense = 10;
+
+    const action = {
+        action_type: "Exploit", // Or "Hack" / "SystemAttack" depending on your enum/schema
+        target_id: target.id,
+        ability_id: 3,
+    };
+    performAction(action);
 
     // Simulated vulnerability database / CVE tags
     const cveList = [
@@ -200,7 +241,7 @@ const useExploitScript: AttackHandler = async (target, playerStats, onLog) => {
     const selectedCVE = cveList[Math.floor(Math.random() * cveList.length)];
 
     const stages = [
-        `[+] Loading custom exploit framework against target node [${target.id}]...`,
+        `[+] Loading custom exploit framework against target node [${target.name}]...`,
         `[*] Matching targeted defense profile against vulnerability database...`,
         `[+] Selected vector payload: ${selectedCVE}`,
         `[*] Constructing ROP chain & injecting memory payload into process stack...`,
@@ -209,7 +250,7 @@ const useExploitScript: AttackHandler = async (target, playerStats, onLog) => {
 
     // Emit live execution logs
     for (const stageMessage of stages) {
-        let logType:  "system" | "error" | "test" | "load" = 'system';
+        let logType:  LogType = 'system';
         if (stageMessage.includes('[+] ')) logType = 'load';
         if (stageMessage.includes('[*] ')) logType = 'test';
         onLog?.({ type: logType, content: stageMessage });
@@ -224,22 +265,31 @@ const useExploitScript: AttackHandler = async (target, playerStats, onLog) => {
 
     if (isSuccess) {
         const injectedAddress = `0x${Math.floor(Math.random() * 0xFFFFFFFF).toString(16).padStart(8, '0')}`;
+        updatePlayerStats({health: 94, xp: 1375});
         return {
             type: "action",
             content: `[+] SUCCESS: Exploit executed successfully.\n[+] Memory redirected at address [${injectedAddress}]\n[+] System privilege escalated on target node [${target.id}].`
         };
     } else {
+        updatePlayerStats({health: -2, xp: 20});
         return {
             type: "error",
-            content: `[-] FAIL: Buffer execution failed. Target system ASLR memory mitigation active.\n[-] Target node [${target.id}] firewall terminated remote thread.`
+            content: `[-] FAIL: Buffer execution failed. Target system ASLR memory mitigation active.\n[-] Target node [${target.name}] firewall terminated remote thread.`
         };
     }
 };
 
-const simulatePortScanner: AttackHandler = async (target, playerStats, onLog) => {
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const simulatePortScanner: AttackHandler = async (services, onLog) => {
+    const { target, performAction, updatePlayerStats } = services;
 
-    const scanSpeed = playerStats?.scanSpeed ?? 1;
+    // 1. Dispatch the scan action to game services
+    performAction({
+        action_type: "Scan",
+        target_id: target.id,
+        ability_id: 1,
+    });
+
+    const scanSpeed = 1;
 
     // Standard port definitions for target scanning
     const targetPorts = [
@@ -251,14 +301,15 @@ const simulatePortScanner: AttackHandler = async (target, playerStats, onLog) =>
     ];
 
     const stages = [
-        `[+] Launching Nmap-style TCP SYN stealth scan on target node [${target.id}]...`,
+        `[+] Launching Nmap-style TCP SYN stealth scan on target node [${target.name}]...`,
         `[*] Probing top 1000 standard ports...`,
     ];
 
     for (const stageMessage of stages) {
-        let logType:  "system" | "error" | "test" | "load" = 'system';
-        if (stageMessage.includes('[+] ')) logType = 'load';
-        if (stageMessage.includes('[*] ')) logType = 'test';
+        let logType: LogType = 'system';
+        if (stageMessage.startsWith('[+]')) logType = 'load';
+        else if (stageMessage.startsWith('[*]')) logType = 'test';
+
         onLog?.({ type: logType, content: stageMessage });
         await delay(400 / scanSpeed);
     }
@@ -269,19 +320,25 @@ const simulatePortScanner: AttackHandler = async (target, playerStats, onLog) =>
         await delay(250 / scanSpeed);
         const formattedPort = `${p.port}/tcp`.padEnd(9, " ");
         const formattedState = p.state.padEnd(8, " ");
-        let logType:  "system" | "error" | "test" | "load" = 'system';
         const content = `${formattedPort}${formattedState}${p.service}`;
-        if (content.includes('[+] ')) logType = 'load';
-        if (content.includes('[*] ')) logType = 'test';
-        onLog?.({ type: logType, content: content });
+
+        let logType: LogType = 'system';
+        if (p.state === 'OPEN') logType = 'load';
+        else if (p.state === 'FILTERED') logType = 'test';
+
+        onLog?.({ type: logType, content });
     }
 
     await delay(500);
 
     // Calculate revealed stats
     const revealedDefense = 10;
-    const revealedIntegrity =  100;
-    const estimatedLevel = target.securityLevel ?? Math.ceil(revealedDefense / 2);
+    const revealedIntegrity = 100;
+    const estimatedLevel = 1;
+
+    // 2. Award reconnaissance XP upon successful completion
+    const xpGained = 150;
+    updatePlayerStats({ health: 0, xp: xpGained});
 
     return {
         type: "system",
@@ -293,11 +350,16 @@ const simulatePortScanner: AttackHandler = async (target, playerStats, onLog) =>
     };
 };
 
-const simulateDeepScanner: AttackHandler = async (target, playerStats, onLog) => {
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const simulateDeepScanner: AttackHandler = async (services, onLog) => {
+    const { target, performAction, updatePlayerStats } = services;
+    performAction({
+        action_type: "DeepScan",
+        target_id: target.id,
+        ability_id: 4, // Higher ability ID for advanced scanner
+    });
 
     const targetIp = target.ip || "192.168.1.105";
-    const scanSpeed = playerStats?.scanSpeed ?? 1;
+    const scanSpeed = 1;
 
     await delay(400);
 
@@ -309,9 +371,10 @@ const simulateDeepScanner: AttackHandler = async (target, playerStats, onLog) =>
     ];
 
     for (const stageMessage of stages) {
-        let logType:  "system" | "error" | "test" | "load" = 'system';
-        if (stageMessage.includes('[+] ')) logType = 'load';
-        if (stageMessage.includes('[*] ')) logType = 'test';
+        let logType: LogType = 'system';
+        if (stageMessage.startsWith('[+]')) logType = 'load';
+        else if (stageMessage.startsWith('[*]')) logType = 'test';
+
         onLog?.({ type: logType, content: stageMessage });
         await delay(500 / scanSpeed);
     }
@@ -333,8 +396,12 @@ const simulateDeepScanner: AttackHandler = async (target, playerStats, onLog) =>
         const formattedService = vuln.service.padEnd(18, " ");
         const formattedSeverity = vuln.severity.padEnd(17, " ");
 
+        let logType: LogType = 'system';
+        if (vuln.severity.startsWith('CRITICAL')) logType = 'load';
+        else if (vuln.severity.startsWith('HIGH')) logType = 'test';
+
         onLog?.({
-            type: "system",
+            type: logType,
             content: `${formattedCve}${formattedService}${formattedSeverity}${vuln.vector}`
         });
     }
@@ -346,6 +413,10 @@ const simulateDeepScanner: AttackHandler = async (target, playerStats, onLog) =>
     const integrity = target.integrity ?? 100;
     const isCompromised = target.isCompromised ? "YES" : "NO";
 
+    // 2. Award deep vulnerability audit XP upon completion
+    const xpGained = 300;
+    updatePlayerStats({health: 0, xp: xpGained,});
+
     return {
         type: "system",
         content: `\n[+] DEEP AUDIT COMPLETE for ${targetIp}\n` +
@@ -356,11 +427,11 @@ const simulateDeepScanner: AttackHandler = async (target, playerStats, onLog) =>
     };
 };
 
-const simulatePacketSniffer: AttackHandler = async (target, playerStats, onLog) => {
+const simulatePacketSniffer: AttackHandler = async (services, onLog) => {
     const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
+    const { target } = services;
     const targetIp = target.ip || "192.168.1.105";
-    const captureSpeed = playerStats?.scanSpeed ?? 1;
+    const captureSpeed = 1;
 
     await delay(300);
 
@@ -371,7 +442,7 @@ const simulatePacketSniffer: AttackHandler = async (target, playerStats, onLog) 
     ];
 
     for (const stageMessage of stages) {
-        let logType:  "system" | "error" | "test" | "load" = 'system';
+        let logType:  LogType = 'system';
         if (stageMessage.includes('[+] ')) logType = 'load';
         if (stageMessage.includes('[*] ')) logType = 'test';
         onLog?.({ type: logType, content: stageMessage });
@@ -413,13 +484,18 @@ const simulatePacketSniffer: AttackHandler = async (target, playerStats, onLog) 
     };
 };
 
-const simulateCredentialStuffing: AttackHandler = async (target, playerStats, onLog) => {
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const simulateCredentialStuffing: AttackHandler = async (services, onLog) => {
+    const { target, performAction, updatePlayerStats } = services;
+
+    performAction({
+        action_type: "CredentialStuffing",
+        target_id: target.id,
+        ability_id: 5,
+    });
 
     const targetIp = target.ip || "192.168.1.105";
     const targetHost = target.hostname || targetIp;
-    const attackSpeed = playerStats?.scanSpeed ?? 1;
-    const hackingSkill = playerStats?.hacking ?? 1;
+    const attackSpeed = 1;
 
     await delay(300);
 
@@ -431,83 +507,93 @@ const simulateCredentialStuffing: AttackHandler = async (target, playerStats, on
     ];
 
     for (const stageMessage of stages) {
-        let logType:  "system" | "error" | "test" | "load" = 'system';
-        if (stageMessage.includes('[+] ')) logType = 'load';
-        if (stageMessage.includes('[*] ')) logType = 'test';
+        let logType: LogType = 'system';
+        if (stageMessage.startsWith('[+]')) logType = 'load';
+        else if (stageMessage.startsWith('[*]')) logType = 'test';
+
         onLog?.({ type: logType, content: stageMessage });
         await delay(450 / attackSpeed);
     }
 
-    // Simulated progress updates
+    // Simulated progress updates showing no matches
     const progressLogs = [
-        `[*] Progress: 15% (6,780/45,200) | 120 req/s | Rate-limit: NOMINAL`,
-        `[*] Progress: 42% (18,984/45,200) | 115 req/s | WAF status: BYPASSED`,
-        `[!] Match detected: row #22,401 [usr: dev_lead@corp.internal]`,
-        `[*] Progress: 78% (35,256/45,200) | 98 req/s | Captcha trigger: NEUTRALIZED`
+        `[*] Progress: 25% (11,300/45,200) | 120 req/s | Rate-limit: NOMINAL`,
+        `[*] Progress: 50% (22,600/45,200) | 118 req/s | WAF status: NOMINAL`,
+        `[*] Progress: 75% (33,900/45,200) | 110 req/s | Validations: 0 MATCHES`,
+        `[*] Progress: 100% (45,200/45,200) | 105 req/s | Process Completed`
     ];
 
     for (const logMsg of progressLogs) {
         await delay(400 / attackSpeed);
-        let logType:  "system" | "error" | "test" | "load" = 'system';
-        if (logMsg.includes('[+] ')) logType = 'load';
-        if (logMsg.includes('[*] ')) logType = 'test';
+        let logType: LogType = 'system';
+        if (logMsg.startsWith('[*]')) logType = 'test';
         onLog?.({ type: logType, content: logMsg });
     }
 
     await delay(600);
 
-    // Success probability based on hacking skill vs target defense
-    const targetDefense = target.defense ?? 10;
-    const successChance = Math.min(Math.max(0.65 + (hackingSkill - targetDefense) * 0.04, 0.20), 0.90);
-    const isSuccess = Math.random() < successChance;
+    updatePlayerStats({health: 0, xp: 50,});
 
-    if (isSuccess) {
-        const generatedPass = `P@ss_${Math.floor(1000 + Math.random() * 9000)}`;
-        return {
-            type: "system",
-            content: `\n[+] CREDENTIAL STUFFING COMPLETE for ${targetHost}\n` +
-                `    ├─ Total Tested: 45,200 combos\n` +
-                `    ├─ Matches Found: 1 valid account\n` +
-                `    ├─ Credential Pair: [ dev_lead@corp.internal : ${generatedPass} ]\n` +
-                `    └─ Privilege Level: Developer / Internal API Access`
-        };
-    } else {
-        return {
-            type: "error",
-            content: `\n[-] ATTACK HALTED: Target host ${targetHost} enforced IP lockout / Cloudflare Bot Management.\n` +
-                `    └─ Error 429: Too Many Requests. Combo list exhausted without valid access.`
-        };
-    }
+    // Output: No credentials found
+    return {
+        type: "error",
+        content: `\n[-] STUFFING EXHAUSTED for ${targetHost}\n` +
+            `    ├─ Total Tested: 45,200 combos\n` +
+            `    ├─ Matches Found: 0 valid accounts\n` +
+            `    └─ Result: Target credentials not present in provided list.`
+    };
 };
 
-const simulateSessionHijack: AttackHandler = async (target, playerStats, onLog) => {
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const simulateSessionHijack: AttackHandler = async (services, onLog) => {
+    const { target, connections } = services;
 
     const targetIp = target.ip || "192.168.1.105";
     const targetHost = target.hostname || targetIp;
-    const hackingSkill = playerStats?.hacking ?? 1;
+    const hackingSkill = 1;
+
+    // Guard Clause: Validate active bot for target IP
+    const matchingBot = connections.find(
+        (connection) => connection.status === "bot" && connection.targetIp === targetIp
+    );
+
+    if (!matchingBot) {
+        return {
+            type: "error",
+            content: `\n[-] SESSION HIJACK ABORTED on ${targetHost}\n` +
+                `    ├─ Reason: No active bot connection found targeting IP ${targetIp}.\n` +
+                `    └─ Security Action: Attack initialization failed.`
+        };
+    }
+
+    // Realistic token generators
+    const generateSessionId = () => Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    const generateCsrfToken = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+    const stolenSessionId = `PHPSESSID=${generateSessionId()}`;
+    const csrfToken = generateCsrfToken();
+    const epochExpiry = Math.floor(Date.now() / 1000) + 86400; // 24h into the future
 
     await delay(300);
 
     const stages = [
-        `[+] Injecting stolen cookie header [SESSIONID=x9f8a2...] into HTTP proxy stack...`,
+        `[+] Injecting stolen cookie header [Cookie: ${stolenSessionId}; path=/; Secure; HttpOnly] into HTTP proxy stack`,
         `[*] Target session endpoint: https://${targetHost}/admin/dashboard`,
-        `[*] Verifying cookie validity and expiration epoch...`,
-        `[+] Token status: ACTIVE | Valid for target user: "admin"`,
-        `[*] Overriding current user context and injecting CSRF token...`
+        `[*] Verifying cookie validity and expiration epoch [Expires: ${epochExpiry}]`,
+        `[+] Token status: ACTIVE | Validated context: user="admin" (UID: 1001)`,
+        `[*] Overriding client headers: X-CSRF-Token="${csrfToken}"`
     ];
 
     for (const stageMessage of stages) {
-        let logType:  "system" | "error" | "test" | "load" = 'system';
-        if (stageMessage.includes('[+] ')) logType = 'load';
-        if (stageMessage.includes('[*] ')) logType = 'test';
+        let logType: LogType = 'system';
+        if (stageMessage.startsWith('[+] ')) logType = 'load';
+        if (stageMessage.startsWith('[*] ')) logType = 'test';
         onLog?.({ type: logType, content: stageMessage });
         await delay(400);
     }
 
     await delay(500);
 
-    // Success check based on target defense and security level vs hacking skill
+    // Success check based on security parameters
     const targetDefense = target.defense ?? 10;
     const isSecurityStrict = target.securityLevel ? target.securityLevel > 3 : false;
 
@@ -516,108 +602,153 @@ const simulateSessionHijack: AttackHandler = async (target, playerStats, onLog) 
     const isSuccess = Math.random() < successChance;
 
     if (isSuccess) {
-        const adminToken = Math.random().toString(36).substring(2, 12);
+        const adminBearer = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${btoa(JSON.stringify({ uid: 1001, role: "admin", exp: epochExpiry })).replace(/=/g, '')}`;
+
         return {
             type: "system",
             content: `\n[+] SESSION HIJACK SUCCESSFUL on ${targetHost}\n` +
-                `    ├─ Active Session Claimed: user="admin"\n` +
-                `    ├─ High-Privilege Bearer Token: auth_admin_${adminToken}\n` +
-                `    ├─ Access Level: Full Administrative Access\n` +
+                `    ├─ Active Session Claimed: user="admin" (UID: 1001)\n` +
+                `    ├─ High-Privilege Bearer Token: Bearer ${adminBearer}\n` +
+                `    ├─ Access Level: Full Administrative Access (Scope: root)\n` +
                 `    └─ Root Node Status: [COMPROMISED]`
         };
-    } else {
-        return {
-            type: "error",
-            content: `\n[-] SESSION HIJACK FAILED on ${targetHost}\n` +
-                `    ├─ Reason: Token revoked or IP binding mismatch detected by server.\n` +
-                `    └─ Security Action: Session invalidated by target Intrusion Prevention System.`
-        };
     }
+
+    return {
+        type: "error",
+        content: `\n[-] SESSION HIJACK FAILED on ${targetHost}\n` +
+            `    ├─ Reason: Session binding mismatch (TLS fingerprinting mismatch on ${targetIp}).\n` +
+            `    └─ Security Action: Session invalidated by target Intrusion Prevention System.`
+    };
 };
 
-const simulateMalwareDrop: AttackHandler = async (target, playerStats, onLog) => {
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const simulateMalwareDrop: AttackHandler = async (services, onLog) => {
+    const { target, connections, updatePlayerStats } = services;
 
     const targetIp = target.ip || "192.168.1.105";
     const targetHost = target.hostname || targetIp;
-    const stealthRating = playerStats?.stealth ?? playerStats?.hacking ?? 1;
+    const stealthRating = 1;
+
+    // Guard Clause: Ensure target is an active compromised bot connection
+    const targetBot = connections.find(
+        (connection) => connection.status === "bot" && connection.targetIp === targetIp
+    );
+
+    if (!targetBot) {
+        return {
+            type: "error",
+            content: `\n[-] MALWARE DROP ABORTED on ${targetHost}\n` +
+                `    ├─ Reason: Target is not registered as an active compromised bot node.\n` +
+                `    └─ Security Action: Payload execution prohibited on unverified target.`
+        };
+    }
+
+    // Dynamic generation of realistic artifact identifiers
+    const generateHex = (len: number) => Array.from({ length: len }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    const payloadHash = generateHex(12);
+    const pid = Math.floor(Math.random() * (9000 - 1000) + 1000);
+    const c2Domain = `sysupdate-telemetry-${generateHex(4)}.internal-cdn.net`;
 
     await delay(300);
 
+    // Believable execution stages using real Linux internal mechanisms
     const stages = [
-        `[+] Fetching remote payload stage2.sh from http://c2.server...`,
-        `[*] Pipe executing script directly in memory via bash process...`,
-        `[+] Unpacking stage 2 payload: implant.elf (architecture: x86_64)`,
-        `[*] Establishing persistent reverse shell to C2 server on port 4444...`,
-        `[*] Writing systemd service entry [/etc/systemd/system/net-mon.service]...`
+        `[+] Fetching obfuscated payload stage via https://${c2Domain}:443/api/v2/update_${payloadHash}.bin`,
+        `[*] Invoking memfd_create("elf_exec", MFD_CLOEXEC) to allocate anonymous RAM file descriptor`,
+        `[+] Staging payload payload directly to memory (FD: /proc/self/fd/3) - Bypassing disk write`,
+        `[*] Executing elf_exec via fexecve (PID: ${pid}) under spoofed process identifier [kworker/0:2]`,
+        `[*] Initiating mbedTLS handshake to ${c2Domain}:443 (eSNI & domain fronting enabled)`,
+        `[*] Installing persistence timer unit [/etc/systemd/system/systemd-networkd-sync.timer]`
     ];
 
     for (const stageMessage of stages) {
-        let logType:  "system" | "error" | "test" | "load" = 'system';
-        if (stageMessage.includes('[+] ')) logType = 'load';
-        if (stageMessage.includes('[*] ')) logType = 'test';
+        let logType: LogType = 'system';
+        if (stageMessage.startsWith('[+] ')) logType = 'load';
+        if (stageMessage.startsWith('[*] ')) logType = 'test';
         onLog?.({ type: logType, content: stageMessage });
         await delay(450);
     }
 
     await delay(500);
 
-    // Success check: stealth/hacking vs target defense
+    // Success check vs target defense
     const targetDefense = target.defense ?? 10;
     const baseChance = 0.70;
     const successChance = Math.min(Math.max(baseChance + (stealthRating - targetDefense) * 0.05, 0.20), 0.95);
     const isSuccess = Math.random() < successChance;
 
     if (isSuccess) {
-        const beaconId = Math.random().toString(36).substring(2, 10);
+        const beaconId = generateHex(8);
+        updatePlayerStats({health: -12, xp: 1123});
         return {
             type: "system",
             content: `\n[+] MALWARE DROP SUCCESSFUL on ${targetHost}\n` +
                 `    ├─ C2 Beacon Established: ID [bcn_${beaconId}]\n` +
-                `    ├─ Persistence Method: systemd background service\n` +
-                `    ├─ Privileges: root / SYSTEM\n` +
+                `    ├─ Execution Vector: In-Memory Fileless (memfd_create / fexecve)\n` +
+                `    ├─ Process Masquerade: [kworker/0:2] (PID ${pid})\n` +
+                `    ├─ Persistence: systemd timer [systemd-networkd-sync.timer]\n` +
                 `    └─ Node Status: [PERMANENTLY BACKDOORED]`
         };
-    } else {
-        return {
-            type: "error",
-            content: `\n[-] MALWARE DROP BLOCKED on ${targetHost}\n` +
-                `    ├─ Reason: Host-based Endpoint Detection (EDR) flagged memory execution.\n` +
-                `    └─ Security Action: Suspicious bash process killed & payload deleted.`
-        };
     }
+
+    return {
+        type: "error",
+        content: `\n[-] MALWARE DROP BLOCKED on ${targetHost}\n` +
+            `    ├─ Reason: Host-based EDR (eBPF process probe) flagged anomalous memfd execution.\n` +
+            `    └─ Security Action: PID ${pid} terminated & memory pages wiped by kernel agent.`
+    };
 };
 
-const simulateDDoSBurst: AttackHandler = async (target, playerStats, onLog) => {
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const simulateDDoSBurst: AttackHandler = async (services, onLog) => {
+    const { target, connections, performAction, updatePlayerStats } = services;
 
     const targetIp = target.ip || "192.168.1.105";
     const targetHost = target.hostname || targetIp;
-    const botnetSize = playerStats?.botnetSize ?? 1000;
-    const attackPower = playerStats?.hacking ?? 1;
 
+    // 1. Guard Clause: Calculate active botnet size from connections
+    const activeBots = connections.filter((connection) => connection.status === "bot");
+    const botnetSize = activeBots.length;
+
+    if (botnetSize === 0) {
+        return {
+            type: "error",
+            content: `\n[-] DDOS BURST ABORTED on ${targetHost}\n` +
+                `    ├─ Reason: Zero active compromised bot nodes available in C2 inventory.\n` +
+                `    └─ Security Action: Volumetric flood payload failed to initiate.`
+        };
+    }
+
+    // 2. Dynamic Metric Calculations based on Botnet Scale
+    const attackPower = 1;
+    const gbps = (botnetSize * 0.085 + Math.random() * 2).toFixed(1); // Scales bandwidth with bot count
+    const mpps = (botnetSize * 0.12 + Math.random()).toFixed(1);     // Mega Packets Per Second
+    const reflectionVector = botnetSize > 50 ? "DNS/NTP Reflection & TCP SYN-ACK" : "UDP Volumetric Flood";
+
+    // 3. Execution Stage: Believable Attack Logs
     await delay(300);
 
     const stages = [
-        `[!] WARNING: HIGH NOISE MOVE INITIATED`,
-        `[+] Connecting to Command & Control network (${botnetSize} active nodes)...`,
-        `[+] Synchronizing TCP SYN packet vectors against target ${targetIp}:80/443...`,
-        `[*] FLOOD STARTED: Transmitting 10 Gbps peak packet burst...`
+        `[!] WARNING: HIGH NOISE VOLUMETRIC ATTACK INITIATED`,
+        `[+] Dispatching payload payload manifest to ${botnetSize} zombie nodes across C2 subnets`,
+        `[+] Initializing spoofed raw sockets for ${reflectionVector} attack vector`,
+        `[*] Synchronizing UDP/TCP packet bursts against target endpoint ${targetIp}:443`,
+        `[*] VOLUMETRIC FLOOD ACTIVE: Saturation pipeline broadcasting at ~${gbps} Gbps peak output`
     ];
 
+    updatePlayerStats({ health: -54, xp: 1561 })
     for (const stageMessage of stages) {
-        let logType:  "system" | "error" | "test" | "load" = 'system';
-        if (stageMessage.includes('[+] ')) logType = 'load';
-        if (stageMessage.includes('[*] ')) logType = 'test';
+        let logType: LogType = 'system';
+        if (stageMessage.startsWith('[+] ')) logType = 'load';
+        if (stageMessage.startsWith('[*] ')) logType = 'test';
         onLog?.({ type: logType, content: stageMessage });
         await delay(350);
     }
 
-    // Volumetric flood updates
+    // Dynamic Traffic & Impact Updates
     const burstLogs = [
-        `[>>>] Packet Rate: 14.2 Mpps | Bandwidth Saturation: 94%`,
-        `[!] Target server socket queue exhausted (HTTP 503 Service Unavailable)...`,
-        `[!] ISP Scrubbing Center alert triggered on network segment!`
+        `[>>>] Ingress Rate: ${mpps} Mpps | Target Pipeline Bandwidth Saturation: 98.4%`,
+        `[!] TCP Connection backlog queue full (ACK-FLOOD socket exhaustion | HTTP 503)`,
+        `[!] Upstream Tier-1 Transit Provider trigger: Anycast BGP Route Scrubbing activated!`
     ];
 
     for (const logMsg of burstLogs) {
@@ -627,72 +758,78 @@ const simulateDDoSBurst: AttackHandler = async (target, playerStats, onLog) => {
 
     await delay(500);
 
-    // Calculate massive structural damage to node integrity/defense
-    const baseDamage = 80;
+    // 4. Perform Game Action
+    if (target.id) {
+        await performAction?.({
+            action_type: "DDoS",
+            target_id: target.id,
+            ability_id: 5,
+        });
+    }
+
+    // 5. Calculate Structural Damage
+    const baseDamage = 40;
     const damageDealt = Math.min(
         target.integrity ?? 100,
-        baseDamage + Math.floor(attackPower * 5) + Math.floor(botnetSize / 200)
+        baseDamage + Math.floor(attackPower * 5) + Math.floor(botnetSize * 1.5)
     );
     const newIntegrity = Math.max(0, (target.integrity ?? 100) - damageDealt);
 
     return {
         type: "system",
         content: `\n[+] DDOS BURST CONCLUDED on ${targetHost}\n` +
-            `    ├─ Traffic Rate: 10.2 Gbps (SYN Flood)\n` +
+            `    ├─ Participating Bots: ${botnetSize} active nodes\n` +
+            `    ├─ Traffic Rate: ${gbps} Gbps / ${mpps} Mpps (${reflectionVector})\n` +
             `    ├─ Node Integrity Impact: -${damageDealt} HP (Remaining: ${newIntegrity} HP)\n` +
             `    ├─ Defense Rating Degraded: -5 Defense\n` +
-            `    └─ Trace Alert Level: CRITICAL (+40% Detection Exposure)`
+            `    └─ Trace Alert Level: CRITICAL (+40% Exposure)`
     };
 };
 
-const simulateZeroDay: AttackHandler = async (target, playerStats, onLog) => {
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
+const simulateZeroDay: AttackHandler = async (services, onLog) => {
+    const { target, updatePlayerStats } = services;
     const targetIp = target.ip || "192.168.1.105";
     const targetHost = target.hostname || targetIp;
 
     await delay(300);
 
+    // Educational telemetry logs instead of fake exploitation
     const stages = [
-        `[!] INITIATING UNPUBLISHED ZERO-DAY VECTOR (CVE-PENDING)...`,
-        `[*] Target Kernel Family: Linux 6.x (x86_64)`,
-        `[+] Triggering kmalloc heap corruption primitive in networking subsystem...`,
-        `[*] Bypassing KASLR memory randomize placement...`,
-        `[*] Arbitrary kernel write achieved: overwriting task_struct credentials...`,
-        `[+] Injecting shellcode into privilege namespace PID 1...`
+        `[!] ZERO-DAY (0-DAY) RESEARCH ANALYSIS INITIATED for ${targetHost}`,
+        `[*] Definition: A Zero-Day is a software vulnerability unknown to the software vendor with zero days available to patch it.`,
+        `[+] Discovery Reality: Zero-days require months of static code auditing, reverse engineering, and fuzzing.`,
+        `[*] Market Dynamics: Weaponized zero-days sell for $100K to $2M+ on public/private exploit markets (e.g., Zerodium).`,
+        `[*] Defense Vector: Modern systems rely on memory safeguards (ASLR, DEP, CFI) that make reliable zero-day execution exceptionally rare.`
     ];
 
     for (const stageMessage of stages) {
-        let logType:  "system" | "error" | "test" | "load" = 'system';
-        if (stageMessage.includes('[+] ')) logType = 'load';
-        if (stageMessage.includes('[*] ')) logType = 'test';
+        let logType: LogType = 'system';
+        if (stageMessage.startsWith('[+] ')) logType = 'load';
+        if (stageMessage.startsWith('[*] ')) logType = 'test';
         onLog?.({ type: logType, content: stageMessage });
-        await delay(450);
+        await delay(500);
     }
 
     await delay(600);
 
-    // Ultimate Move: Ignores defense and integrity calculations completely
-    const previousIntegrity = target.integrity ?? 100;
-    const damageDealt = previousIntegrity; // Instantly depletes target integrity or forces compromise
-
+    updatePlayerStats({ health: 95, xp: 1564 });
     return {
         type: "system",
-        content: `\n[***] ZERO-DAY EXECUTION SUCCESSFUL [***]\n` +
+        content: `\n[***] ZERO-DAY ANALYSIS COMPLETE [***]\n` +
             `    ├─ Target Host: ${targetHost} (${targetIp})\n` +
-            `    ├─ Defense Mitigation: IGNORED (100% Penetration)\n` +
-            `    ├─ Root Shell: Granted (uid=0[root] gid=0[root])\n` +
-            `    ├─ System Integrity Impact: -${damageDealt} HP (CRITICAL FAILURE)\n` +
-            `    └─ Node Status: [FULLY SUBJUGATED]`
+            `    ├─ Concept: Unknown security flaw with no existing vendor patch or signature.\n` +
+            `    ├─ Rarity & Cost: High complexity; typically deployed by nation-state Threat Actors or Advanced Persistent Threats (APTs).\n` +
+            `    ├─ Mitigation: Defense-in-depth, strict sandboxing, dynamic monitoring (EDR), and Bug Bounty programs.\n` +
+            `    └─ Result: Informational Briefing Delivered (No exploit executed).`
     };
 };
 
-const simulateLogWiper: AttackHandler = async (target, playerStats, onLog) => {
+const simulateLogWiper: AttackHandler = async (services, onLog) => {
     const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
+    const { target } = services;
     const targetIp = target.ip || "192.168.1.105";
     const targetHost = target.hostname || targetIp;
-    const stealthSkill = playerStats?.stealth ?? playerStats?.hacking ?? 1;
+    const stealthSkill = 1;
 
     await delay(300);
 
@@ -706,7 +843,7 @@ const simulateLogWiper: AttackHandler = async (target, playerStats, onLog) => {
     ];
 
     for (const stageMessage of stages) {
-        let logType:  "system" | "error" | "test" | "load" = 'system';
+        let logType:  LogType = 'system';
         if (stageMessage.includes('[+] ')) logType = 'load';
         if (stageMessage.includes('[*] ')) logType = 'test';
         onLog?.({ type: logType, content: stageMessage });
@@ -756,8 +893,7 @@ export const AttackActionMap: Record<GameAttackAction, AttackHandler> = {
  */
 export const executeAttack = async (
     action: GameAttackAction,
-    targetNode: NodeState,
-    playerStats: any,
+    services: GameContextServices,
     onLog?: LogCallback
 ): Promise<AttackResult> => {
     const handler = AttackActionMap[action];
@@ -767,7 +903,7 @@ export const executeAttack = async (
     }
 
     try {
-        return await handler(targetNode, playerStats, onLog);
+        return await handler(services, onLog);
     } catch (error) {
         return {
             type: 'error',

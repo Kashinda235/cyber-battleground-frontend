@@ -2,16 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import type {
     Player, Ability, ChatLog, GameState, MoveLog, ActionRequest,
     StateUpdateRequest, RegisterRequest, LoginRequest, PlayerProfile, Asset, Connection, System, Mail,
-    MailRequest, PlayerStatsRequest,
+    MailRequest, PlayerStatsRequest, ConnectionRequest,
 } from '../utils/types';
 import {
     fetchPlayers, fetchChats, fetchGameState, fetchMoveLogs, fetchMyProfile, fetchMyConnections, fetchMyAsstes,
     fetchSystems, fetchInboxMails, fetchSentMails,
 } from '../services/fetch_api.ts';
 import {
-    patchPlayerStats,
-    postAction, postChat, postGameState, postMail, postPlayer, postUser,
-    updateNetworkPort, updateSeenMail, updateSystemConfig, updateSystemDefense,
+    patchPlayerStats, postAction, postChat, postGameState, postMail, postPlayer, postUser,
+    updateNetworkPort, updateSeenMail, updateSystemConfig, updateSystemDefense, postConnection, updateConnection
 } from '../services/post_api.ts'
 import { useWebSocket } from './useWebSocket';
 
@@ -173,6 +172,19 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         return res.data;
     }
 
+    const stateConnection = async (data: ConnectionRequest) => {
+        if (!token) throw new Error('Authentication required for chat');
+        const connection = connections.find(connection => connection.targetIp === data.target_ip);
+        if (!connection) {
+            const res = await postConnection(data, token);
+            setConnections(prevConnections => [...prevConnections, res.data]);
+            return res.data;
+        } else {
+            const newData = {status: data.status};
+            const res = await updateConnection(connection.id, newData, token);
+            return res.data;
+        }
+    }
     const updateSeen = async (data: Mail) => {
         if (!token) throw new Error('Authentication required for chat');
         const res = await updateSeenMail({...data, isSeen: true}, token);
@@ -186,7 +198,9 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
 
     const updatePlayerStats = async (data: PlayerStatsRequest) => {
         if (!token) throw new Error('Authentication required to update state');
-        const res = await patchPlayerStats(data, token);
+        const incHealth = Math.min(100, Math.max(0, systemHealth + data.health));
+        const incData = { health: incHealth, xp: playerXp + data.xp };
+        const res = await patchPlayerStats(incData, token);
         setSystemHealth(res.data.health);
         setPlayerXp(res.data.xp);
 
@@ -231,6 +245,7 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         updatePlayerStats,
         sendChat,
         sendMail,
+        stateConnection,
         updateSeen,
         updateGameState,
         updatePlayerProfile,

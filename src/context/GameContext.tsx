@@ -1,6 +1,16 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import {executeAttack, type LogCallback, type NodeState} from "../utils/AttackActionMap.ts";
-import type {Player, GameState, ChatLog, MoveLog, PlayerProfile, System, Mail, MailRequest} from '../utils/types';
+import type {
+    Player,
+    GameState,
+    ChatLog,
+    MoveLog,
+    PlayerProfile,
+    System,
+    Mail,
+    MailRequest,
+    ActionResult, ActionRequest, PlayerStatsRequest, Connection, ConnectionRequest
+} from '../utils/types';
 import {useGameData} from "../hooks/useGameData.ts";
 import {type TerminalEntry, terminalCommand} from "../utils/terminalCommands.ts";
 
@@ -27,12 +37,13 @@ interface GameContextType {
     // Actions (from useGameData)
     sendChat: (msg: string) => void;
     updateSeen: (data: Mail) => Promise<Mail>
-    performAction: (actionData: any) => void;
+    performAction: (data: ActionRequest) => Promise<ActionResult>;
     updatePlayerProfile:  (data: PlayerProfile) => void;
 
     // Local UI State
     target: Player | undefined;
-    sendMail: (data: MailRequest) => Promise<Mail>
+    sendMail: (data: MailRequest) => Promise<Mail>;
+    stateConnection:  (data: ConnectionRequest) => Promise<Connection>;
     setTarget: (target: Player) => void;
     activeTab: TabType;
     setActiveTab: (tab: TabType) => void;
@@ -41,7 +52,19 @@ interface GameContextType {
     terminalHistory: TerminalEntry[];
     executeCommand: (cmd: string) => void;
     clearTerminal: () => void;
-    handleCommand: (action: any, target: string | null) => void;
+    handleCommand: (action: any, target: string | null, targetId: number | null) => void;
+}
+
+export interface GameContextServices {
+    target: NodeState;
+    performAction: (data: ActionRequest) => Promise<ActionResult>;
+    sendMail: (data: MailRequest) => Promise<Mail>;
+    stateConnection:  (data: ConnectionRequest) => Promise<Connection>;
+    updatePlayerStats: (data: PlayerStatsRequest) => any;
+    playerXp: number;
+    systemHealth: number;
+    connections: Connection[];
+    // ..more required functions
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -54,8 +77,8 @@ interface GameProviderProps {
 
 export const GameProvider: React.FC<GameProviderProps> = ({ token, player, children }) => {
     const {
-        profile, gameState, systemHealth, playerXp, chats, sendChat, moveLogs,
-        inboxMails, sentMails, players, systems, performAction,
+        profile, gameState, systemHealth, playerXp, updatePlayerStats, chats, sendChat, moveLogs,
+        inboxMails, sentMails, players, systems, performAction, stateConnection, connections,
         updatePlayerProfile, sendMail, updateSeen, isLoading,
     } = useGameData({ token, player });
     const [target, setTarget] = useState<Player | undefined>(undefined);
@@ -75,26 +98,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         terminalCommand(cmd, setTerminalHistory);
     }
 
-    const handleCommand = async (action: any, target: string | null, targetId: number | null) => {
+    const handleCommand = async (action: any, targetName: string | null, targetId: number | null) => {
         const targetPlayer = players.find( player => player.id === targetId);
         const targetSystem = systems.find( system => system.playerId === targetId);
-
-        if (!targetPlayer || !targetSystem) {
-            console.log("target not found");
-            return;
-        }
-
-        const targetNode: NodeState = {
-            id: `player-0${targetPlayer.id}`,
-            ip: targetSystem.ip,
-            hostname: targetSystem.hostname,
-            password: targetSystem.password,
-            securityLevel: 2, // e.g., 1 to 5
-            defense: 6,
-            integrity: 85,
-            isCompromised: true,
-            isFirewallActive: true,
-        };
 
         const timestamp = new Date().toLocaleTimeString();
 
@@ -102,7 +108,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         const userEntry: TerminalEntry = {
             id: Date.now().toString(),
             type: 'user',
-            content: action.command.replace("<TARGET>", target),
+            content: action.command.replace("<TARGET>", targetName),
             timestamp,
         };
         setTerminalHistory((prev) => [...prev, userEntry]);
@@ -117,8 +123,30 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
             setTerminalHistory((prev) => [...prev, liveEntry]);
         };
 
+        if (!targetPlayer || !targetSystem) {
+            handleLiveLog({type: "error", content: "No target selected"});
+            return;
+        }
+        const target: NodeState = {
+            id: targetId,
+            name: `player-0${targetPlayer.id}`,
+            ip: targetSystem.ip,
+            hostname: targetSystem.hostname,
+            password: targetSystem.password,
+            securityLevel: 2, // e.g., 1 to 5
+            defense: 6,
+            integrity: 85,
+            isCompromised: true,
+            isFirewallActive: true,
+        };
+
+        const gameServices: GameContextServices = {
+            target, performAction, sendMail, updatePlayerStats, playerXp, systemHealth, stateConnection,
+            connections
+        };
+
         // 3. Execute attack (will fire handleLiveLog periodically)
-        const result = await executeAttack(action.name, targetNode, "ME", handleLiveLog);
+        const result = await executeAttack(action.name, gameServices, handleLiveLog);
 
         // 4. Append final summary result
         const resultEntry: TerminalEntry = {
@@ -147,6 +175,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         isLoading,
         sendChat,
         sendMail,
+        stateConnection,
         updateSeen,
         performAction,
         updatePlayerProfile,

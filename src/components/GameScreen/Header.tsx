@@ -214,7 +214,7 @@ export const Header = () => {
     const playerData: PlayerDetailsProps = { name: currentPlayer?.username ?? "Guest", ip: `192.168.1.${currentPlayer?.id}`, role: String(currentPlayer?.role) }
     // const playerData = { name:  "Guest", ip: `192.168.1.${10}`, role: 'red' }
 
-    const gameStateData = { systemHealth: 65, score: 543 }
+    const gameStateData = { systemHealth: systemHealth, score: playerXp }
 
     let isUnderAttack = true;
     let defenseState = {
