@@ -10,25 +10,25 @@ const GameLayout = () => {
     const { activeTab } = useGame();
     const monitoringTabs = ["defence", "alerts", "events", "actions"];
     return (
-    <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full mx-auto px-4 sm:px-6 lg:px-4">
 
         {/* Grid Layout Container */}
-        <div className="grid grid-cols-1 lg:grid-cols-8 gap-4 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-36 gap-4 w-full">
 
             {/* Top/First Row on Large Screens: 3:2 Ratio (3/5ths vs 2/5ths) */}
             {/* ActivityFeed (3 parts of 5 -> 60%) */}
-            <div className="h-[600px] w-full overflow-y-auto lg:col-span-2">
+            <div className="h-[600px] w-full overflow-y-auto lg:col-span-9">
                 <ActivityFeed />
             </div>
 
             {/* ActivityLog (2 parts of 5 -> 40%) */}
-            <div className="h-[600px] w-full overflow-y-auto lg:col-span-4">
+            <div className="h-[600px] w-full overflow-y-auto lg:col-span-19">
                 <ActivityLog />
             </div>
 
             {/* Bottom Row on Large Screens: Full Width (5/5ths) */}
             {/* GameCanvas */}
-            <div className="h-[600px] w-full overflow-hidden lg:col-span-2">
+            <div className="h-[600px] w-full overflow-hidden lg:col-span-8">
                 {activeTab === "profile" && <PlayersList />}
                 {activeTab === "chat" && <PlayersList />}
                 {monitoringTabs.includes(activeTab) && <Monitoring />}

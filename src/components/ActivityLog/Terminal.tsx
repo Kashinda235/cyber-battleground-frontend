@@ -27,7 +27,7 @@ export default function ModernTerminal() {
 
     return (
         <div
-            className="w-full h-full flex flex-col max-w-3xl mx-auto rounded-xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 text-slate-200 font-mono text-sm"
+            className="w-full h-full flex flex-col mx-auto rounded-xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 text-slate-200 font-mono text-sm"
             onClick={() => inputRef.current?.focus()}
         >
             <div className="bg-slate-900/90 px-4 py-3 flex items-center justify-between border-b border-slate-800/80 backdrop-blur select-none shrink-0">
