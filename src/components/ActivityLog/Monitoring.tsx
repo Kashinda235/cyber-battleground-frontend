@@ -9,7 +9,6 @@ const Monitoring = () => {
     const { moveLogs } = useGame();
     const { defenseState, logs, activeAlert, dispatchAttackEvent} =
         useCyberSecurityCenter(moveLogs);
-    console.log(moveLogs);
 
     const triggerSimulatedAttack = (type: AttackEvent['attackType'], severity: AttackEvent['severity'], port: number) => {
         dispatchAttackEvent({

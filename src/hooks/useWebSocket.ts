@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import type { Player, GameState, ChatLog, ActionResult } from '../utils/types';
+import type {Player, GameState, ChatLog, ActionResult, Mail} from '../utils/types';
 import { WS_BASE_URL } from '../utils/constants'
 // ==========================================
 // WebSocket Types
 // ==========================================
 
 export type WebSocketMessageType =
-    | 'welcome' | 'player_joined' | 'player_left' | 'action' | 'game_state' | 'chat';
+    | 'welcome' | 'player_joined' | 'player_left' | 'action' | 'game_state' | 'chat' | 'mail';
 
 export interface WebSocketMessage<T = unknown> {
     type: WebSocketMessageType;
@@ -26,6 +26,7 @@ export interface UseWebSocketProps {
     onActionPerformed?: (action: ActionResult) => void;
     onGameStateUpdated?: (state: GameState) => void;
     onChatMessageReceived?: (message: ChatLog) => void;
+    onMailReceived?: (mail: Mail) => void;
 }
 
 export interface UseWebSocketReturn {
@@ -50,6 +51,7 @@ export function useWebSocket({
                                  onActionPerformed,
                                  onGameStateUpdated,
                                  onChatMessageReceived,
+                                 onMailReceived,
                              }: UseWebSocketProps): UseWebSocketReturn {
     const [isConnected, setIsConnected] = useState<boolean>(false);
     const [error, setError] = useState<Event | null>(null);
@@ -65,7 +67,8 @@ export function useWebSocket({
         onPlayerLeft,
         onActionPerformed,
         onGameStateUpdated,
-        onChatMessageReceived
+        onChatMessageReceived,
+        onMailReceived
     });
 
     useEffect(() => {
@@ -75,9 +78,10 @@ export function useWebSocket({
             onPlayerLeft,
             onActionPerformed,
             onGameStateUpdated,
-            onChatMessageReceived
+            onChatMessageReceived,
+            onMailReceived
         };
-    }, [onWelcome, onPlayerJoined, onPlayerLeft, onActionPerformed, onGameStateUpdated, onChatMessageReceived]);
+    }, [onWelcome, onPlayerJoined, onPlayerLeft, onActionPerformed, onGameStateUpdated, onChatMessageReceived, onMailReceived]);
 
     const connect = useCallback(() => {
         // Prevent duplicate connections if already connected or connecting
@@ -129,6 +133,9 @@ export function useWebSocket({
                         break;
                     case 'chat':
                         callbacks.onChatMessageReceived?.(parsed.data as ChatLog);
+                        break;
+                    case 'mail':
+                        callbacks.onMailReceived?.(parsed.data as Mail);
                         break;
                     default:
                         console.warn('[WS] Unknown message type:', parsed.type);
