@@ -1,17 +1,25 @@
 import ChatBlock from '../Feed/ChatBlock.tsx';
 import ActionMode from '../Feed/Action/ActionMode.tsx';
 import Events from "../Feed/Events.tsx";
-// import {useToast} from "../../context/ToastContext.tsx";
+import {useToast} from "../../context/ToastContext.tsx";
 import PlayerProfileCard from "../Feed/Profile.tsx";
 import {useGame} from "../../context/GameContext.tsx";
 import SecurityControlPanel from "../Feed/Defense/DefenseMode.tsx";
 import {NAV_ITEMS, NavButton} from "../../utils/FeedUtils.tsx";
 import MailFeature from "../Feed/Notifications.tsx";
+import {useEffect} from "react";
 
 export default function ActivityFeed() {
   const { activeTab, setActiveTab } = useGame();
-  // const { showToast } = useToast();
+  const { showToast } = useToast();
 
+  useEffect(() => {
+      showToast({
+          title: "Hello Toast",
+          description: "This is a test toast",
+          type: "mail"
+      });
+  }, [activeTab]);
   return (
     <>
       <style>{`
