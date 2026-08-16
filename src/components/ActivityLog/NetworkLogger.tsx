@@ -1,65 +1,49 @@
-import { useState, useEffect, useMemo } from 'react';
+import {useState, useEffect, useMemo, useRef} from 'react';
 import {
     Play, Pause, Trash2, Search, Shield,
     ShieldAlert, ShieldCheck, Activity, Copy, Check,
     AlertTriangle, ArrowLeft, ChevronRight
 } from 'lucide-react';
 import {INITIAL_LOGS, type LogItem} from "../../utils/logs.ts";
-
+import {useGame} from "../../context/GameContext.tsx";
+import {generateSyntheticLog, moveLogToTrafficLog} from "../../utils/trafficLogMapper.ts";
 
 export default function NetworkLogger() {
-    const [logs, setLogs] = useState<LogItem[]>(INITIAL_LOGS);
+    const { moveLogs } = useGame();
+    const [logs, setLogs] = useState<LogItem[]>([]);
     const [isStreaming, setIsStreaming] = useState(true);
+    const processedMoveIds = useRef<Set<string | number>>(new Set());
     const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [threatFilter, setThreatFilter] = useState('ALL');
     const [activeTab, setActiveTab] = useState('overview');
     const [copied, setCopied] = useState(false);
 
-    // Simulated live traffic generation
+    // Process real WebSocket moveLogs as they arrive
+    useEffect(() => {
+        if (!moveLogs || moveLogs.length === 0) return;
+
+        const newEntries: LogItem[] = [];
+
+        moveLogs.forEach((move) => {
+            if (!processedMoveIds.current.has(move.id)) {
+                processedMoveIds.current.add(move.id);
+                newEntries.push(moveLogToTrafficLog(move));
+            }
+        });
+
+        if (newEntries.length > 0) {
+            setLogs((prev) => [...newEntries, ...prev].slice(0, 100));
+        }
+    }, [moveLogs]);
+
+    // Background synthetic streaming generator (every 3 seconds)
     useEffect(() => {
         if (!isStreaming) return;
 
         const interval = setInterval(() => {
-            const isThreat = Math.random() < 0.25;
-            const protocols = ['HTTP/2', 'gRPC', 'TCP', 'WS'];
-            const methods = ['GET', 'POST', 'PUT', 'DELETE'];
-            const paths = ['/api/v1/user', '/api/v1/checkout', '/graphql', '/api/v1/auth', '/healthz'];
-            const selectedProtocol = protocols[Math.floor(Math.random() * protocols.length)];
-            const selectedMethod = methods[Math.floor(Math.random() * methods.length)];
-            const selectedPath = paths[Math.floor(Math.random() * paths.length)];
-
-            const newLog = {
-                id: `log-${Date.now()}`,
-                timestamp: new Date().toISOString(),
-                method: selectedMethod,
-                path: selectedPath,
-                protocol: selectedProtocol,
-                status: isThreat ? (Math.random() > 0.5 ? 429 : 403) : 200,
-                latency: Math.floor(Math.random() * 80) + 5,
-                sourceIp: `${Math.floor(Math.random() * 200) + 10}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-                destIp: '10.0.4.12',
-                threatLevel: isThreat ? 'BLOCKED' : 'CLEAN',
-                size: `${(Math.random() * 4 + 0.2).toFixed(1)} KB`,
-                geo: isThreat ? 'RU / Moscow' : 'US / Ashburn',
-                userAgent: isThreat ? 'Go-http-client/1.1' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-                arcjet: {
-                    decision: isThreat ? 'DENY' : 'ALLOW',
-                    rule: isThreat ? (Math.random() > 0.5 ? 'BOT_DETECTION' : 'RATE_LIMIT') : 'PASSTHROUGH',
-                    botScore: isThreat ? 89 : 2,
-                    shieldTriggered: isThreat
-                },
-                headers: {
-                    'content-type': 'application/json',
-                    'host': 'api.internal.service'
-                },
-                payload: JSON.stringify({ timestamp: Date.now(), stream: true }, null, 2),
-                responseBody: isThreat
-                    ? JSON.stringify({ error: 'Request blocked by security rules' }, null, 2)
-                    : JSON.stringify({ status: 'ok', timestamp: Date.now() }, null, 2)
-            };
-
-            setLogs((prev) => [newLog, ...prev.slice(0, 49)]);
+            const syntheticLog = generateSyntheticLog();
+            setLogs((prev) => [syntheticLog, ...prev.slice(0, 99)]);
         }, 3000);
 
         return () => clearInterval(interval);

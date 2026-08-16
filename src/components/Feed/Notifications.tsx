@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import {useState} from 'react';
 import {
     Inbox,
     Send,
@@ -50,9 +50,6 @@ export default function MailFeature() {
         updateSeen,
          // Added claim hook if present in your useGame implementation
     } = useGame();
-    useEffect(() =>{
-        console.log(inboxMails);
-    }, []);
 
     const claimReward = (reward: number) => {
         console.log(`Reward earned ${reward}`);

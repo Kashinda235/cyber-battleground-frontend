@@ -2,11 +2,14 @@ import {AnimatePresence, motion} from "framer-motion";
 import {AlertTriangle, Server} from "lucide-react";
 import {type AttackEvent, useCyberSecurityCenter} from "../../hooks/useCyberSecurityCenter.ts";
 import {useEffect} from "react";
+import {useGame} from "../../context/GameContext.tsx";
 
 
 const Monitoring = () => {
+    const { moveLogs } = useGame();
     const { defenseState, logs, activeAlert, dispatchAttackEvent} =
-        useCyberSecurityCenter();
+        useCyberSecurityCenter(moveLogs);
+    console.log(moveLogs);
 
     const triggerSimulatedAttack = (type: AttackEvent['attackType'], severity: AttackEvent['severity'], port: number) => {
         dispatchAttackEvent({
@@ -61,7 +64,7 @@ const Monitoring = () => {
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-2 shadow-lg space-y-3">
 
                 {/* LOG STREAM DISPLAY */}
-                <div className="bg-slate-950 border border-slate-800/80 rounded-lg p-3 overflow-y-auto font-mono text-[11px] space-y-2">
+                <div className="box-scroll bg-slate-950 border border-slate-800/80 rounded-lg p-3 overflow-y-auto max-h-96 font-mono text-[11px] space-y-2">
                     {logs.length === 0 ? (
                         <div className="h-full flex items-center justify-center text-slate-600">
                             Awaiting telemetry events...
@@ -96,7 +99,7 @@ const Monitoring = () => {
                 <span className="text-yellow-400 font-mono font-bold flex items-center gap-1">
                   <Server className="w-3.5 h-3.5" /> Captured Honeypot Credentials:
                 </span>
-                        <div className="font-mono text-[11px] text-yellow-200/80 space-y-0.5">
+                        <div className="font-mono text-[11px] text-yellow-200/80 space-y-0.5 overflow-y-auto h-16">
                             {defenseState.honeypot.caughtCredentials.map((cred, idx) => (
                                 <div key={idx} className="bg-yellow-950/40 px-2 py-0.5 rounded border border-yellow-500/20">
                                     {cred}

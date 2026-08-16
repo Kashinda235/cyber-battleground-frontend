@@ -1,4 +1,6 @@
-import React, { useState, useCallback, useReducer } from 'react';
+import { useEffect, useState, useCallback, useReducer } from 'react';
+import {parseMoveLogToSecurityLog, type RealSecurityLog} from "../utils/telemetryMapper.ts";
+import type {MoveLog} from "../utils/types.ts";
 
 // --- Types & Tool Interfaces ---
 export type DefenseToolId =
@@ -120,10 +122,10 @@ function defenseReducer(state: DefenseState, action: Action): DefenseState {
 }
 
 // --- Main Custom Hook ---
-export function useCyberSecurityCenter() {
+export function useCyberSecurityCenter(moveLogs: MoveLog[]) {
     const [defenseState, dispatch] = useReducer(defenseReducer, initialDefenseState);
-    const [logs, setLogs] = useState<LogEntry[]>([]);
-    const [activeAlert, setActiveAlert] = useState<AttackEvent | null>(null);
+    const [logs, setLogs] = useState<RealSecurityLog[]>([]);
+    const [activeAlert, setActiveAlert] = useState<RealSecurityLog | null>(null);
 
     // Central Event Router connecting Attacks to Defense Tools
     const dispatchAttackEvent = useCallback((attack: AttackEvent) => {
@@ -159,6 +161,22 @@ export function useCyberSecurityCenter() {
     const toggleDefense = (tool: DefenseToolId, payload?: any) => {
         dispatch({ type: 'TOGGLE_TOOL', tool, payload });
     };
+
+    useEffect(() => {
+        if (!moveLogs || moveLogs.length === 0) return;
+
+        // Map WebSocket broadcast logs to realistic SIEM telemetry
+        const formattedLogs = moveLogs.map(parseMoveLogToSecurityLog);
+        setLogs(formattedLogs);
+
+        // Set active alert if a CRITICAL or ALERT event occurs
+        const latestCritical = formattedLogs.find(
+            (l) => l.level === 'CRITICAL' || l.level === 'ALERT'
+        );
+        if (latestCritical) {
+            setActiveAlert(latestCritical);
+        }
+    }, [moveLogs]);
 
     return {
         defenseState,

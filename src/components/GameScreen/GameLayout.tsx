@@ -22,13 +22,13 @@ const GameLayout = () => {
             </div>
 
             {/* ActivityLog (2 parts of 5 -> 40%) */}
-            <div className="h-[600px] w-full overflow-y-auto lg:col-span-19">
+            <div className="h-[600px] w-full overflow-y-auto lg:col-span-17">
                 <ActivityLog />
             </div>
 
             {/* Bottom Row on Large Screens: Full Width (5/5ths) */}
             {/* GameCanvas */}
-            <div className="h-[600px] w-full overflow-hidden lg:col-span-8">
+            <div className="h-[600px] w-full overflow-hidden lg:col-span-10">
                 {activeTab === "profile" && <PlayersList />}
                 {activeTab === "chat" && <PlayersList />}
                 {monitoringTabs.includes(activeTab) && <Monitoring />}
