@@ -1,7 +1,8 @@
 import { clamp } from './utils';
 import { COLS, ROWS, TILE_W, TILE_H, MIN_ZOOM, MAX_ZOOM, DRAG_THRESHOLD } from './constants';
 import { PlayerEntity } from './PlayerEntity';
-import type { PlayerProfileData } from './constants'; // Adjust path
+import type { PlayerProfileData } from './constants';
+import type {Player} from "../../utils/types.ts"; // Adjust path
 
 export class GameEngine {
   canvas: HTMLCanvasElement;
@@ -40,10 +41,33 @@ export class GameEngine {
     this.loop();
   }
 
-  updateData(players: any[], currentPlayer: any) {
+  updateData(players: Player[], currentPlayer: Player) {
     this.currentPlayer = currentPlayer;
-    // Map fresh data to entities
-    this.entities = players.map((p, i) => new PlayerEntity(p, i));
+
+    // 1. Map current entities by their unique player ID
+    const existingMap = new Map<string | number, PlayerEntity>();
+    for (const entity of this.entities) {
+      const id = entity.player.id ?? entity.player.username ?? entity.idIndex;
+      existingMap.set(id, entity);
+    }
+
+    // 2. Reconcile incoming players list
+    const updatedEntities: PlayerEntity[] = players.map((p, index) => {
+      const id = p.id ?? p.username ?? index;
+      const existing = existingMap.get(id);
+
+      if (existing) {
+        // Player already exists -> update color, role, status in place
+        existing.updatePlayerData(p);
+        return existing;
+      } else {
+        // New player joined -> spawn a new block
+        return new PlayerEntity(p, index);
+      }
+    });
+
+    // 3. Swap entity list (automatically removes players who disconnected)
+    this.entities = updatedEntities;
   }
 
   toScreen(col: number, row: number) {

@@ -90,6 +90,21 @@ export class PlayerEntity {
         }
     }
 
+    updatePlayerData(player: any) {
+        this.player = player;
+        this.status = player.status;
+        this.label = player.username || player.id || this.label;
+
+        // Recalculate role and color dynamically
+        const newRole = this.status === "online"
+            ? (player.role?.toUpperCase() || "SPECTATOR")
+            : "OFFLINE";
+
+        this.role = newRole;
+        const roleIndex = ROLES.indexOf(this.role);
+        this.color = NEON[roleIndex >= 0 ? roleIndex : ROLES.indexOf("OFFLINE")];
+    }
+
     screenPos(engine: GameEngine) {
         const col = this.fromCol + (this.toCol - this.fromCol) * this.progress;
         const row = this.fromRow + (this.toRow - this.fromRow) * this.progress;
