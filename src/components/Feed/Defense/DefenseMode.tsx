@@ -1,59 +1,34 @@
 import {
-    ShieldCheck, Flame, Eye, Wrench, Bug, ArrowUpRight, Activity, Lock
+    ShieldCheck, ArrowUpRight, Activity, Lock
 } from 'lucide-react';
 import {useState} from "react";
 import MaintenancePanel from "./MaintenancePanel.tsx";
 import FirewallPanel from "./FirewallPanel.tsx";
 import IDSPanel from "./IDSPanel.tsx";
 import HoneypotPanel from "./HoneypotPanel.tsx";
+import {DEFENSE_MODULES} from "../../../utils/DefenseUtils.ts";
+import {useGame} from "../../../context/GameContext.tsx";
+import {useToast} from "../../../context/ToastContext.tsx";
 
 export type PanelType = 'main' | 'firewall' | 'ids' | 'maintenance' | 'honeypot' ;
 
 export default function SecurityControlPanel() {
     const [panel, setPanel] = useState<PanelType>('main');
-    const modules = [
-        {
-            id: 'firewall',
-            name: 'Firewall Configuration',
-            description: 'Rules, port forwarding & IP blocking',
-            icon: Flame,
-            // Vibrant Amber / Rose Accent
-            iconBg: 'bg-amber-500/10 group-hover:bg-amber-500/20 text-amber-400 border-amber-500/20',
-            hoverBorder: 'hover:border-amber-500/40 hover:shadow-[0_0_20px_rgba(245,158,11,0.08)]',
-            arrowColor: 'group-hover:text-amber-400',
-        },
-        {
-            id: 'ids',
-            name: 'Intrusion Detection (IDS)',
-            description: 'Real-time traffic monitoring & logs',
-            icon: Eye,
-            // Electric Cyan Accent
-            iconBg: 'bg-cyan-500/10 group-hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20',
-            hoverBorder: 'hover:border-cyan-500/40 hover:shadow-[0_0_20px_rgba(6,182,212,0.08)]',
-            arrowColor: 'group-hover:text-cyan-400',
-        },
-        {
-            id: 'maintenance',
-            name: 'Maintenance Mode',
-            description: 'System updates & diagnostic tools',
-            icon: Wrench,
-            // Violet Accent
-            iconBg: 'bg-violet-500/10 group-hover:bg-violet-500/20 text-violet-400 border-violet-500/20',
-            hoverBorder: 'hover:border-violet-500/40 hover:shadow-[0_0_20px_rgba(139,92,246,0.08)]',
-            arrowColor: 'group-hover:text-violet-400',
-        },
-        {
-            id: 'honeypot',
-            name: 'HoneyPot Network',
-            description: 'Decoy telemetry & intruder tracking',
-            icon: Bug,
-            // Emerald Accent
-            iconBg: 'bg-emerald-500/10 group-hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20',
-            hoverBorder: 'hover:border-emerald-500/40 hover:shadow-[0_0_20px_rgba(16,185,129,0.08)]',
-            arrowColor: 'group-hover:text-emerald-400',
-        },
-    ];
+    const { playerXp } = useGame();
+    const { showToast } = useToast();
+    const UNLOCK_THRESHOLD = 4500;
+    const isUnlocked = playerXp > UNLOCK_THRESHOLD;
 
+    const handleClick = (panel: PanelType) => {
+        if (isUnlocked) {
+            setPanel(panel);
+        } else {
+            showToast({
+                title: `${panel.toUpperCase()} is locked`,
+                description: `Reach ${UNLOCK_THRESHOLD}xp to UNLOCK.`,
+            });
+        }
+    };
     return (
         <div>
             {panel === 'maintenance' && <MaintenancePanel onBack={() => setPanel('main')} />}
@@ -83,15 +58,16 @@ export default function SecurityControlPanel() {
 
         {/* Scrollable Navigation List */}
         <div className="p-3.5 mt-5 space-y-2.5 overflow-y-auto max-h-[380px] scrollbar-thin scrollbar-thumb-zinc-800">
-            {modules.map((item) => {
+            {DEFENSE_MODULES.map((item) => {
                 const Icon = item.icon;
                 return (
                     <button
                         key={item.id}
-                        onClick={() => setPanel(item.id)}
+                        onClick={() => handleClick(item.id)}
                         className={`w-full group flex pop-up items-center gap-4 rounded-xl border border-gray-800 bg-gray-900 p-4 text-left transition-all hover:border-gray-600 hover:bg-gray-800/80 active:scale-95`}
                     >
-                        <div className={`relative z-10 transition-transform group-hover:scale-110 ${item.iconBg}`}>
+                        <div className={`relative z-10 transition-transform group-hover:scale-110 ${isUnlocked 
+                        ? item.iconBg : "defense-locked"}`}>
                             <Icon size={24}/>
                         </div>
 
@@ -108,8 +84,10 @@ export default function SecurityControlPanel() {
                             </div>
                         </div>
                         <div
-                            className={`p-1.5 rounded-lg text-zinc-600 transition-all duration-300 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${item.arrowColor}`}>
-                            <ArrowUpRight className="w-4 h-4"/>
+                            className={`p-1.5 rounded-lg text-zinc-600 transition-all duration-300 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${isUnlocked
+                                ? item.arrowColor : "group-hover:text-gray-400"}`}>
+                            {!isUnlocked && <Lock className="w-4 h-4"/>}
+                            {isUnlocked && <ArrowUpRight className="w-4 h-4"/>}
                         </div>
                     </button>
                 );

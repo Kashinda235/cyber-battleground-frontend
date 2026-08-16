@@ -8,7 +8,7 @@ export interface ToastMessage {
     id: string;
     title: string;
     description?: string;
-    type: ToastType;
+    type?: ToastType;
     duration?: number;
 }
 

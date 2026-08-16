@@ -133,4 +133,10 @@
   .pop-up {
     @apply animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-300
   }
+  .defense-plain {
+    @apply bg-blue-500/10 text-blue-400 border-blue-500/20
+  }
+  .defense-locked {
+    @apply bg-gray-500/10 text-gray-400 border-gray-500/20  group-hover:bg-gray-500/20
+  }
 }
