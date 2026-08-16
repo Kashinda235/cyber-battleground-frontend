@@ -3,7 +3,7 @@ import PlayersList from "../ActivityLog/PlayersList.tsx";
 import {useGame} from "../../context/GameContext.tsx";
 import Monitoring from "../ActivityLog/Monitoring.tsx";
 import NetworkLogger from "../ActivityLog/NetworkLogger.tsx";
-import GameCanvas from "./GameCanvas.tsx";
+import GameCanvas from "../Canvas/GameCanvas.tsx";
 
 const ActivityLog = () => {
   const {activeTab} = useGame();

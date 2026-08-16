@@ -1,57 +1,8 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import {
-    Trophy,
-    Clock,
-    CheckCircle2,
-    Lock,
-    Swords,
-    Shield,
-    Gift,
-    Star, Zap, Tickets
+    Clock, CheckCircle2, Lock, Star, Tickets
 } from 'lucide-react';
-
-// --- MOCK DATA ---
-const GAME_EVENTS = [
-    {
-        id: 'evt_1',
-        title: 'Operation: Shadow Strike',
-        description: 'Eliminate 50 enemies using silenced weapons in Ranked matches.',
-        progress: 50,
-        total: 50,
-        timeLeft: 'Ends in 2h',
-        isCompleted: true,
-        rewards: [
-            { id: 'r1', name: 'Shadow Sniper Camo', icon: Swords, claimed: true },
-            { id: 'r2', name: '5,000 XP', icon: Star, claimed: true }
-        ]
-    },
-    {
-        id: 'evt_2',
-        title: 'Weekend Warrior',
-        description: 'Play 10 matches with friends in any game mode.',
-        progress: 7,
-        total: 10,
-        timeLeft: '2 days left',
-        isCompleted: false,
-        rewards: [
-            { id: 'r3', name: 'Golden Emblem', icon: Shield, claimed: false },
-            { id: 'r4', name: 'Loot Box', icon: Gift, claimed: false }
-        ]
-    },
-    {
-        id: 'evt_3',
-        title: 'Pacifist Run',
-        description: 'Survive to the top 10 without dealing any damage.',
-        progress: 0,
-        total: 1,
-        timeLeft: '5 days left',
-        isCompleted: false,
-        rewards: [
-            { id: 'r5', name: '"The Ghost" Title', icon: Trophy, claimed: false }
-        ]
-    }
-];
+import {GAME_EVENTS} from "../../utils/EventsUtils.ts";
 
 export default function EventHub() {
     // Animation variants for staggered list loading
@@ -70,7 +21,7 @@ export default function EventHub() {
 
     return (
         /* Top wrapper fills grid slot (w-full h-full flex flex-col) without page-level screen constraints */
-        <div className="w-full h-full flex flex-col p-4 md:p-6 bg-slate-950 font-sans text-slate-200 overflow-hidden box-scroll">
+        <div className="w-full h-full flex flex-col p-4 bg-slate-950 font-sans text-slate-200 overflow-hidden box-scroll">
 
             {/* Header (Pinned to Top) */}
             <header className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4 shrink-0">
@@ -80,11 +31,11 @@ export default function EventHub() {
                     <span className="font-bold text-emerald-400">
                                 <Tickets size={35}/>
                             </span>
-                    <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white italic">
+                    <h1 className="text-2xl font-black tracking-tight text-white italic">
                         Active Events
                     </h1>
                 </div>
-                    <p className="text-xs md:text-sm text-slate-400 mt-1">
+                    <p className="text-xs text-slate-400 mt-1">
                         Complete challenges to unlock exclusive rewards.
                     </p>
                 </div>
@@ -110,7 +61,7 @@ export default function EventHub() {
                                 key={evt.id}
                                 variants={itemVariants}
                                 className={`
-                                relative overflow-hidden rounded-xl border p-5 md:p-6
+                                relative overflow-hidden rounded-xl border p-5
                                 ${evt.isCompleted
                                     ? 'bg-emerald-950/20 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.05)]'
                                     : 'bg-slate-900 border-slate-800'}
@@ -121,13 +72,13 @@ export default function EventHub() {
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                                 )}
 
-                                <div className="relative z-10 flex flex-col md:flex-row gap-6 justify-between">
+                                <div className="relative z-10 flex flex-col gap-6 justify-between">
 
                                     {/* Left Side: Info & Progress */}
                                     <div className="flex-1 space-y-4 min-w-0">
                                         <div className="flex justify-between items-start gap-2">
                                             <div className="min-w-0">
-                                                <h2 className="text-lg md:text-xl font-bold text-white flex items-center gap-2 truncate">
+                                                <h2 className="text-lg font-bold text-white flex items-center gap-2 truncate">
                                                     <span className="truncate">{evt.title}</span>
                                                     {evt.isCompleted && <CheckCircle2 className="text-emerald-500 shrink-0" size={20} />}
                                                 </h2>
@@ -135,7 +86,7 @@ export default function EventHub() {
                                             </div>
 
                                             {/* Mobile Time Left */}
-                                            <div className="md:hidden flex items-center gap-1.5 text-xs text-slate-500 bg-slate-950 px-2.5 py-1 rounded-md shrink-0">
+                                            <div className="flex items-center gap-1.5 text-xs text-slate-500 bg-slate-950 px-2.5 py-1 rounded-md shrink-0">
                                                 <Clock size={12} /> {evt.timeLeft}
                                             </div>
                                         </div>
@@ -168,10 +119,10 @@ export default function EventHub() {
                                     </div>
 
                                     {/* Right Side: Rewards */}
-                                    <div className="flex flex-col gap-3 md:w-[220px] shrink-0 border-t md:border-t-0 md:border-l border-slate-800 pt-4 md:pt-0 md:pl-6">
+                                    <div className="flex flex-col gap-3 shrink-0 border-t border-slate-800 pt-4">
 
                                         {/* Desktop Time Left */}
-                                        <div className="hidden md:flex justify-end items-center gap-1.5 text-xs text-slate-400 mb-1">
+                                        <div className="hidden justify-end items-center gap-1.5 text-xs text-slate-400 mb-1">
                                             <Clock size={14} /> <span>{evt.timeLeft}</span>
                                         </div>
 
