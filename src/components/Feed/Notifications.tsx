@@ -39,7 +39,9 @@ export default function MailFeature() {
         if (activeFolder === 'inbox' && !mail.isSeen) {
             setClaimingId(mail.id);
             try {
-                await updateSeen(mail);
+                const res = await updateSeen(mail);
+                mail = {...res};
+                console.log(mail.isSeen);
                 claimReward(mail.metadata?.reward);
             } catch (error) {
                 console.error("Failed to mark mail as seen", error);
@@ -303,7 +305,7 @@ export default function MailFeature() {
                             </div>
 
                             <button
-                                onClick={() => handleClaimReward(selectedMail)}
+                                onClick={async () => await handleClaimReward(selectedMail)}
                                 disabled={isClaimed || isClaiming}
                                 className={`px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${
                                     isClaimed
