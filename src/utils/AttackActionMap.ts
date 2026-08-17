@@ -1,5 +1,6 @@
 import {PASSWORDS_LIST, WORD_LIST} from "../constants/ActionTools.ts";
 import type {GameContextServices} from "../context/GameContext.tsx";
+import {checkAchievement} from "./EventsUtils.ts";
 
 export type GameAttackAction =
     | 'Brute Force'
@@ -59,7 +60,7 @@ const getTimestamp = (): string => {
 // ============================================================================
 
 const simulateBruteForce: AttackHandler = async (services, onLog) => {
-    const { target, performAction, stateConnection, updatePlayerStats} = services;
+    const { target, performAction, stateConnection, updatePlayerStats, showToast } = services;
     const wordlistName = (typeof WORD_LIST !== "undefined" && WORD_LIST[0]) ? WORD_LIST[0] : "rockyou.txt";
     const passwordList = PASSWORDS_LIST || ["admin", "root", "123456", "admin_9021", "password"];
     const targetPort = 22;
@@ -95,6 +96,7 @@ const simulateBruteForce: AttackHandler = async (services, onLog) => {
     let matchFound = false;
     let matchedPassword = "";
 
+    checkAchievement("BRUTE_FORCE", showToast);
     // 2. Iterate through EVERY password attempt in the list
     for (let index = 0; index < passwordList.length; index++) {
         const attemptNum = index + 1;
@@ -139,6 +141,7 @@ const simulateBruteForce: AttackHandler = async (services, onLog) => {
             content: `[${getTimestamp()}] [+] SUCCESS: Valid credentials recovered!`
         });
 
+        checkAchievement("BOTNET_CREATOR", showToast);
         return {
             type: "action",
             content: `[+] SUCCESS: SSH credentials recovered for ${targetUser}@${target.ip}\n[+] Match found: "${targetUser}:${matchedPassword}"`
@@ -157,7 +160,7 @@ const simulateBruteForce: AttackHandler = async (services, onLog) => {
 };
 
 const simulatePhishingKit: AttackHandler = async (services, onLog) => {
-    const { target, performAction, sendMail, playerXp, stateConnection, updatePlayerStats } = services;
+    const { target, showToast, performAction, sendMail, playerXp, stateConnection, updatePlayerStats } = services;
     performAction({
         action_type: "Mail",
         target_id: target.id,
@@ -203,10 +206,13 @@ const simulatePhishingKit: AttackHandler = async (services, onLog) => {
     await delay(800);
     updatePlayerStats({health: 94, xp: 2});
 
+    checkAchievement("PHISHING_CAMPAIGN", showToast);
     if (isSuccess) {
         const fakeSessionToken = Math.random().toString(36).substring(2, 15);
         updatePlayerStats({health: 96, xp: 1324});
         stateConnection({target_ip: target.ip, status: "bot"});
+        checkAchievement("PHISHING_PAYLOAD", showToast);
+        checkAchievement("BOTNET_CREATOR", showToast);
         return {
             type: "action",
             content: `[+] SUCCESS: Victim authenticated via cloned portal.\n[+] Captured session token: auth_bearer_${fakeSessionToken}\n[+] Host ${target.id} security bypass complete.`
@@ -220,7 +226,7 @@ const simulatePhishingKit: AttackHandler = async (services, onLog) => {
 };
 
 const useExploitScript: AttackHandler = async (services, onLog) => {
-    const { target, performAction, updatePlayerStats, playerXp } = services;
+    const { target, showToast, performAction, updatePlayerStats, playerXp } = services;
     const exploitSkill = playerXp / 10000 * 3;
     const targetDefense = 10;
 
@@ -230,7 +236,7 @@ const useExploitScript: AttackHandler = async (services, onLog) => {
         ability_id: 3,
     };
     performAction(action);
-
+    checkAchievement("EXPLOIT_DEPLOYMENT", showToast);
     // Simulated vulnerability database / CVE tags
     const cveList = [
         "CVE-2024-3094 (XZ Utils Backdoor)",
@@ -280,7 +286,7 @@ const useExploitScript: AttackHandler = async (services, onLog) => {
 };
 
 const simulatePortScanner: AttackHandler = async (services, onLog) => {
-    const { target, performAction, updatePlayerStats } = services;
+    const { target, showToast, performAction, updatePlayerStats } = services;
 
     // 1. Dispatch the scan action to game services
     performAction({
@@ -288,6 +294,7 @@ const simulatePortScanner: AttackHandler = async (services, onLog) => {
         target_id: target.id,
         ability_id: 1,
     });
+    checkAchievement("PORT_SCANNER", showToast);
 
     const scanSpeed = 1;
 
@@ -351,12 +358,13 @@ const simulatePortScanner: AttackHandler = async (services, onLog) => {
 };
 
 const simulateDeepScanner: AttackHandler = async (services, onLog) => {
-    const { target, performAction, updatePlayerStats } = services;
+    const { target, showToast, performAction, updatePlayerStats } = services;
     performAction({
         action_type: "DeepScan",
         target_id: target.id,
         ability_id: 4, // Higher ability ID for advanced scanner
     });
+    checkAchievement("DEEP_SCAN", showToast);
 
     const targetIp = target.ip || "192.168.1.105";
     const scanSpeed = 1;
@@ -545,11 +553,12 @@ const simulateCredentialStuffing: AttackHandler = async (services, onLog) => {
 };
 
 const simulateSessionHijack: AttackHandler = async (services, onLog) => {
-    const { target, connections } = services;
+    const { target, showToast, connections } = services;
 
     const targetIp = target.ip || "192.168.1.105";
     const targetHost = target.hostname || targetIp;
     const hackingSkill = 1;
+    checkAchievement("SESSION_HIJACK", showToast);
 
     // Guard Clause: Validate active bot for target IP
     const matchingBot = connections.find(
@@ -623,11 +632,12 @@ const simulateSessionHijack: AttackHandler = async (services, onLog) => {
 };
 
 const simulateMalwareDrop: AttackHandler = async (services, onLog) => {
-    const { target, connections, updatePlayerStats } = services;
+    const { target, showToast, connections, updatePlayerStats } = services;
 
     const targetIp = target.ip || "192.168.1.105";
     const targetHost = target.hostname || targetIp;
     const stealthRating = 1;
+    checkAchievement("MALWARE_DROP", showToast);
 
     // Guard Clause: Ensure target is an active compromised bot connection
     const targetBot = connections.find(
@@ -700,10 +710,11 @@ const simulateMalwareDrop: AttackHandler = async (services, onLog) => {
 };
 
 const simulateDDoSBurst: AttackHandler = async (services, onLog) => {
-    const { target, connections, performAction, updatePlayerStats } = services;
+    const { target, showToast, connections, performAction, updatePlayerStats } = services;
 
     const targetIp = target.ip || "192.168.1.105";
     const targetHost = target.hostname || targetIp;
+    checkAchievement("DDOS_BURST", showToast);
 
     // 1. Guard Clause: Calculate active botnet size from connections
     const activeBots = connections.filter((connection) => connection.status === "bot");

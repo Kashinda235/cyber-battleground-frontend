@@ -13,6 +13,7 @@ import type {
 } from '../utils/types';
 import {useGameData} from "../hooks/useGameData.ts";
 import {type TerminalEntry, terminalCommand} from "../utils/terminalCommands.ts";
+import {type ToastMessage, useToast} from "./ToastContext.tsx";
 
 export type TabType = 'profile' | 'chat' | 'actions' | 'defence' | 'events' | 'alerts';
 
@@ -64,6 +65,7 @@ export interface GameContextServices {
     playerXp: number;
     systemHealth: number;
     connections: Connection[];
+    showToast: (toast: Omit<ToastMessage, "id">) => void;
     // ..more required functions
 }
 
@@ -81,6 +83,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         inboxMails, sentMails, players, systems, performAction, stateConnection, connections,
         updatePlayerProfile, sendMail, updateSeen, isLoading,
     } = useGameData({ token, player });
+    const { showToast } = useToast();
     const [target, setTarget] = useState<Player | undefined>(undefined);
     const [activeTab, setActiveTab] = useState<TabType>('profile');
 
@@ -128,7 +131,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
             return;
         }
         const target: NodeState = {
-            id: targetId,
+            id: targetId ?? 1,
             name: `player-0${targetPlayer.id}`,
             ip: targetSystem.ip,
             hostname: targetSystem.hostname,
@@ -142,7 +145,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
 
         const gameServices: GameContextServices = {
             target, performAction, sendMail, updatePlayerStats, playerXp, systemHealth, stateConnection,
-            connections
+            connections, showToast
         };
 
         // 3. Execute attack (will fire handleLiveLog periodically)

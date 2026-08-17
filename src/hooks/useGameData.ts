@@ -13,6 +13,8 @@ import {
     updateNetworkPort, updateSeenMail, updateSystemConfig, updateSystemDefense, postConnection, updateConnection
 } from '../services/post_api.ts'
 import { useWebSocket } from './useWebSocket';
+import {useToast} from "../context/ToastContext.tsx";
+import {checkAchievement} from "../utils/EventsUtils.ts";
 
 export interface UseGameDataOptions {
     token?: string;
@@ -20,9 +22,6 @@ export interface UseGameDataOptions {
 }
 
 export function useGameData({ token, player }: UseGameDataOptions = {}) {
-    // ==========================================
-    // Local State Management
-    // ==========================================
     const [players, setPlayers] = useState<Player[]>([]);
     const [systems, setSystems] = useState<System[]>([]);
     const [systemHealth, setSystemHealth] = useState<number>(0);
@@ -39,6 +38,7 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const { showToast } = useToast();
 
     // ==========================================
     // Initial Data Fetching (REST API)
@@ -129,6 +129,11 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
 
         // Server broadcasts a new chat message
         onMailReceived: useCallback((mail: Mail) => {
+            showToast({
+                title: "Received a mail",
+                description: `Mail from ${mail.metadata.sender}`,
+                type: "mail"
+            });
             setInboxMails((prev) => [...prev, mail]);
         }, []),
 
@@ -156,6 +161,7 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
         await Promise.all(
             data.network.map(port => updateNetworkPort(port.id, port, token))
         );
+        checkAchievement("OPSEC_ESSENTIALS", showToast);
         return ({system: resSystem.data, defense: resDefense.data});
     }
 
@@ -168,6 +174,7 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
     const sendChat = async (message: string) => {
         if (!token) throw new Error('Authentication required for chat');
         const res = await postChat({ message }, token);
+        checkAchievement("CHAT_MSG", showToast);
         return res.data;
     };
 

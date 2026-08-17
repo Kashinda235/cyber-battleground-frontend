@@ -29,7 +29,7 @@ export interface EventType {
         }[]
 }
 
-// --- MOCK DATA ---
+// --- EVENTS DATA ---
 export const GAME_EVENTS: EventType[] = [
     {
         id: 'evt_1',
@@ -201,3 +201,85 @@ export const GAME_EVENTS: EventType[] = [
         ]
     }
 ];
+
+//. Define the registry map with initial states set to false
+export const ACHIEVEMENTS = {
+    OPSEC_ESSENTIALS: {
+        title: 'OpSec Essentials',
+        description: 'Updated your security settings and node hostname.',
+        isCompleted: false
+    },
+    CHAT_MSG: {
+        title: 'Social Fun',
+        description: 'Transmitted an message in the chat room.',
+        isCompleted: false
+    },
+    BRUTE_FORCE: {
+        title: 'Cracking the Vault',
+        description: 'Cracked an authentication gateway using brute force.',
+        isCompleted: false
+    },
+    BOTNET_CREATOR: {
+        title: 'Rise of the Botnet',
+        description: 'Enslaved 3 remote systems into your network.',
+        isCompleted: false
+    },
+    PHISHING_CAMPAIGN: {
+        title: 'Social Engineering',
+        description: 'Dispatched a social engineering phishing email.',
+        isCompleted: false
+    },
+    PHISHING_PAYLOAD: {
+        title: 'Trojan Transmission',
+        description: 'Sent a targeted email with a weaponized phishing payload.',
+        isCompleted: false
+    },
+    EXPLOIT_DEPLOYMENT: {
+        title: 'Zero-Day Injection',
+        description: 'Executed an automated exploit script on a target system.',
+        isCompleted: false
+    },
+    PORT_SCANNER: {
+        title: 'Perimeter Recon',
+        description: 'Ran a port scan to map active services and open vectors.',
+        isCompleted: false
+    },
+    DEEP_SCAN: {
+        title: 'Deep System Audit',
+        description: 'Executed a deep scan for underlying kernel vulnerabilities.',
+        isCompleted: false
+    },
+    SESSION_HIJACK: {
+        title: 'Identity Theft',
+        description: 'Intercepted authentication tokens to hijack an active session.',
+        isCompleted: false
+    },
+    MALWARE_DROP: {
+        title: 'Payload Delivery',
+        description: 'Bypassed local antivirus and dropped a stealth malware payload.',
+        isCompleted: false
+    },
+    DDOS_BURST: {
+        title: 'Overload Protocol',
+        description: 'Unleashed a high-volume DDoS burst to swamp an enemy node.',
+        isCompleted: false
+    }
+} as const;
+
+type AchievementKey = keyof typeof ACHIEVEMENTS;
+
+export function checkAchievement(key: AchievementKey, showToast) {
+    const achievement = ACHIEVEMENTS[key];
+
+    // If achievement exists and hasn't been completed yet
+    if (achievement && !achievement.isCompleted) {
+        // Mark completed directly
+        (achievement as { isCompleted: boolean }).isCompleted = true;
+
+        showToast({
+            title: achievement.title,
+            description: achievement.description,
+            type: "achievement"
+        });
+    }
+}
