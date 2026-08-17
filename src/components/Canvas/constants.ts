@@ -6,10 +6,10 @@ export const MIN_ZOOM = 0.5;
 export const MAX_ZOOM = 3;
 export const DRAG_THRESHOLD = 5;
 
-export const ROLES = ["BLUE", "RED", "SPECTATOR", "ADMIN", "MODERATOR", "OFFLINE"];
+export const ROLES = ["BLUE", "RED", "SPECTATOR", "ADMIN", "MODERATOR", "BOT", "OFFLINE"];
 export const NEON = [
-    "#4de1ff", "#fb1e3f", "#a1f55d",
-    "#ffd24d", "#a24dff", "#958e8e"
+    "#4de1ff", "#fb1e3f", "#a1f55d", "#ffd24d",
+    "#a24dff", "#ffff00", "#958e8e"
 ]
 export const FLAVORS = [
     "Patrolling assigned sector without incident.",
