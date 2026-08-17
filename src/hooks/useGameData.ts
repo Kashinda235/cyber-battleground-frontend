@@ -134,7 +134,7 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
                 description: `Mail from ${mail.metadata.sender}`,
                 type: "mail"
             });
-            setInboxMails((prev) => [...prev, mail]);
+            setInboxMails((prev) => [mail, ...prev]);
         }, []),
 
         // Server broadcasts a combat/movement action
