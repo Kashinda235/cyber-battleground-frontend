@@ -5,12 +5,6 @@ import {
 import {useGame} from "../../context/GameContext.tsx";
 import type {Mail} from "../../utils/types.ts";
 
-export interface Player {
-    id: number;
-    name: string;
-    mail: string;
-}
-
 export default function MailFeature() {
     const {
         inboxMails, sentMails, players, sendMail, updateSeen, claimReward,
@@ -22,6 +16,7 @@ export default function MailFeature() {
     const [isComposing, setIsComposing] = useState(false);
 
     // Local Claim Tracking State
+    const [claimedMailIds, setClaimedMailIds] = useState<Set<number>>(new Set());
     const [claimingId, setClaimingId] = useState<number | null>(null);
 
     // Compose Form State
@@ -33,7 +28,7 @@ export default function MailFeature() {
     const unreadCount = inboxMails.filter(m => !m.isSeen).length;
 
     const handleClaimReward = async (mail: Mail) => {
-        if (!mail.metadata?.reward) return;
+        if (!mail.metadata?.reward || claimedMailIds.has(mail.id)) return;
 
         // Mark as seen if opening an unread inbox mail
         if (activeFolder === 'inbox' && !mail.isSeen) {
@@ -43,6 +38,7 @@ export default function MailFeature() {
                 mail = {...res};
                 console.log(mail.isSeen);
                 claimReward(mail.metadata?.reward);
+                setClaimedMailIds((prev) => new Set(prev).add(mail.id));
             } catch (error) {
                 console.error("Failed to mark mail as seen", error);
                 console.error("Failed to claim reward", error);
@@ -170,7 +166,7 @@ export default function MailFeature() {
                 {mails.map((mail) => {
                     const isUnread = activeFolder === 'inbox' && !mail.isSeen;
                     const hasReward = (mail.metadata?.reward ?? 0) > 0;
-                    const isClaimed = mail.isSeen;
+                    const isClaimed = claimedMailIds.has(mail.id) || mail.isSeen;
 
                     return (
                         <div
@@ -252,7 +248,7 @@ export default function MailFeature() {
         if (!selectedMail) return null;
 
         const hasReward = (selectedMail.metadata?.reward ?? 0) > 0;
-        const isClaimed = selectedMail.isSeen;
+        const isClaimed = claimedMailIds.has(selectedMail.id) || selectedMail.isSeen;
         const isClaiming = claimingId === selectedMail.id;
 
         return (
