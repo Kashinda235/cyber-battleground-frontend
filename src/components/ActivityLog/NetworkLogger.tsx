@@ -4,7 +4,7 @@ import {
     ShieldAlert, ShieldCheck, Activity, Copy, Check,
     AlertTriangle, ArrowLeft, ChevronRight
 } from 'lucide-react';
-import {INITIAL_LOGS, type LogItem} from "../../utils/logs.ts";
+import {type LogItem} from "../../utils/logs.ts";
 import {useGame} from "../../context/GameContext.tsx";
 import {generateSyntheticLog, moveLogToTrafficLog} from "../../utils/trafficLogMapper.ts";
 
@@ -26,8 +26,8 @@ export default function NetworkLogger() {
         const newEntries: LogItem[] = [];
 
         moveLogs.forEach((move) => {
-            if (!processedMoveIds.current.has(move.id)) {
-                processedMoveIds.current.add(move.id);
+            if (!processedMoveIds.current.has(move.id ?? "NaN")) {
+                processedMoveIds.current.add(move.id ?? "NaN");
                 newEntries.push(moveLogToTrafficLog(move));
             }
         });
@@ -309,7 +309,7 @@ export default function NetworkLogger() {
                     </div>
                 ) : (
                     /* LOG TABLE VIEW */
-                    <div className="h-full overflow-y-auto">
+                    <div className="box-scroll h-full overflow-y-auto">
                         <table className="w-full text-left border-collapse">
                             <thead className="bg-slate-900 text-slate-400 sticky top-0 z-10 border-b border-slate-800 text-[10px] uppercase">
                             <tr>

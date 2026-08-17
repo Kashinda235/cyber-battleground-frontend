@@ -40,6 +40,7 @@ interface GameContextType {
     updateSeen: (data: Mail) => Promise<Mail>
     performAction: (data: ActionRequest) => Promise<ActionResult>;
     updatePlayerProfile:  (data: PlayerProfile) => void;
+    claimReward: (reward: number) => void;
 
     // Local UI State
     target: Player | undefined;
@@ -162,6 +163,15 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
 
     const clearTerminal = () => setTerminalHistory([]);
 
+    const claimReward = (reward: number) => {
+        updatePlayerStats({health: 0, xp: reward} );
+        showToast({
+            type: "reward",
+            title: "Reward claimed",
+            description: `XP ${reward} earned`,
+        })
+    };
+
     const value: GameContextType = {
         token,
         currentPlayer: player,
@@ -182,6 +192,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         updateSeen,
         performAction,
         updatePlayerProfile,
+        claimReward,
         target,
         setTarget,
         activeTab,

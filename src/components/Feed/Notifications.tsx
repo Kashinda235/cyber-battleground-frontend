@@ -1,38 +1,9 @@
 import {useState} from 'react';
 import {
-    Inbox,
-    Send,
-    PenSquare,
-    Mail as MailIcon,
-    MailOpen,
-    AlertTriangle,
-    Gift,
-    ArrowLeft,
-    User,
-    X,
-    CheckCircle2,
-    Sparkles
+    Inbox, Send, PenSquare, Mail as MailIcon, MailOpen, AlertTriangle, Gift, ArrowLeft, User, X, CheckCircle2, Sparkles
 } from 'lucide-react';
 import {useGame} from "../../context/GameContext.tsx";
-
-// --- Types ---
-export interface Mail {
-    id: number;
-    senderId: number;
-    receiverId: number;
-    message: string;
-    isSeen: boolean;
-    phishingPayload: boolean;
-    metadata: { reward: number; sender: string };
-    createdAt: Date;
-    timestamp: Date;
-}
-
-export interface MailRequest {
-    receiverId: number;
-    message: string;
-    phishingPayload: boolean;
-}
+import type {Mail} from "../../utils/types.ts";
 
 export interface Player {
     id: number;
@@ -41,27 +12,16 @@ export interface Player {
 }
 
 export default function MailFeature() {
-    // Extracting methods from useGame (including optional claimReward if available)
     const {
-        inboxMails,
-        sentMails,
-        players,
-        sendMail,
-        updateSeen,
-         // Added claim hook if present in your useGame implementation
+        inboxMails, sentMails, players, sendMail, updateSeen, claimReward,
     } = useGame();
 
-    const claimReward = (reward: number) => {
-        console.log(`Reward earned ${reward}`);
-
-    };
     // Navigation & View State
     const [activeFolder, setActiveFolder] = useState<'inbox' | 'sent'>('inbox');
     const [selectedMail, setSelectedMail] = useState<Mail | null>(null);
     const [isComposing, setIsComposing] = useState(false);
 
     // Local Claim Tracking State
-    const [claimedMailIds, setClaimedMailIds] = useState<Set<number>>(new Set());
     const [claimingId, setClaimingId] = useState<number | null>(null);
 
     // Compose Form State
@@ -72,35 +32,21 @@ export default function MailFeature() {
 
     const unreadCount = inboxMails.filter(m => !m.isSeen).length;
 
-    // --- Handlers ---
-    const handleOpenMail = async (mail: Mail) => {
-        setSelectedMail(mail);
+    const handleClaimReward = async (mail: Mail) => {
+        if (!mail.metadata?.reward) return;
+
         // Mark as seen if opening an unread inbox mail
         if (activeFolder === 'inbox' && !mail.isSeen) {
+            setClaimingId(mail.id);
             try {
                 await updateSeen(mail);
+                claimReward(mail.metadata?.reward);
             } catch (error) {
                 console.error("Failed to mark mail as seen", error);
+                console.error("Failed to claim reward", error);
+            } finally {
+                setClaimingId(null);
             }
-        }
-    };
-
-    const handleClaimReward = async (mail: Mail) => {
-        if (!mail.metadata?.reward || claimedMailIds.has(mail.id)) return;
-
-        setClaimingId(mail.id);
-        try {
-            if (claimReward) {
-                await claimReward(mail.metadata.reward);
-            } else {
-                // Fallback simulation delay if claimReward isn't passed in useGame yet
-                await new Promise((resolve) => setTimeout(resolve, 600));
-            }
-            setClaimedMailIds((prev) => new Set(prev).add(mail.id));
-        } catch (error) {
-            console.error("Failed to claim reward", error);
-        } finally {
-            setClaimingId(null);
         }
     };
 
@@ -222,12 +168,12 @@ export default function MailFeature() {
                 {mails.map((mail) => {
                     const isUnread = activeFolder === 'inbox' && !mail.isSeen;
                     const hasReward = (mail.metadata?.reward ?? 0) > 0;
-                    const isClaimed = claimedMailIds.has(mail.id);
+                    const isClaimed = mail.isSeen;
 
                     return (
                         <div
                             key={mail.id}
-                            onClick={() => handleOpenMail(mail)}
+                            onClick={() => setSelectedMail(mail)}
                             className={`p-4 cursor-pointer transition-all flex items-start gap-3 relative border-l-2 ${
                                 isUnread
                                     ? 'bg-amber-950/20 border-l-amber-500 hover:bg-amber-950/30'
@@ -304,7 +250,7 @@ export default function MailFeature() {
         if (!selectedMail) return null;
 
         const hasReward = (selectedMail.metadata?.reward ?? 0) > 0;
-        const isClaimed = claimedMailIds.has(selectedMail.id);
+        const isClaimed = selectedMail.isSeen;
         const isClaiming = claimingId === selectedMail.id;
 
         return (

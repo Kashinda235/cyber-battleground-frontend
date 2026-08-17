@@ -1,8 +1,8 @@
 import React, { useState, createContext, useContext, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {UserPlus, Target, Trophy, Info, X, Swords, Mail, AlertTriangle} from 'lucide-react';
+import {UserPlus, Target, Trophy, Info, X, Swords, Mail, AlertTriangle, Coins} from 'lucide-react';
 
-export type ToastType = 'join' | 'mission' | 'achievement' | 'info' | 'alert' | 'mail' ;
+export type ToastType = 'join' | 'mission' | 'achievement' | 'info' | 'alert' | 'mail' | "reward" ;
 
 export interface ToastMessage {
     id: string;
@@ -35,6 +35,13 @@ const toastVariants: Record<
         iconColor: 'text-rose-400',
         bg: 'from-rose-350/90 to-rose-950/90',
         iconBg: 'bg-rose-950/50 border-rose-700/30',
+    },
+    reward: {
+        icon: Coins,
+        border: 'border-yellow-500/70',
+        iconColor: 'text-yellow-400',
+        bg: 'from-yellow-350/90 to-yellow-950/90',
+        iconBg: 'bg-yellow-950/50 border-yellow-700/30',
     },
     achievement: {
         icon: Trophy,
