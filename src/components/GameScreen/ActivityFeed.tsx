@@ -10,52 +10,55 @@ import MailFeature from "../Feed/Notifications.tsx";
 export default function ActivityFeed() {
   const { activeTab, setActiveTab } = useGame();
 
-  return (
-    <>
-      <style>{`
-        @keyframes cooldown-spin {
-          from { stroke-dashoffset: 100; }
-          to { stroke-dashoffset: 0; }
-        }
-      `}</style>
+    return (
+        <>
+            <style>{`
+      @keyframes cooldown-spin {
+        from { stroke-dashoffset: 100; }
+        to { stroke-dashoffset: 0; }
+      }
+    `}</style>
 
-      <div className="relative mx-auto h-full flex w-full overflow-hidden rounded-xl border border-gray-800 bg-gray-950 font-sans text-gray-100 shadow-2xl">
-        {/* Side Navigation */}
-        <div className="z-10 flex w-16 shrink-0 flex-col items-center gap-4 border-r border-gray-800 bg-gray-900 py-6">
-          {NAV_ITEMS.map((item) => (
-              <NavButton
-                  key={item.targetTab}
-                  activeTab={activeTab}
-                  targetTab={item.targetTab}
-                  onClick={setActiveTab}
-                  icon={item.icon}
-                  title={item.title}
-                  activeColorClass={item.activeColorClass}
-                  hasBadge={item.hasBadge}
-              />
-          ))}
-        </div>
-        {/* Main Content Area */}
-        <div className="relative flex flex-1 flex-col overflow-hidden bg-gray-950">
-          {/* --- [PROFILE] --- */}
-          {activeTab === "profile" && <PlayerProfileCard />}
+            {/* Parent Container: Always vertical column */}
+            <div className="relative mx-auto flex h-full w-full flex-col overflow-hidden rounded-xl border border-gray-800 bg-gray-950 font-sans text-gray-100 shadow-2xl">
 
-          {/* --- CHAT MODE --- */}
-          {activeTab === "chat" && <ChatBlock />}
+                {/* Navigation: Locked as a top bar across all breakpoints */}
+                <div className="z-10 flex h-16 w-full shrink-0 flex-row items-center justify-around border-b border-gray-800 bg-gray-900 px-2">
+                    {NAV_ITEMS.map((item) => (
+                        <NavButton
+                            key={item.targetTab}
+                            activeTab={activeTab}
+                            targetTab={item.targetTab}
+                            onClick={setActiveTab}
+                            icon={item.icon}
+                            title={item.title}
+                            activeColorClass={item.activeColorClass}
+                            hasBadge={item.hasBadge}
+                        />
+                    ))}
+                </div>
 
-          {/* --- ACTIONS MODE --- */}
-          {activeTab === "actions" && <ActionMode />}
+                {/* Main Content Area */}
+                <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-gray-950">
+                    {/* --- [PROFILE] --- */}
+                    {activeTab === "profile" && <PlayerProfileCard />}
 
-          {/* --- DEFENCE MODE --- */}
-          {activeTab === "defence" && <SecurityControlPanel />}
+                    {/* --- CHAT MODE --- */}
+                    {activeTab === "chat" && <ChatBlock />}
 
-          {/* EVENTS MODE */}
-          {activeTab === "events" && <Events />}
+                    {/* --- ACTIONS MODE --- */}
+                    {activeTab === "actions" && <ActionMode />}
 
-          {/* --- ALERTS MODE --- */}
-          {activeTab === "alerts" && <MailFeature />}
-        </div>
-      </div>
-    </>
-  )
+                    {/* --- DEFENCE MODE --- */}
+                    {activeTab === "defence" && <SecurityControlPanel />}
+
+                    {/* EVENTS MODE */}
+                    {activeTab === "events" && <Events />}
+
+                    {/* --- ALERTS MODE --- */}
+                    {activeTab === "alerts" && <MailFeature />}
+                </div>
+            </div>
+        </>
+    );
 }

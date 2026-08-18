@@ -99,7 +99,7 @@ export const NavButton = ({activeTab, targetTab, onClick, icon: Icon, title, act
             }`}
             title={title}
         >
-            <Icon size={22} />
+            <Icon size={18} />
             {hasBadge && !isActive && (
                 <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full border border-gray-900 bg-amber-500" />
             )}
