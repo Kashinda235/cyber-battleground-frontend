@@ -2,7 +2,7 @@ import { clamp } from './utils';
 import { COLS, ROWS, TILE_W, TILE_H, MIN_ZOOM, MAX_ZOOM, DRAG_THRESHOLD } from './constants';
 import { PlayerEntity } from './PlayerEntity';
 import type { PlayerProfileData } from './constants';
-import type {Player} from "../../utils/types.ts"; // Adjust path
+import type { Player } from "../../utils/types.ts"; // Adjust path
 
 export class GameEngine {
   canvas: HTMLCanvasElement;
@@ -194,61 +194,114 @@ export class GameEngine {
     }
   }
 
+  // --- Touch Math Helpers ---
+  touchDist(t0: Touch, t1: Touch): number {
+    const dx = t0.clientX - t1.clientX;
+    const dy = t0.clientY - t1.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
   // --- Events ---
   onResize = () => {
-    // 1. Read dimensions from the parent container instead of the window
     const parent = this.canvas.parentElement;
     this.W = this.canvas.width = parent ? parent.clientWidth : window.innerWidth;
     this.H = this.canvas.height = parent ? parent.clientHeight : 600;
 
-    // 2. Calculate true map dimensions
-    // In an isometric grid, total width and height are determined by the sum of columns and rows
     const mapPixelWidth = (ROWS + COLS) * (TILE_W / 2);
     const mapPixelHeight = (ROWS + COLS) * (TILE_H / 2);
 
-    // 3. Center the origin point (the top-most tile at 0,0)
-    // We place originX in the middle of the screen
     this.originX = this.W / 2;
-
-    // We place originY such that the middle of the grid's height lands at the middle of the screen (this.H / 2)
     this.originY = (this.H / 2) - (mapPixelHeight / 2) + (TILE_H / 2);
 
-    // 4. (Optional) Auto-zoom to fit the map exactly within the screen
-    // If your map is larger than 600px, this ensures it zooms out enough to fit
-    // with a 10% padding margin (the 0.9 multiplier).
-    // You can remove these 2 lines if you want to keep the default zoom=1
     const targetZoom = Math.min(this.W / mapPixelWidth, this.H / mapPixelHeight) * 0.9;
     this.zoom = Math.max(MIN_ZOOM, Math.min(targetZoom, MAX_ZOOM));
   }
 
-  onMouseDown = (e: MouseEvent) => { this.mouseDown = true; this.mouseLastX = e.clientX; this.mouseLastY = e.clientY; this.mouseDragDist = 0; this.canvas.style.cursor = "grabbing"; }
+  onMouseDown = (e: MouseEvent) => {
+    this.mouseDown = true;
+    this.mouseLastX = e.clientX;
+    this.mouseLastY = e.clientY;
+    this.mouseDragDist = 0;
+    this.canvas.style.cursor = "grabbing";
+  }
+
   onMouseMove = (e: MouseEvent) => {
     if (!this.mouseDown) return;
-    this.panX += e.clientX - this.mouseLastX;
-    this.panY += e.clientY - this.mouseLastY;
-    this.mouseDragDist += Math.abs(e.clientX - this.mouseLastX) + Math.abs(e.clientY - this.mouseLastY);
-    this.mouseLastX = e.clientX; this.mouseLastY = e.clientY;
+    const dx = e.clientX - this.mouseLastX;
+    const dy = e.clientY - this.mouseLastY;
+    this.panX += dx;
+    this.panY += dy;
+    this.mouseDragDist += Math.abs(dx) + Math.abs(dy);
+    this.mouseLastX = e.clientX;
+    this.mouseLastY = e.clientY;
   }
+
   onMouseUp = (e: MouseEvent) => {
     if (!this.mouseDown) return;
-    this.mouseDown = false; this.canvas.style.cursor = "grab";
+    this.mouseDown = false;
+    this.canvas.style.cursor = "grab";
     if (this.mouseDragDist < DRAG_THRESHOLD) this.handleTap(e.clientX, e.clientY);
   }
+
+  onTouchStart = (e: TouchEvent) => {
+    if (e.touches.length === 2) {
+      this.touchPanning = false;
+      this.pinchStartDist = this.touchDist(e.touches[0], e.touches[1]);
+      this.pinchStartZoom = this.zoom;
+    } else if (e.touches.length === 1) {
+      this.touchPanning = true;
+      this.touchLastX = e.touches[0].clientX;
+      this.touchLastY = e.touches[0].clientY;
+      this.touchDragDist = 0;
+    }
+  }
+
+  onTouchMove = (e: TouchEvent) => {
+    if (e.touches.length === 2 && this.pinchStartDist) {
+      e.preventDefault();
+      const d = this.touchDist(e.touches[0], e.touches[1]);
+      this.zoom = clamp(this.pinchStartZoom * (d / this.pinchStartDist), MIN_ZOOM, MAX_ZOOM);
+    } else if (e.touches.length === 1 && this.touchPanning) {
+      e.preventDefault();
+      const t = e.touches[0];
+      const dx = t.clientX - this.touchLastX;
+      const dy = t.clientY - this.touchLastY;
+      this.panX += dx;
+      this.panY += dy;
+      this.touchDragDist += Math.abs(dx) + Math.abs(dy);
+      this.touchLastX = t.clientX;
+      this.touchLastY = t.clientY;
+    }
+  }
+
+  onTouchEnd = (e: TouchEvent) => {
+    if (e.touches.length < 2) this.pinchStartDist = null;
+    if (e.touches.length === 0) {
+      if (this.touchPanning && this.touchDragDist < DRAG_THRESHOLD && e.changedTouches.length === 1) {
+        const t = e.changedTouches[0];
+        this.handleTap(t.clientX, t.clientY);
+      }
+      this.touchPanning = false;
+    }
+  }
+
   onWheel = (e: WheelEvent) => {
     e.preventDefault();
     this.zoom = clamp(this.zoom * (1 + (-e.deltaY * 0.0015)), MIN_ZOOM, MAX_ZOOM);
   }
-
-  // Include Touch Events similarly to original code adapting `this.x` etc.
-  // ... omitting touch math for brevity, but map directly from your original code
 
   bindEvents() {
     window.addEventListener("resize", this.onResize);
     this.canvas.addEventListener("mousedown", this.onMouseDown);
     window.addEventListener("mousemove", this.onMouseMove);
     window.addEventListener("mouseup", this.onMouseUp);
+
+    // Touch Events ({ passive: false } allows calling e.preventDefault() during scrolling/zooming)
+    this.canvas.addEventListener("touchstart", this.onTouchStart, { passive: false });
+    window.addEventListener("touchmove", this.onTouchMove, { passive: false });
+    window.addEventListener("touchend", this.onTouchEnd);
+
     this.canvas.addEventListener("wheel", this.onWheel, { passive: false });
-    // Bind touch events here
   }
 
   cleanup() {
@@ -257,6 +310,11 @@ export class GameEngine {
     this.canvas.removeEventListener("mousedown", this.onMouseDown);
     window.removeEventListener("mousemove", this.onMouseMove);
     window.removeEventListener("mouseup", this.onMouseUp);
+
+    this.canvas.removeEventListener("touchstart", this.onTouchStart);
+    window.removeEventListener("touchmove", this.onTouchMove);
+    window.removeEventListener("touchend", this.onTouchEnd);
+
     this.canvas.removeEventListener("wheel", this.onWheel);
   }
 }
