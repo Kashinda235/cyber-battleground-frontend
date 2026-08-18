@@ -30,6 +30,7 @@ interface GameContextType {
     players: Player[];
     systems: System[];
     chats: ChatLog[];
+    connections: Connection[];
     inboxMails: Mail[]
     sentMails: Mail[]
     moveLogs: MoveLog[];
@@ -41,6 +42,7 @@ interface GameContextType {
     performAction: (data: ActionRequest) => Promise<ActionResult>;
     updatePlayerProfile:  (data: PlayerProfile) => void;
     claimReward: (reward: number) => void;
+    healthRisk: (damage: number) => void;
 
     // Local UI State
     target: Player | undefined;
@@ -163,12 +165,21 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
 
     const clearTerminal = () => setTerminalHistory([]);
 
-    const claimReward = (reward: number) => {
-        updatePlayerStats({health: 0, xp: reward} );
+    const claimReward = async (reward: number) => {
+        await updatePlayerStats({health: 0, xp: reward} );
         showToast({
             type: "reward",
             title: "Reward claimed",
             description: `XP ${reward} earned`,
+        })
+    };
+
+    const healthRisk = async (damage: number) => {
+        await updatePlayerStats({health: -1 * damage, xp: 0} );
+        showToast({
+            type: "alert",
+            title: "System at risk",
+            description: `Health risked ${damage}%`,
         })
     };
 
@@ -181,6 +192,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         gameState,
         players,
         systems,
+        connections,
         chats,
         inboxMails,
         sentMails,
@@ -193,6 +205,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ token, player, child
         performAction,
         updatePlayerProfile,
         claimReward,
+        healthRisk,
         target,
         setTarget,
         activeTab,

@@ -127,15 +127,23 @@ export function useGameData({ token, player }: UseGameDataOptions = {}) {
             setChats((prev) => [...prev, chatMsg]);
         }, []),
 
-        // Server broadcasts a new chat message
+        // Server broadcasts a new mail
         onMailReceived: useCallback((mail: Mail) => {
-            showToast({
-                title: "Received a mail",
-                description: `Mail from ${mail.metadata.sender}`,
-                type: "mail"
+            setInboxMails((prev) => {
+                // Guard against duplicate IDs
+                if (prev.some((m) => m.id === mail.id)) {
+                    return prev;
+                }
+
+                showToast({
+                    title: "Received a mail",
+                    description: `Mail from ${mail.metadata.sender}`,
+                    type: "mail"
+                });
+
+                return [mail, ...prev];
             });
-            setInboxMails((prev) => [mail, ...prev]);
-        }, []),
+        }, [showToast]),
 
         // Server broadcasts a combat/movement action
         onActionPerformed: useCallback((result: any) => {

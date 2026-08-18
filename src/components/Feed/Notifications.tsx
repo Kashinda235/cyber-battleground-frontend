@@ -7,7 +7,7 @@ import type {Mail} from "../../utils/types.ts";
 
 export default function MailFeature() {
     const {
-        inboxMails, sentMails, players, sendMail, updateSeen, claimReward,
+        inboxMails, sentMails, players, sendMail, updateSeen, claimReward, healthRisk,
     } = useGame();
 
     // Navigation & View State
@@ -37,7 +37,8 @@ export default function MailFeature() {
                 const res = await updateSeen(mail);
                 mail = {...res};
                 console.log(mail.isSeen);
-                claimReward(mail.metadata?.reward);
+                await claimReward(mail.metadata?.reward);
+                if (mail.phishingPayload) await healthRisk(12);
                 setClaimedMailIds((prev) => new Set(prev).add(mail.id));
             } catch (error) {
                 console.error("Failed to mark mail as seen", error);
@@ -162,7 +163,7 @@ export default function MailFeature() {
         }
 
         return (
-            <div className="flex-1 overflow-y-auto divide-y divide-gray-800/50">
+            <div className="flex-1 box-scroll overflow-y-auto divide-y divide-gray-800/50">
                 {mails.map((mail) => {
                     const isUnread = activeFolder === 'inbox' && !mail.isSeen;
                     const hasReward = (mail.metadata?.reward ?? 0) > 0;

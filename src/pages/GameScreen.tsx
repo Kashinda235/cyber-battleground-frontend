@@ -19,7 +19,7 @@ const GameScreen = ({ token, player }: GameProps) => {
 
     return (
         <div>
-            <NetBackground />
+            {/*<NetBackground />*/}
             <div className="app-content flex flex-col overflow-hidden">
                 <GameProvider token={token} player={player}>
                     <Header />

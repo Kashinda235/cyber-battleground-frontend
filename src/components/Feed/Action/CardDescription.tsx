@@ -35,7 +35,7 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
     const [copied, setCopied] = useState<boolean>(false);
     const [copiedCommand, setCopiedCommand] = useState<boolean>(false);
     const [showLore, setShowLore] = useState<boolean>(false);
-    const { handleCommand, systems } = useGame();
+    const { handleCommand, systems, connections } = useGame();
 
     // const color = 'red';
 
@@ -99,13 +99,14 @@ export const CardDescription: React.FC<DescriptionProps> = ({ onBack, currentAct
         systems.forEach((sys) => {
             if (sys.mail) rawTargets.push({ id: sys.playerId, value: sys.mail, label: sys.hostname });
         });
-    } else {
+    } else if (listType === 'sys_ip') {
         systems.forEach((sys) => {
             if (sys.ip) rawTargets.push({ id: sys.playerId, value: sys.ip, label: sys.hostname });
         });
-        // connections.forEach((conn) => {
-        //     if (conn.targetIp) rawTargets.push({ id: `conn-${conn.id}`, value: conn.targetIp, label: `Conn #${conn.id}` });
-        // });
+    } else {
+        connections.forEach((conn) => {
+            if (conn.targetIp) rawTargets.push({ id: `conn-${conn.id}`, value: conn.targetIp, label: `Conn #${conn.id}` });
+        });
     }
 
     const uniqueTargets = Array.from(new Map(rawTargets.map((item) => [item.value, item])).values());

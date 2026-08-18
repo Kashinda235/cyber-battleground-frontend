@@ -102,8 +102,8 @@ const simulateBruteForce: AttackHandler = async (services, onLog) => {
         const attemptNum = index + 1;
         const currentPassword = passwordList[index];
         const timestamp = getTimestamp();
-        performAction(action);
-        updatePlayerStats({health: -2, xp: 21});
+        await performAction(action);
+        await updatePlayerStats({health: -2, xp: 21});
 
         // Check if current password matches target password
         const isMatch = currentPassword === actualTargetPassword;
@@ -111,9 +111,9 @@ const simulateBruteForce: AttackHandler = async (services, onLog) => {
         if (isMatch) {
             matchFound = true;
             matchedPassword = currentPassword;
-            performAction({...action, action_type: "User Login Successful"});
-            stateConnection({target_ip: target.ip, status: "bot"});
-            updatePlayerStats({health: 95, xp: 1245});
+            await performAction({...action, action_type: "User Login Successful"});
+            await stateConnection({target_ip: target.ip, status: "bot"});
+            await updatePlayerStats({health: 95, xp: 1245});
 
             // Log successful attempt
             onLog?.({
@@ -161,7 +161,7 @@ const simulateBruteForce: AttackHandler = async (services, onLog) => {
 
 const simulatePhishingKit: AttackHandler = async (services, onLog) => {
     const { target, showToast, performAction, sendMail, playerXp, stateConnection, updatePlayerStats } = services;
-    performAction({
+    await performAction({
         action_type: "Mail",
         target_id: target.id,
         ability_id: 2, // Cleaned up dangling trailing decimal
@@ -171,7 +171,7 @@ const simulatePhishingKit: AttackHandler = async (services, onLog) => {
         message: "Hello! What side are you on?",
         phishingPayload: true,
     });
-    stateConnection({target_ip: target.ip, status: "friend"});
+    await stateConnection({target_ip: target.ip, status: "friend"});
     const socialEngineeringSkill = playerXp / 10000 * 3;
     const targetPort = 443;
     const targetName = target.hostname || target.name;
@@ -194,7 +194,7 @@ const simulatePhishingKit: AttackHandler = async (services, onLog) => {
 
         onLog?.({ type: logType, content: stageMessage });
         await delay(600);
-        updatePlayerStats({health: -2, xp: 2});
+        await updatePlayerStats({health: -2, xp: 2});
     }
 
     // Success probability based on player skill vs target defense/integrity
@@ -204,13 +204,13 @@ const simulatePhishingKit: AttackHandler = async (services, onLog) => {
     const isSuccess = Math.random() < totalChance;
 
     await delay(800);
-    updatePlayerStats({health: 94, xp: 2});
+    await updatePlayerStats({health: 94, xp: 2});
 
     checkAchievement("PHISHING_CAMPAIGN", showToast);
     if (isSuccess) {
         const fakeSessionToken = Math.random().toString(36).substring(2, 15);
-        updatePlayerStats({health: 96, xp: 1324});
-        stateConnection({target_ip: target.ip, status: "bot"});
+        await updatePlayerStats({health: 96, xp: 1324});
+        await stateConnection({target_ip: target.ip, status: "bot"});
         checkAchievement("PHISHING_PAYLOAD", showToast);
         checkAchievement("BOTNET_CREATOR", showToast);
         return {
@@ -235,7 +235,7 @@ const useExploitScript: AttackHandler = async (services, onLog) => {
         target_id: target.id,
         ability_id: 3,
     };
-    performAction(action);
+    await performAction(action);
     checkAchievement("EXPLOIT_DEPLOYMENT", showToast);
     // Simulated vulnerability database / CVE tags
     const cveList = [
@@ -271,13 +271,13 @@ const useExploitScript: AttackHandler = async (services, onLog) => {
 
     if (isSuccess) {
         const injectedAddress = `0x${Math.floor(Math.random() * 0xFFFFFFFF).toString(16).padStart(8, '0')}`;
-        updatePlayerStats({health: 94, xp: 1375});
+        await updatePlayerStats({health: 94, xp: 1375});
         return {
             type: "action",
             content: `[+] SUCCESS: Exploit executed successfully.\n[+] Memory redirected at address [${injectedAddress}]\n[+] System privilege escalated on target node [${target.id}].`
         };
     } else {
-        updatePlayerStats({health: -2, xp: 20});
+        await updatePlayerStats({health: -2, xp: 20});
         return {
             type: "error",
             content: `[-] FAIL: Buffer execution failed. Target system ASLR memory mitigation active.\n[-] Target node [${target.name}] firewall terminated remote thread.`
@@ -289,7 +289,7 @@ const simulatePortScanner: AttackHandler = async (services, onLog) => {
     const { target, showToast, performAction, updatePlayerStats } = services;
 
     // 1. Dispatch the scan action to game services
-    performAction({
+    await performAction({
         action_type: "Scan",
         target_id: target.id,
         ability_id: 1,
@@ -345,7 +345,7 @@ const simulatePortScanner: AttackHandler = async (services, onLog) => {
 
     // 2. Award reconnaissance XP upon successful completion
     const xpGained = 150;
-    updatePlayerStats({ health: 0, xp: xpGained});
+    await updatePlayerStats({ health: 0, xp: xpGained});
 
     return {
         type: "system",
@@ -359,7 +359,7 @@ const simulatePortScanner: AttackHandler = async (services, onLog) => {
 
 const simulateDeepScanner: AttackHandler = async (services, onLog) => {
     const { target, showToast, performAction, updatePlayerStats } = services;
-    performAction({
+    await performAction({
         action_type: "DeepScan",
         target_id: target.id,
         ability_id: 4, // Higher ability ID for advanced scanner
@@ -423,7 +423,7 @@ const simulateDeepScanner: AttackHandler = async (services, onLog) => {
 
     // 2. Award deep vulnerability audit XP upon completion
     const xpGained = 300;
-    updatePlayerStats({health: 0, xp: xpGained,});
+    await updatePlayerStats({health: 0, xp: xpGained,});
 
     return {
         type: "system",
@@ -495,7 +495,7 @@ const simulatePacketSniffer: AttackHandler = async (services, onLog) => {
 const simulateCredentialStuffing: AttackHandler = async (services, onLog) => {
     const { target, performAction, updatePlayerStats } = services;
 
-    performAction({
+    await performAction({
         action_type: "CredentialStuffing",
         target_id: target.id,
         ability_id: 5,
@@ -540,7 +540,7 @@ const simulateCredentialStuffing: AttackHandler = async (services, onLog) => {
 
     await delay(600);
 
-    updatePlayerStats({health: 0, xp: 50,});
+    await updatePlayerStats({health: 0, xp: 50,});
 
     // Output: No credentials found
     return {
@@ -689,7 +689,7 @@ const simulateMalwareDrop: AttackHandler = async (services, onLog) => {
 
     if (isSuccess) {
         const beaconId = generateHex(8);
-        updatePlayerStats({health: -12, xp: 1123});
+        await updatePlayerStats({health: -12, xp: 1123});
         return {
             type: "system",
             content: `\n[+] MALWARE DROP SUCCESSFUL on ${targetHost}\n` +
@@ -746,7 +746,7 @@ const simulateDDoSBurst: AttackHandler = async (services, onLog) => {
         `[*] VOLUMETRIC FLOOD ACTIVE: Saturation pipeline broadcasting at ~${gbps} Gbps peak output`
     ];
 
-    updatePlayerStats({ health: -54, xp: 1561 })
+    await updatePlayerStats({ health: -54, xp: 1561 })
     for (const stageMessage of stages) {
         let logType: LogType = 'system';
         if (stageMessage.startsWith('[+] ')) logType = 'load';
@@ -823,7 +823,7 @@ const simulateZeroDay: AttackHandler = async (services, onLog) => {
 
     await delay(600);
 
-    updatePlayerStats({ health: 95, xp: 1564 });
+    await updatePlayerStats({ health: 95, xp: 1564 });
     return {
         type: "system",
         content: `\n[***] ZERO-DAY ANALYSIS COMPLETE [***]\n` +
@@ -918,7 +918,7 @@ export const executeAttack = async (
     } catch (error) {
         return {
             type: 'error',
-            content: 'SYSTEM ERROR'
+            content: `SYSTEM ERROR: ${error}`
         };
     }
 };
