@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
-import type { Player } from "../utils/types.ts"
+import type {Player, PlayerStatus} from "../../utils/types.ts"
+import {useGame} from "../../context/GameContext.tsx";
 
 // --- Constants ---
 const COLS = 30
@@ -10,8 +11,9 @@ const MIN_ZOOM = 0.5
 const MAX_ZOOM = 3
 const DRAG_THRESHOLD = 6
 
-const NEON = ["#4de1ff", "#fb1e3f", "#925df5", "#ffd24d", "#a24dff"]
-const ROLES = ["BLUE", "RED", "SPECTATOR", "ADMIN", "MODERATOR"]
+const NEON = ["#4de1ff", "#fb1e3f", "#a1f55d",
+                    "#ffd24d", "#a24dff", "#958e8e"]
+const ROLES = ["BLUE", "RED", "SPECTATOR", "ADMIN", "MODERATOR", "OFFLINE"]
 const FLAVORS = [
   "Patrolling assigned sector without incident.",
   "Signal chatter nominal. No anomalies detected.",
@@ -36,12 +38,8 @@ interface PlayerProfileData {
   flavor: string
 }
 
-interface GameCanvasProps {
-  players: Player[]
-  currentPlayer: Player
-}
-
-export default function GameCanvas({ players, currentPlayer }: GameCanvasProps) {
+export default function GameCanvas() {
+  const { players, currentPlayer } = useGame();
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [profile, setProfile] = useState<PlayerProfileData | null>(null)
 
@@ -97,6 +95,7 @@ export default function GameCanvas({ players, currentPlayer }: GameCanvasProps) 
     class PlayerEntity {
       player: Player
       idIndex: number
+      status: PlayerStatus | undefined
       col: number
       row: number
       fromCol: number
@@ -120,6 +119,7 @@ export default function GameCanvas({ players, currentPlayer }: GameCanvasProps) 
       constructor(player: Player, index: number) {
         this.player = player
         this.idIndex = index
+        this.status = player.status
         this.col = Math.floor(rand(1, COLS - 1))
         this.row = Math.floor(rand(1, ROWS - 1))
         this.fromCol = this.col
@@ -135,7 +135,9 @@ export default function GameCanvas({ players, currentPlayer }: GameCanvasProps) 
         this.label = (player as any).username || (player as any).id || "PLAYER_" + String(index + 1).padStart(2, "0")
 
         this.bob = rand(0, Math.PI * 2)
-        this.role = (player as any).role.toUpperCase() || 'SPECTAOR'
+        this.role = this.status === "online"
+            ? (player as any).role.toUpperCase() || "SPECTATOR"
+            : "OFFLINE"
         this.color = NEON[ROLES.indexOf(this.role)]
         this.flavor = FLAVORS[Math.floor(rand(0, FLAVORS.length))]
         this.integrity = Math.floor(rand(82, 100))
@@ -192,6 +194,7 @@ export default function GameCanvas({ players, currentPlayer }: GameCanvasProps) 
         } else {
           this.pauseTimer--
           if (this.pauseTimer <= 0) {
+            if (this.role === "OFFLINE") return;
             const next = this.pickNextTile()
             if (next) {
               this.fromCol = this.col

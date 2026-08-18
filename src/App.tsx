@@ -1,11 +1,12 @@
 import {useEffect, useState} from 'react'
-import Loader from "./components/Loader"
+import Loader from "./components/Home/Loader.tsx"
 import Home from "./pages/Home.tsx"
 import GameLobby from "./pages/GameLobby.tsx";
 import "./styles/site.css"
 import GameScreen from "./pages/GameScreen.tsx";
 import { motion, AnimatePresence } from 'framer-motion';
 import type {Player} from "./utils/types.ts";
+import {ToastProvider} from "./context/ToastContext.tsx";
 
 const App = () => {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -15,6 +16,26 @@ const App = () => {
     const [player, setPlayer] = useState<Player | undefined>(undefined);
 
     const [savedUsernames, setSavedUsernames] = useState<string[]>([]);
+
+    // Restore session on initial load/refresh
+    useEffect(() => {
+        const savedSession = sessionStorage.getItem('cyber_battleground_session');
+
+        if (savedSession) {
+            try {
+                const { token: savedToken, player: savedPlayer } = JSON.parse(savedSession);
+                if (savedToken && savedPlayer) {
+                    setToken(savedToken);
+                    setPlayer(savedPlayer);
+                    setCurrentScreen('game');
+                }
+            } catch (e) {
+                console.error("Failed to restore session from sessionStorage", e);
+                sessionStorage.removeItem('cyber_battleground_session');
+            }
+        }
+        setIsLoaded(true);
+    }, []);
 
     // Load saved usernames from localStorage on mount
     useEffect(() => {
@@ -47,15 +68,27 @@ const App = () => {
         setToken(receivedToken);
         setPlayer(receivedPlayer);
         setCurrentScreen('game');
+
+        sessionStorage.setItem(
+            'cyber_battleground_session',
+            JSON.stringify({ token: receivedToken, player: receivedPlayer })
+        );
+    };
+
+    const handleLogout = () => {
+        setToken('');
+        setPlayer(undefined);
+        setCurrentScreen('home');
+        sessionStorage.removeItem('cyber_battleground_session');
     };
 
     return (
         <div className="app-container">
 
-            <Loader onComplete={() => setIsLoaded(true)} />
+            {/*<Loader onComplete={() => setIsLoaded(true)} />*/}
             {/* AnimatePresence handles animating components as they unmount */}
             <div id="main-site" className={isLoaded ? 'in' : ''}>
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode="popLayout">
                 {currentScreen === 'home' && (
                     <motion.div
                         key="home"
@@ -67,6 +100,8 @@ const App = () => {
                         <Home onStart={() => setCurrentScreen('lobby')} />
                     </motion.div>
                 )}
+
+                    <ToastProvider>
 
                 {currentScreen === 'lobby' && (
                     <motion.div
@@ -90,6 +125,8 @@ const App = () => {
                         <GameScreen token={token} player={player} />
                     </motion.div>
                 )}
+
+                    </ToastProvider>
             </AnimatePresence>
             </div>
         </div>
